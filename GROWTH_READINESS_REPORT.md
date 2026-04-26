@@ -136,6 +136,7 @@ gh repo edit Zulut30/Wordpress-skills --description ... --homepage ... --add-top
 gh label create ...
 gh issue create ...
 gh release create v0.1.0 --repo Zulut30/Wordpress-skills --target main --title "v0.1.0 - Initial WordPress Plugin Dev Skill" --notes-file RELEASE_SUMMARY_V0.1.0.md
+gh release edit v0.1.0 --repo Zulut30/Wordpress-skills --notes-file RELEASE_SUMMARY_V0.1.0.md
 ```
 
 Results:
