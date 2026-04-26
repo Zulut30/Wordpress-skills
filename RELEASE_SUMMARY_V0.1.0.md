@@ -14,6 +14,7 @@ Initial public work-in-progress release of a portable Agent Skill for developing
 - Curated WordPress plugin development reference library with source mapping and review dates.
 - Secure-by-default templates for common WordPress plugin surfaces.
 - Heuristic plugin audit script with human and JSON output.
+- Text-based demo docs with sample human and JSON audit output.
 - Validation, source-map, smoke, and install-target sync scripts.
 - Sample fixtures for validating audit behavior.
 - Honest compatibility and limitation notes for release-sensitive tooling.
@@ -76,6 +77,7 @@ Initial public work-in-progress release of a portable Agent Skill for modern Wor
 - Curated WordPress plugin development references
 - Secure starter templates for common plugin surfaces
 - Heuristic plugin audit script with human and JSON output
+- Text-based demo docs with sample human and JSON audit output
 - Validation, source-map, sync, smoke, and audit test scripts
 - Sample plugin fixture for audit validation
 

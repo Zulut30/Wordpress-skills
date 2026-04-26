@@ -17,6 +17,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- GitHub-facing README polish with quickstart, support matrix, repository map, limitations checklist, and example output links.
+- Text-based demo docs and normalized audit output examples for the sample plugin fixture.
+- Local Markdown link checker wired into the smoke test.
 - Portable canonical Agent Skill under `skills/wordpress-plugin-dev/`.
 - Synchronized install-target copies for `.agents`, `.claude`, and `.cursor` workflows.
 - Codex plugin metadata and local marketplace metadata.

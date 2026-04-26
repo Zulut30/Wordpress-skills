@@ -10,10 +10,12 @@ Professional Agent Skill for building, auditing, testing, and releasing modern W
 
 - `wordpress`
 - `wordpress-plugin`
+- `ai-agent`
 - `agent-skills`
 - `codex`
 - `claude-code`
 - `cursor`
+- `plugin-security`
 - `gutenberg`
 - `block-editor`
 - `wp-cli`
@@ -24,7 +26,9 @@ Professional Agent Skill for building, auditing, testing, and releasing modern W
 
 ## Homepage
 
-Leave empty for now unless the project has a real website or documentation site.
+Use the repository demo page until a real project site exists:
+
+`https://github.com/Zulut30/Wordpress-skills/blob/main/docs/demo.md`
 
 ## Suggested Release Title
 
@@ -55,7 +59,8 @@ Initial public work-in-progress release of WordPress Plugin Dev Skill.
 ## Recommended Repository Settings
 
 - Enable issues.
-- Enable discussions only if maintainers plan to monitor them.
+- Create starter issues from `docs/starter-issues.md`.
+- Pin a roadmap issue or enable discussions only if maintainers plan to monitor them.
 - Enable private vulnerability reporting if available.
 - Require pull requests before merging once more contributors are involved.
 - Add branch protection after the validation workflow has run successfully at least once.

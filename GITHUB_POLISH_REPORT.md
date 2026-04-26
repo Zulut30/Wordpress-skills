@@ -12,6 +12,16 @@
 - `CODE_OF_CONDUCT.md`
 - `assets/repo-card.svg`
 - `docs/github-repository-setup.md`
+- `docs/demo.md`
+- `docs/demo-script.md`
+- `docs/examples/audit-sample-human.md`
+- `docs/examples/audit-sample-json.json`
+- `docs/examples/audit-sample-explanation.md`
+- `docs/examples/agent-review-example.md`
+- `docs/testing-and-fixtures.md`
+- `docs/roadmap.md`
+- `docs/starter-issues.md`
+- `docs/github-manual-actions.md`
 
 ## Files Updated
 
@@ -30,6 +40,7 @@
 - Added copy-paste usage prompts.
 - Added tables for references, templates, and scripts.
 - Added audit-script disclaimer, security model, compatibility notes, roadmap, contributing summary, and license.
+- Added decision-page content, 1-minute quickstart, support matrix, repository map, generated-folder explanation, and links to real sample outputs.
 
 ## GitHub Community Files
 
@@ -55,7 +66,10 @@
 - Set repository description:
   `Professional Agent Skill for building, auditing, testing, and releasing modern WordPress plugins with Codex, Cursor, and Claude Code.`
 - Add suggested topics from `docs/github-repository-setup.md`.
-- Leave homepage empty unless a real project site exists.
+- Set homepage to the text demo until a real project site exists:
+  `https://github.com/Zulut30/Wordpress-skills/blob/main/docs/demo.md`
+- Open prepared starter issues from `docs/starter-issues.md`.
+- Pin a roadmap issue or enable Discussions if maintainers will monitor them.
 - Use release title:
   `v0.1.0 - Initial WordPress Plugin Dev Skill`
 - Enable private vulnerability reporting if available.

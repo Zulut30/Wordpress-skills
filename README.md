@@ -1,5 +1,6 @@
 # WordPress Plugin Dev Skill
 
+[![Validate](https://github.com/Zulut30/Wordpress-skills/actions/workflows/validate.yml/badge.svg)](https://github.com/Zulut30/Wordpress-skills/actions/workflows/validate.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 ![Version v0.1.0](https://img.shields.io/badge/version-v0.1.0-blue)
 ![Agent Skill](https://img.shields.io/badge/Agent%20Skill-portable-4b5563)
@@ -11,29 +12,77 @@ A professional Agent Skill for building, reviewing, testing, and releasing moder
 
 Status: `v0.1.0` work in progress. Useful today, but intentionally honest about limitations.
 
-## What Is This?
+## Table Of Contents
 
-`wordpress-plugin-dev` is a portable Agent Skill that gives AI coding agents WordPress-specific workflows, reference notes, templates, and local scripts. It helps agents work more like experienced WordPress plugin engineers instead of generic PHP/JavaScript assistants.
+- [For Whom](#for-whom)
+- [1-Minute Quickstart](#1-minute-quickstart)
+- [Demo And Example Outputs](#demo-and-example-outputs)
+- [Features](#features)
+- [Why This Is Better Than Generic Coding Agents](#why-this-is-better-than-generic-coding-agents)
+- [Repository Map](#repository-map)
+- [Canonical Vs Generated Skill Folders](#canonical-vs-generated-skill-folders)
+- [Installation](#installation)
+- [Usage Examples](#usage-examples)
+- [Tool Support Matrix](#tool-support-matrix)
+- [Included References](#included-references)
+- [Templates](#templates)
+- [Scripts](#scripts)
+- [Testing And Fixtures](#testing-and-fixtures)
+- [Limitations](#limitations)
+- [Security Model](#security-model)
+- [Project Maturity](#project-maturity)
+- [Roadmap](#roadmap)
+- [Contributing](#contributing)
+- [License](#license)
 
-The canonical skill lives in:
+## For Whom
 
-```text
-skills/wordpress-plugin-dev/
+| Question | Answer |
+| --- | --- |
+| For whom? | Developers and teams using AI coding agents to build or review WordPress plugins. |
+| When to use? | Plugin scaffolding, feature implementation, REST/admin/settings work, Gutenberg blocks, security review, tests/CI, and WordPress.org release readiness. |
+| When not to use? | Non-WordPress PHP apps, full custom security audits, legal/license advice, or fully automated release decisions without human review. |
+
+## 1-Minute Quickstart
+
+```bash
+git clone https://github.com/Zulut30/Wordpress-skills.git
+cd Wordpress-skills
+npm install
+npm run sync
+npm run validate:skill
 ```
 
-Generated install-target copies live in:
+Then invoke the skill in your agent:
 
 ```text
-.agents/skills/wordpress-plugin-dev/
-.claude/skills/wordpress-plugin-dev/
-.cursor/skills/wordpress-plugin-dev/
+Use wordpress-plugin-dev to audit this plugin for security and WordPress.org release readiness.
 ```
 
-## Why This Exists
+Expected result: the agent loads the compact `SKILL.md`, routes into the relevant reference files, uses safe WordPress-specific checklists, and reports concrete findings instead of generic PHP advice.
 
-WordPress plugin development has sharp edges: capabilities, nonces, sanitization, escaping, hooks, REST API permissions, admin UI, Gutenberg blocks, i18n, accessibility, privacy, tests, Plugin Check, and WordPress.org release rules.
+You can also run the bundled audit scanner directly:
 
-Generic coding agents often miss those WordPress-specific rules. This skill gives them curated workflows, source-backed references, safe starter templates, and a heuristic audit script so the first answer is closer to a professional WordPress review.
+```bash
+node skills/wordpress-plugin-dev/scripts/audit-plugin.mjs test-fixtures/sample-plugin
+```
+
+The sample fixture intentionally reports issues in `unsafe-example.php`.
+
+## Demo And Example Outputs
+
+The repository includes text-based demos and real audit outputs:
+
+| Demo | File |
+| --- | --- |
+| Demo overview | [docs/demo.md](docs/demo.md) |
+| Terminal demo script | [docs/demo-script.md](docs/demo-script.md) |
+| Human audit output | [docs/examples/audit-sample-human.md](docs/examples/audit-sample-human.md) |
+| JSON audit output | [docs/examples/audit-sample-json.json](docs/examples/audit-sample-json.json) |
+| Audit output explanation | [docs/examples/audit-sample-explanation.md](docs/examples/audit-sample-explanation.md) |
+| Agent review example | [docs/examples/agent-review-example.md](docs/examples/agent-review-example.md) |
+
+Optional future improvement: add a short terminal GIF or screencast after the text demo is stable.
 
 ## Features
 
@@ -46,27 +95,62 @@ Generic coding agents often miss those WordPress-specific rules. This skill give
 - WordPress.org release readiness checks.
 - Safe starter templates.
 - Heuristic audit script with human and JSON output.
-- Compatibility notes for Codex, Cursor, Claude Code, and other Agent Skills-compatible tools.
+- Codex, Cursor, Claude Code, and other Agent Skills-compatible workflow notes.
 
-## Repository Structure
+## Why This Is Better Than Generic Coding Agents
+
+Generic coding agents can write PHP and JavaScript, but they often miss WordPress-specific rules: capabilities, nonces, REST `permission_callback`, context-aware escaping, block metadata, text domains, Plugin Check, and WordPress.org release requirements.
+
+This skill gives the agent:
+
+- a compact role and routing file instead of a long prompt;
+- curated WordPress references with official source links;
+- operational security and release workflows;
+- safe templates for common plugin surfaces;
+- a local audit script for quick triage;
+- fixture outputs that show what the tool actually reports.
+
+## Repository Map
+
+```text
+skills/wordpress-plugin-dev/                  canonical skill
+|-- SKILL.md                                  skill router
+|-- references/                               curated WordPress knowledge base
+|-- assets/templates/                         starter templates
+|-- assets/examples/                          small examples for agents
+`-- scripts/                                  validation, audit, and sync scripts
+
+test-fixtures/                                test plugins for scanner/CI
+docs/                                         examples, release, setup, and roadmap notes
+.github/                                     workflows and community files
+.agents/skills/wordpress-plugin-dev/          generated by npm run sync
+.claude/skills/wordpress-plugin-dev/          generated by npm run sync
+.cursor/skills/wordpress-plugin-dev/          generated by npm run sync
+```
+
+## Canonical Vs Generated Skill Folders
+
+Edit this folder:
 
 ```text
 skills/wordpress-plugin-dev/
-|-- SKILL.md
-|-- references/
-|-- assets/
-|   |-- templates/
-|   `-- examples/
-`-- scripts/
 ```
 
-Edit the canonical skill folder first, then run:
+These folders are synchronized install targets:
+
+```text
+.agents/skills/wordpress-plugin-dev/
+.claude/skills/wordpress-plugin-dev/
+.cursor/skills/wordpress-plugin-dev/
+```
+
+Regenerate them with:
 
 ```bash
 npm run sync
 ```
 
-Do not edit generated install-target copies directly unless you are debugging sync behavior.
+Do not edit generated folders directly unless you are debugging sync behavior.
 
 ## Installation
 
@@ -76,12 +160,6 @@ For local skill testing through `.agents/skills`, run:
 
 ```bash
 npm run sync
-```
-
-This creates or refreshes:
-
-```text
-.agents/skills/wordpress-plugin-dev/
 ```
 
 Codex plugin metadata is included in:
@@ -96,7 +174,7 @@ Local marketplace metadata for testing is included in:
 .agents/plugins/marketplace.json
 ```
 
-Where explicit skill invocation is supported, you can use:
+Where explicit skill invocation is supported, use:
 
 ```text
 $wordpress-plugin-dev review this plugin for security issues.
@@ -117,7 +195,7 @@ mkdir -p ~/.claude/skills
 cp -R skills/wordpress-plugin-dev ~/.claude/skills/
 ```
 
-Claude Code discovers project and personal skills from those folders. If slash invocation is unavailable in your version, use natural language:
+If slash invocation is unavailable in your version, use natural language:
 
 ```text
 Use the wordpress-plugin-dev skill to review this WordPress plugin.
@@ -125,7 +203,7 @@ Use the wordpress-plugin-dev skill to review this WordPress plugin.
 
 ### Cursor
 
-Cursor support for Agent Skills or skill-style workflows can vary by version and rollout. This repository includes a synchronized `.cursor/skills/wordpress-plugin-dev/` copy for workflows that support project-level skills, but verify the current Cursor docs or in-app Settings before relying on a specific path or slash invocation.
+Cursor support for Agent Skills or skill-style workflows can vary by version and rollout. This repository includes a synchronized `.cursor/skills/wordpress-plugin-dev/` copy for workflows that support project-level skills, but verify current Cursor docs or in-app Settings before relying on a specific path or slash invocation.
 
 Use the canonical folder if your Cursor version offers an import/create workflow:
 
@@ -156,6 +234,15 @@ Use wordpress-plugin-dev to create a dynamic Gutenberg block registered with blo
 ```text
 Use wordpress-plugin-dev to review this REST API endpoint for permission_callback, nonce handling, sanitization, escaping, and WP_Error responses.
 ```
+
+## Tool Support Matrix
+
+| Tool | What Works | Status |
+| --- | --- | --- |
+| Codex | Local skill folder, plugin metadata, explicit invocation where supported. | Supported |
+| Claude Code | Project skill and personal skill filesystem install. | Supported |
+| Cursor | Skill-style workflows using canonical folder or `.cursor/skills` when supported by the user's version. | Experimental / verify current docs |
+| Other Agent Skills-compatible tools | Use `skills/wordpress-plugin-dev/` as the portable skill folder. | Portable fallback |
 
 ## Included References
 
@@ -191,16 +278,33 @@ Use wordpress-plugin-dev to review this REST API endpoint for permission_callbac
 | Command | Purpose |
 | --- | --- |
 | `npm run validate:skill` | Validate `SKILL.md`, metadata, references, templates, scripts, and README install docs. |
-| `npm run smoke` | Run validation, source-map check, audit unit tests, and demo fixture audit. |
+| `npm run smoke` | Run validation, source-map check, markdown link check, audit unit tests, and demo fixture audit. |
 | `npm run sync` | Copy canonical skill into `.agents`, `.claude`, and `.cursor` install targets. |
 | `node skills/wordpress-plugin-dev/scripts/audit-plugin.mjs /path/to/plugin` | Run the heuristic plugin audit in human-readable mode. |
 | `node skills/wordpress-plugin-dev/scripts/audit-plugin.mjs /path/to/plugin --json` | Run the heuristic plugin audit with structured JSON output. |
 
-## Audit Script Disclaimer
+## Testing And Fixtures
 
-The audit script is a heuristic scanner. It can find common issues, but it is not a replacement for a professional security review.
+See [docs/testing-and-fixtures.md](docs/testing-and-fixtures.md).
 
-Treat findings as triage signals. Verify them against the plugin context, WordPress APIs, current official docs, and human security judgment.
+Current coverage:
+
+- skill metadata validation;
+- source-map validation;
+- markdown local link validation;
+- audit script unit tests;
+- demo fixture audit;
+- intentionally unsafe sample fixture for expected scanner findings.
+
+## Limitations
+
+- The audit script is heuristic and can miss vulnerabilities.
+- A clean audit output is not proof that a plugin is secure.
+- Cursor install paths and slash invocation are version/workflow-dependent.
+- Live WordPress runtime checks are not part of the default local workflow yet.
+- Composer/PHPStan/PHPCS checks are documented but not wired into the root CI matrix yet.
+- Release-sensitive guidance should be verified against current official docs.
+- The project is `v0.1.0`; it does not claim broad production adoption.
 
 ## Security Model
 
@@ -211,23 +315,26 @@ Treat findings as triage signals. Verify them against the plugin context, WordPr
 - Verify external docs for release-sensitive tasks.
 - Do not blindly trust generated plugin code, especially around auth, capabilities, nonces, SQL, filesystem operations, external requests, and privacy.
 
-## Compatibility Notes
+## Project Maturity
 
-| Tool | Status |
-| --- | --- |
-| Codex | Supported as a local Agent Skill and plugin-style package via included metadata. |
-| Claude Code | Supported through project and personal skill folders. |
-| Cursor | Supported for skill-style workflows where the user's Cursor version supports them; verify current install path and invocation behavior. |
-| Other Agent Skills-compatible tools | Use the canonical `skills/wordpress-plugin-dev/` folder and adapt installation to the tool. |
+This is an early `v0.1.0` release. The project already includes a validated Agent Skill structure, curated WordPress references, templates, local scripts, CI checks, example outputs, and test fixtures. It does not yet claim broad production adoption.
+
+Trust comes from visible checks, examples, limitations, roadmap, and open starter work rather than fake stars, testimonials, or adoption claims.
 
 ## Roadmap
 
-- Stronger fixture tests.
-- More block examples.
-- Expanded Plugin Check integration.
-- Better CI matrix.
-- Optional docs refresh script.
-- Richer audit rules for AJAX, SQL, filesystem, SSRF, and REST callbacks.
+See [docs/roadmap.md](docs/roadmap.md).
+
+Near-term priorities:
+
+- stronger fixture tests;
+- richer audit rules;
+- better CI matrix;
+- more block examples;
+- optional docs refresh script;
+- Cursor install verification.
+
+Prepared starter issues live in [docs/starter-issues.md](docs/starter-issues.md). If they are not open on GitHub yet, use that file as the source for labels, issue bodies, and acceptance criteria.
 
 ## Contributing
 

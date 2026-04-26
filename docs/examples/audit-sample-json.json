@@ -1,0 +1,49 @@
+{
+  "tool": "wordpress-plugin-dev audit-plugin",
+  "limitation": "This is a heuristic scanner for agent review triage, not a security oracle. It can miss vulnerabilities and produce false positives; verify findings manually against current WordPress docs and project context.",
+  "targetPath": "test-fixtures/sample-plugin",
+  "summary": {
+    "phpFiles": 6,
+    "blockJsonFiles": 1,
+    "mainPluginFile": "sample-plugin.php",
+    "findings": {
+      "error": 1,
+      "warning": 2,
+      "info": 1
+    }
+  },
+  "findings": [
+    {
+      "severity": "error",
+      "rule": "security.rest-route-missing-permission-callback",
+      "file": "unsafe-example.php",
+      "line": 16,
+      "message": "register_rest_route() call has no permission_callback.",
+      "remediation": "Add a permission_callback. Use __return_true only for intentionally public endpoints."
+    },
+    {
+      "severity": "warning",
+      "rule": "security.superglobal-without-nearby-sanitization",
+      "file": "unsafe-example.php",
+      "line": 29,
+      "message": "Request superglobal is used without nearby sanitization or validation.",
+      "remediation": "Validate intent and type first, then sanitize using a WordPress sanitizer such as sanitize_text_field(), sanitize_key(), absint(), or map_deep() as appropriate."
+    },
+    {
+      "severity": "warning",
+      "rule": "security.output-without-obvious-escaping",
+      "file": "unsafe-example.php",
+      "line": 32,
+      "message": "Output statement does not include an obvious escaping function.",
+      "remediation": "Escape late with esc_html(), esc_attr(), esc_url(), wp_kses(), or another context-appropriate escaping API."
+    },
+    {
+      "severity": "info",
+      "rule": "blocks.dynamic-render-reminder",
+      "file": "blocks/sample-block/block.json",
+      "line": 1,
+      "message": "Dynamic block render output should be validated and escaped.",
+      "remediation": "Treat attributes as untrusted in render.php or render callbacks; validate, sanitize, authorize if needed, and escape late."
+    }
+  ]
+}

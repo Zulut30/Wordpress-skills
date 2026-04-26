@@ -28,10 +28,12 @@ Initial work-in-progress release of the WordPress Plugin Dev Agent Skill.
   - official source map
 - Production-oriented templates for plugin bootstrap, Composer, npm, `block.json`, REST controllers, Settings API pages, WordPress.org readme, and GitHub Actions CI.
 - Node-based scripts for skill validation, source-map checks, install-target sync, and heuristic plugin audit.
+- Local Markdown link checker wired into `npm run smoke`.
 - Unit tests for the audit script parsing and scanner rules.
 - Demo fixture plugin under the skill folder.
 - Project-level sample plugin fixture under `test-fixtures/sample-plugin/` with a fixture-only unsafe example for audit validation.
-- README install guidance for Codex, Claude Code, and Cursor.
+- README install guidance for Codex, Claude Code, and Cursor, plus quickstart, support matrix, repository map, limitations checklist, and example output links.
+- Text-based demo docs with representative human and JSON audit output.
 - Compatibility notes that mark Cursor filesystem discovery and slash invocation as version/workflow-dependent and requiring verification against current official docs.
 
 ### Validation
