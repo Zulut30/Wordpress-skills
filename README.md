@@ -357,3 +357,10 @@ npm run smoke
 ## License
 
 MIT. See [LICENSE](LICENSE).
+
+
+---
+
+## Auto-generated contribution
+
+Added by bounty bot.
