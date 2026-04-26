@@ -1,0 +1,9 @@
+{
+  "name": "skill-fixture/demo-skill-plugin",
+  "description": "Fixture plugin for the WordPress Plugin Dev skill.",
+  "type": "wordpress-plugin",
+  "license": "GPL-2.0-or-later",
+  "require": {
+    "php": ">=8.1"
+  }
+}

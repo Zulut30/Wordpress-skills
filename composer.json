@@ -4,6 +4,8 @@
   "type": "project",
   "license": "MIT",
   "require-dev": {
+    "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
+    "squizlabs/php_codesniffer": "^3.9",
     "wp-coding-standards/wpcs": "^3.0",
     "phpcompatibility/phpcompatibility-wp": "^2.1",
     "phpunit/phpunit": "^9.6 || ^10.5"
@@ -12,5 +14,9 @@
     "allow-plugins": {
       "dealerdirect/phpcodesniffer-composer-installer": true
     }
+  },
+  "scripts": {
+    "lint": "phpcs --standard=WordPress skills/wordpress-plugin-dev/fixtures/demo-plugin test-fixtures/sample-plugin",
+    "format": "phpcbf --standard=WordPress skills/wordpress-plugin-dev/fixtures/demo-plugin test-fixtures/sample-plugin"
   }
 }

@@ -6,9 +6,13 @@
   "type": "module",
   "scripts": {
     "validate": "node skills/wordpress-plugin-dev/scripts/validate-skill.mjs",
+    "validate:skill": "node skills/wordpress-plugin-dev/scripts/validate-skill.mjs",
     "check:sources": "node skills/wordpress-plugin-dev/scripts/check-source-map.mjs",
     "audit:fixture": "node skills/wordpress-plugin-dev/scripts/audit-plugin.mjs skills/wordpress-plugin-dev/fixtures/demo-plugin",
-    "sync:targets": "node skills/wordpress-plugin-dev/scripts/sync-install-targets.mjs"
+    "test:audit": "node skills/wordpress-plugin-dev/scripts/audit-plugin.test.mjs",
+    "sync:targets": "node skills/wordpress-plugin-dev/scripts/sync-install-targets.mjs",
+    "sync": "node skills/wordpress-plugin-dev/scripts/sync-install-targets.mjs",
+    "smoke": "npm run validate:skill && npm run check:sources && npm run test:audit && npm run audit:fixture"
   },
   "engines": {
     "node": ">=18"

@@ -1,0 +1,21 @@
+{
+  "name": "fixture/sample-fixture-plugin",
+  "description": "Small WordPress plugin fixture for testing the wordpress-plugin-dev skill and audit script.",
+  "type": "wordpress-plugin",
+  "license": "GPL-2.0-or-later",
+  "autoload": {
+    "psr-4": {
+      "SampleFixturePlugin\\": "src/"
+    }
+  },
+  "require": {
+    "php": ">=8.1"
+  },
+  "require-dev": {
+    "wp-coding-standards/wpcs": "^3.0"
+  },
+  "scripts": {
+    "lint": "phpcs --standard=phpcs.xml.dist",
+    "lint:php": "phpcs --standard=phpcs.xml.dist"
+  }
+}

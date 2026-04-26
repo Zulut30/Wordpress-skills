@@ -1,0 +1,113 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { tmpdir } from 'node:os';
+
+import { auditPlugin, parsePluginHeaders } from './audit-plugin.mjs';
+
+function withPlugin(files, callback) {
+  const root = mkdtempSync(join(tmpdir(), 'wp-plugin-audit-'));
+
+  try {
+    for (const [file, content] of Object.entries(files)) {
+      const fullPath = join(root, file);
+      mkdirSync(dirname(fullPath), { recursive: true });
+      writeFileSync(fullPath, content);
+    }
+
+    return callback(root);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+}
+
+test('parsePluginHeaders reads WordPress plugin headers', () => {
+  const headers = parsePluginHeaders(`<?php
+/**
+ * Plugin Name: Example Plugin
+ * Version: 1.2.3
+ * Text Domain: example-plugin
+ * Requires at least: 6.5
+ * Requires PHP: 8.1
+ */
+`);
+
+  assert.equal(headers['Plugin Name'], 'Example Plugin');
+  assert.equal(headers.Version, '1.2.3');
+  assert.equal(headers['Text Domain'], 'example-plugin');
+  assert.equal(headers['Requires at least'], '6.5');
+  assert.equal(headers['Requires PHP'], '8.1');
+});
+
+test('auditPlugin detects missing REST permission callback', () => {
+  withPlugin(
+    {
+      'example.php': `<?php
+/**
+ * Plugin Name: Example
+ * Version: 1.0.0
+ * Text Domain: example
+ */
+defined( 'ABSPATH' ) || exit;
+add_action( 'rest_api_init', function () {
+	register_rest_route( 'example/v1', '/items', array(
+		'methods' => 'GET',
+		'callback' => '__return_empty_array',
+	) );
+} );
+`,
+    },
+    (root) => {
+      const report = auditPlugin(root);
+      assert.ok(report.findings.some((finding) => finding.rule === 'security.rest-route-missing-permission-callback'));
+    }
+  );
+});
+
+test('auditPlugin detects unsafe request and output heuristics', () => {
+  withPlugin(
+    {
+      'example.php': `<?php
+/**
+ * Plugin Name: Example
+ * Version: 1.0.0
+ * Text Domain: example
+ */
+defined( 'ABSPATH' ) || exit;
+$name = $_GET['name'];
+echo $name;
+`,
+    },
+    (root) => {
+      const report = auditPlugin(root);
+      assert.ok(report.findings.some((finding) => finding.rule === 'security.superglobal-without-nearby-sanitization'));
+      assert.ok(report.findings.some((finding) => finding.rule === 'security.output-without-obvious-escaping'));
+    }
+  );
+});
+
+test('auditPlugin validates block metadata shape', () => {
+  withPlugin(
+    {
+      'example.php': `<?php
+/**
+ * Plugin Name: Example
+ * Version: 1.0.0
+ * Text Domain: example
+ */
+defined( 'ABSPATH' ) || exit;
+`,
+      'blocks/example/block.json': JSON.stringify({
+        apiVersion: 3,
+        name: 'bad-name',
+        title: 'Example',
+      }),
+    },
+    (root) => {
+      const report = auditPlugin(root);
+      assert.ok(report.findings.some((finding) => finding.rule === 'blocks.invalid-name'));
+      assert.ok(report.findings.some((finding) => finding.rule === 'blocks.missing-textdomain'));
+    }
+  );
+});

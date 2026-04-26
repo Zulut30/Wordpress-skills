@@ -1,9 +1,21 @@
 {
-  "name": "wordpress-plugin-dev-skill",
-  "displayName": "WordPress Plugin Dev Skill",
-  "description": "Portable skill for building, reviewing, testing, and releasing WordPress plugins.",
-  "version": "0.1.0",
-  "skills": [
-    ".agents/skills/wordpress-plugin-dev"
+  "name": "local-wordpress-plugin-dev-marketplace",
+  "interface": {
+    "displayName": "Local WordPress Plugin Dev Skills"
+  },
+  "plugins": [
+    {
+      "name": "wordpress-plugin-dev",
+      "version": "0.1.0",
+      "source": {
+        "source": "local",
+        "path": "."
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    }
   ]
 }

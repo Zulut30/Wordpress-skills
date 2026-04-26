@@ -1,11 +1,8 @@
 {
-  "name": "wordpress-plugin-dev-skill",
+  "name": "wordpress-plugin-dev",
   "version": "0.1.0",
-  "description": "Codex-compatible Agent Skill for modern WordPress plugin development.",
-  "skills": [
-    {
-      "name": "wordpress-plugin-dev",
-      "path": "skills/wordpress-plugin-dev"
-    }
-  ]
+  "description": "Portable Agent Skill bundle for developing, reviewing, testing, securing, packaging, and releasing modern WordPress plugins.",
+  "author": "WordPress Plugin Dev Skill Maintainers",
+  "license": "MIT",
+  "skills": "./skills/"
 }

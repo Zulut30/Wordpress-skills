@@ -1,0 +1,64 @@
+name: Validate
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate skill package
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Install npm dependencies
+        shell: bash
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Validate skill
+        run: npm run validate:skill
+
+      - name: Smoke test
+        run: npm run smoke
+
+      - name: Audit sample fixture
+        shell: bash
+        run: |
+          if [ ! -d test-fixtures/sample-plugin ]; then
+            echo "No test-fixtures/sample-plugin directory found; skipping fixture audit."
+            exit 0
+          fi
+
+          set +e
+          node skills/wordpress-plugin-dev/scripts/audit-plugin.mjs test-fixtures/sample-plugin > audit-output.txt
+          status=$?
+          set -e
+
+          cat audit-output.txt
+
+          if ! grep -q "unsafe-example.php" audit-output.txt; then
+            echo "Expected fixture finding for unsafe-example.php was not reported."
+            exit 1
+          fi
+
+          if [ "$status" -ne 1 ]; then
+            echo "Expected audit exit code 1 for intentionally unsafe fixture, got $status."
+            exit 1
+          fi
+
+          echo "Sample fixture audit produced expected findings."

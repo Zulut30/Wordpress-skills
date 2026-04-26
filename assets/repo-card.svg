@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="420" viewBox="0 0 1200 420" role="img" aria-labelledby="title desc">
+  <title id="title">WordPress Plugin Dev Skill</title>
+  <desc id="desc">A clean repository card for the WordPress Plugin Dev Skill project.</desc>
+  <rect width="1200" height="420" fill="#f8fafc"/>
+  <rect x="48" y="48" width="1104" height="324" rx="28" fill="#ffffff" stroke="#dbe3ea" stroke-width="2"/>
+  <circle cx="118" cy="124" r="36" fill="#21759b"/>
+  <path d="M101 105h12l8 34 9-34h10l9 34 8-34h12l-14 47h-12l-8-31-9 31h-12z" fill="#ffffff"/>
+  <text x="180" y="129" font-family="Arial, Helvetica, sans-serif" font-size="44" font-weight="700" fill="#111827">WordPress Plugin Dev Skill</text>
+  <text x="180" y="178" font-family="Arial, Helvetica, sans-serif" font-size="24" fill="#4b5563">Agent workflows, references, templates, and audit scripts for modern WordPress plugin development.</text>
+  <g transform="translate(180 230)">
+    <rect width="145" height="42" rx="21" fill="#e0f2fe"/>
+    <text x="22" y="28" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" fill="#075985">Agent Skill</text>
+  </g>
+  <g transform="translate(345 230)">
+    <rect width="125" height="42" rx="21" fill="#dcfce7"/>
+    <text x="23" y="28" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" fill="#166534">Security</text>
+  </g>
+  <g transform="translate(490 230)">
+    <rect width="145" height="42" rx="21" fill="#fef3c7"/>
+    <text x="24" y="28" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" fill="#92400e">Gutenberg</text>
+  </g>
+  <g transform="translate(655 230)">
+    <rect width="116" height="42" rx="21" fill="#ede9fe"/>
+    <text x="24" y="28" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" fill="#5b21b6">REST</text>
+  </g>
+  <text x="180" y="322" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#6b7280">v0.1.0 work in progress - MIT - Codex - Claude Code - Cursor-compatible workflows</text>
+</svg>

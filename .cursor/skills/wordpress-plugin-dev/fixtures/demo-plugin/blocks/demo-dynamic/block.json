@@ -1,0 +1,21 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "demo-skill-plugin/demo-dynamic",
+  "version": "0.1.0",
+  "title": "Demo Dynamic",
+  "category": "widgets",
+  "icon": "admin-plugins",
+  "description": "Dynamic fixture block for skill validation.",
+  "textdomain": "demo-skill-plugin",
+  "attributes": {
+    "message": {
+      "type": "string",
+      "default": ""
+    }
+  },
+  "supports": {
+    "html": false
+  },
+  "render": "file:./render.php"
+}

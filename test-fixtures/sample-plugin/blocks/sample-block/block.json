@@ -1,0 +1,21 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "sample-fixture-plugin/sample-block",
+  "version": "0.1.0",
+  "title": "Sample Fixture Block",
+  "category": "widgets",
+  "icon": "admin-plugins",
+  "description": "Small fixture block for skill and audit testing.",
+  "textdomain": "sample-fixture-plugin",
+  "attributes": {
+    "message": {
+      "type": "string",
+      "default": ""
+    }
+  },
+  "supports": {
+    "html": false
+  },
+  "render": "file:./render.php"
+}
