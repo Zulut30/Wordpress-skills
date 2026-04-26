@@ -1,0 +1,16 @@
+{
+  "name": "zulut30/wordpress-plugin-dev-skill",
+  "description": "Agent Skill resources for modern WordPress plugin development.",
+  "type": "project",
+  "license": "MIT",
+  "require-dev": {
+    "wp-coding-standards/wpcs": "^3.0",
+    "phpcompatibility/phpcompatibility-wp": "^2.1",
+    "phpunit/phpunit": "^9.6 || ^10.5"
+  },
+  "config": {
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true
+    }
+  }
+}

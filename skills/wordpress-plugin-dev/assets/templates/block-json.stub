@@ -1,0 +1,23 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "{{TEXT_DOMAIN}}/{{BLOCK_SLUG}}",
+  "version": "{{PLUGIN_VERSION}}",
+  "title": "{{BLOCK_TITLE}}",
+  "category": "widgets",
+  "icon": "screenoptions",
+  "description": "{{BLOCK_DESCRIPTION}}",
+  "textdomain": "{{TEXT_DOMAIN}}",
+  "attributes": {
+    "message": {
+      "type": "string",
+      "default": ""
+    }
+  },
+  "supports": {
+    "html": false
+  },
+  "editorScript": "file:./index.js",
+  "style": "file:./style-index.css",
+  "render": "file:./render.php"
+}

@@ -1,0 +1,81 @@
+<?php
+/**
+ * Settings page for {{PLUGIN_NAME}}.
+ *
+ * @package {{PHP_NAMESPACE}}
+ */
+
+namespace {{PHP_NAMESPACE}}\Admin;
+
+class Settings_Page {
+	private const OPTION = '{{OPTION_NAME}}';
+
+	public function register(): void {
+		add_action( 'admin_menu', array( $this, 'add_page' ) );
+		add_action( 'admin_init', array( $this, 'register_settings' ) );
+	}
+
+	public function add_page(): void {
+		add_options_page(
+			__( '{{PLUGIN_NAME}}', '{{TEXT_DOMAIN}}' ),
+			__( '{{PLUGIN_NAME}}', '{{TEXT_DOMAIN}}' ),
+			'manage_options',
+			'{{PLUGIN_SLUG}}',
+			array( $this, 'render' )
+		);
+	}
+
+	public function register_settings(): void {
+		register_setting(
+			'{{PLUGIN_SLUG}}',
+			self::OPTION,
+			array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+				'default'           => '',
+			)
+		);
+
+		add_settings_section(
+			'{{PLUGIN_SLUG}}_main',
+			__( 'Settings', '{{TEXT_DOMAIN}}' ),
+			'__return_false',
+			'{{PLUGIN_SLUG}}'
+		);
+
+		add_settings_field(
+			self::OPTION,
+			__( 'Message', '{{TEXT_DOMAIN}}' ),
+			array( $this, 'render_field' ),
+			'{{PLUGIN_SLUG}}',
+			'{{PLUGIN_SLUG}}_main'
+		);
+	}
+
+	public function render_field(): void {
+		$value = get_option( self::OPTION, '' );
+		printf(
+			'<input class="regular-text" type="text" name="%1$s" value="%2$s" />',
+			esc_attr( self::OPTION ),
+			esc_attr( $value )
+		);
+	}
+
+	public function render(): void {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'You do not have permission to access this page.', '{{TEXT_DOMAIN}}' ) );
+		}
+		?>
+		<div class="wrap">
+			<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
+			<form action="options.php" method="post">
+				<?php
+				settings_fields( '{{PLUGIN_SLUG}}' );
+				do_settings_sections( '{{PLUGIN_SLUG}}' );
+				submit_button();
+				?>
+			</form>
+		</div>
+		<?php
+	}
+}

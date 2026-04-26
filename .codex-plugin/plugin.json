@@ -1,0 +1,11 @@
+{
+  "name": "wordpress-plugin-dev-skill",
+  "version": "0.1.0",
+  "description": "Codex-compatible Agent Skill for modern WordPress plugin development.",
+  "skills": [
+    {
+      "name": "wordpress-plugin-dev",
+      "path": "skills/wordpress-plugin-dev"
+    }
+  ]
+}

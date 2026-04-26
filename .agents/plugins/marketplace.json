@@ -1,0 +1,9 @@
+{
+  "name": "wordpress-plugin-dev-skill",
+  "displayName": "WordPress Plugin Dev Skill",
+  "description": "Portable skill for building, reviewing, testing, and releasing WordPress plugins.",
+  "version": "0.1.0",
+  "skills": [
+    ".agents/skills/wordpress-plugin-dev"
+  ]
+}

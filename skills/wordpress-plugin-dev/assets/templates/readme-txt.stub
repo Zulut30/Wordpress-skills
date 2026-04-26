@@ -1,0 +1,32 @@
+=== {{PLUGIN_NAME}} ===
+Contributors: {{WP_ORG_USER}}
+Tags: blocks, admin, rest-api
+Requires at least: {{REQUIRES_WP}}
+Tested up to: {{TESTED_UP_TO}}
+Requires PHP: {{REQUIRES_PHP}}
+Stable tag: {{PLUGIN_VERSION}}
+License: GPLv2 or later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
+
+{{PLUGIN_DESCRIPTION}}
+
+== Description ==
+
+{{LONG_DESCRIPTION}}
+
+== Installation ==
+
+1. Upload the plugin files to `/wp-content/plugins/{{PLUGIN_SLUG}}`.
+2. Activate the plugin through the Plugins screen in WordPress.
+3. Configure settings if needed.
+
+== Frequently Asked Questions ==
+
+= Does this plugin store personal data? =
+
+Review the plugin privacy notes and settings before release.
+
+== Changelog ==
+
+= {{PLUGIN_VERSION}} =
+* Initial release.

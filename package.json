@@ -1,0 +1,16 @@
+{
+  "name": "wordpress-plugin-dev-skill",
+  "version": "0.1.0",
+  "description": "Portable Agent Skill for modern WordPress plugin development.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "validate": "node skills/wordpress-plugin-dev/scripts/validate-skill.mjs",
+    "check:sources": "node skills/wordpress-plugin-dev/scripts/check-source-map.mjs",
+    "audit:fixture": "node skills/wordpress-plugin-dev/scripts/audit-plugin.mjs skills/wordpress-plugin-dev/fixtures/demo-plugin",
+    "sync:targets": "node skills/wordpress-plugin-dev/scripts/sync-install-targets.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -1,0 +1,45 @@
+<?php
+/**
+ * REST controller for {{PLUGIN_NAME}}.
+ *
+ * @package {{PHP_NAMESPACE}}
+ */
+
+namespace {{PHP_NAMESPACE}}\Rest;
+
+use WP_Error;
+use WP_REST_Controller;
+use WP_REST_Request;
+use WP_REST_Response;
+
+class {{CONTROLLER_CLASS}} extends WP_REST_Controller {
+	protected $namespace = '{{REST_NAMESPACE}}';
+	protected $rest_base = '{{REST_BASE}}';
+
+	public function register_routes(): void {
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base,
+			array(
+				array(
+					'methods'             => 'GET',
+					'callback'            => array( $this, 'get_items' ),
+					'permission_callback' => array( $this, 'can_read' ),
+					'args'                => array(),
+				),
+			)
+		);
+	}
+
+	public function can_read( WP_REST_Request $request ): bool {
+		return current_user_can( 'read' );
+	}
+
+	public function get_items( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+		return rest_ensure_response(
+			array(
+				'items' => array(),
+			)
+		);
+	}
+}

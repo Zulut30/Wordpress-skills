@@ -1,0 +1,50 @@
+<?php
+/**
+ * Plugin Name:       {{PLUGIN_NAME}}
+ * Description:       {{PLUGIN_DESCRIPTION}}
+ * Version:           {{PLUGIN_VERSION}}
+ * Requires at least: {{REQUIRES_WP}}
+ * Requires PHP:      {{REQUIRES_PHP}}
+ * Author:            {{AUTHOR_NAME}}
+ * License:           GPL-2.0-or-later
+ * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
+ * Text Domain:       {{TEXT_DOMAIN}}
+ *
+ * @package {{PHP_NAMESPACE}}
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+define( '{{CONSTANT_PREFIX}}_VERSION', '{{PLUGIN_VERSION}}' );
+define( '{{CONSTANT_PREFIX}}_FILE', __FILE__ );
+define( '{{CONSTANT_PREFIX}}_DIR', plugin_dir_path( __FILE__ ) );
+define( '{{CONSTANT_PREFIX}}_URL', plugin_dir_url( __FILE__ ) );
+
+$autoload = __DIR__ . '/vendor/autoload.php';
+if ( file_exists( $autoload ) ) {
+	require_once $autoload;
+}
+
+register_activation_hook(
+	__FILE__,
+	static function (): void {
+		// Register rewrite-dependent objects before flushing.
+		flush_rewrite_rules();
+	}
+);
+
+register_deactivation_hook(
+	__FILE__,
+	static function (): void {
+		flush_rewrite_rules();
+	}
+);
+
+add_action(
+	'plugins_loaded',
+	static function (): void {
+		if ( class_exists( '{{PHP_NAMESPACE}}\\Plugin' ) ) {
+			{{PHP_NAMESPACE}}\Plugin::instance()->register();
+		}
+	}
+);
