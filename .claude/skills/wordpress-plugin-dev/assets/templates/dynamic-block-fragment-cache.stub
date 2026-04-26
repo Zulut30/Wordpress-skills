@@ -1,0 +1,37 @@
+<?php
+/**
+ * Dynamic block render with fragment cache for {{PLUGIN_NAME}}.
+ *
+ * Placeholders: {{PLUGIN_SLUG}}, {{TEXT_DOMAIN}}, {{VENDOR_NAMESPACE}}, {{PLUGIN_VERSION}}, {{CACHE_GROUP}}.
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+$item_id = absint( $attributes['itemId'] ?? 0 );
+if ( ! $item_id ) {
+	return '';
+}
+
+$cache_key = '{{PLUGIN_SLUG}}_block_' . $item_id;
+$html      = get_transient( $cache_key );
+
+if ( false !== $html ) {
+	return (string) $html;
+}
+
+$title = get_the_title( $item_id );
+if ( '' === $title ) {
+	return '';
+}
+
+$html = sprintf(
+	'<div %1$s><h2>%2$s</h2></div>',
+	get_block_wrapper_attributes(),
+	esc_html( $title )
+);
+
+set_transient( $cache_key, $html, 10 * MINUTE_IN_SECONDS );
+
+return $html;
+
+// Invalidate this key on save_post/delete_post for the source content.

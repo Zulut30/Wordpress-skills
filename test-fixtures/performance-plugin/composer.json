@@ -1,0 +1,17 @@
+{
+  "name": "fixture/performance-plugin",
+  "description": "Performance scanner fixture plugin.",
+  "type": "wordpress-plugin",
+  "license": "GPL-2.0-or-later",
+  "autoload": {
+    "psr-4": {
+      "Performance_Plugin\\": "src/"
+    }
+  },
+  "scripts": {
+    "lint": "phpcs"
+  },
+  "require-dev": {
+    "wp-coding-standards/wpcs": "^3.0"
+  }
+}

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
-import { basename, extname, isAbsolute, join, relative, resolve } from 'node:path';
+import { basename, dirname, extname, isAbsolute, join, relative, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 const EXCLUDED_DIRS = new Set([
@@ -24,15 +24,36 @@ const SANITIZE_OR_VALIDATE_RE =
 
 const NONCE_RE = /\b(wp_verify_nonce|check_admin_referer|check_ajax_referer)\s*\(/;
 const CAPABILITY_RE = /\b(current_user_can|user_can|map_meta_cap)\s*\(/;
+const PERFORMANCE_EXPENSIVE_RE =
+  /\b(wp_remote_get|wp_remote_post|file_get_contents|glob|scandir|get_posts|flush_rewrite_rules)\s*\(|new\s+WP_Query\s*\(|\$wpdb->get_results\s*\(/;
+const PERFORMANCE_SCOPE_RE =
+  /\b(is_admin|wp_doing_ajax|REST_REQUEST|get_current_screen|is_singular|is_page|is_post_type_archive|has_shortcode|has_block|is_main_query|current_user_can|wp_is_serving_rest_request)\s*\(/;
+const CACHE_RE = /\b(get_transient|set_transient|wp_cache_get|wp_cache_set)\s*\(/;
+const BATCH_RE = /\b(batch|limit|offset|paged|per_page|posts_per_page|numberposts)\b/i;
 
 export function parseArgs(argv) {
   const args = [...argv];
   const json = args.includes('--json');
+  const performance = args.includes('--performance') || args.includes('--performance-only');
+  const performanceOnly = args.includes('--performance-only');
   const help = args.includes('--help') || args.includes('-h');
-  const filtered = args.filter((arg) => arg !== '--json' && arg !== '--help' && arg !== '-h');
+  const failOnArg = args.find((arg) => arg.startsWith('--fail-on='));
+  const failOn = failOnArg ? failOnArg.split('=')[1] : 'error';
+  const filtered = args.filter(
+    (arg) =>
+      arg !== '--json' &&
+      arg !== '--performance' &&
+      arg !== '--performance-only' &&
+      arg !== '--help' &&
+      arg !== '-h' &&
+      !arg.startsWith('--fail-on=')
+  );
 
   return {
     json,
+    performance,
+    performanceOnly,
+    failOn: ['error', 'warning', 'none'].includes(failOn) ? failOn : 'error',
     help,
     target: filtered[0] ? resolve(filtered[0]) : null,
   };
@@ -109,27 +130,34 @@ function toDisplayPath(rootDir, file) {
   return isAbsolute(file) ? relative(rootDir, file).replaceAll('\\', '/') || basename(file) : file;
 }
 
-function addFinding(report, severity, rule, file, line, message, remediation) {
+function categoryFromRule(rule) {
+  return rule.includes('.') ? rule.split('.')[0] : 'general';
+}
+
+function addFinding(report, severity, rule, file, line, message, remediation, details = {}) {
   report.findings.push({
     severity,
+    category: details.category || categoryFromRule(rule),
     rule,
     file: file ? toDisplayPath(report.targetPath, file) : null,
     line: line || null,
     message,
+    why: details.why || undefined,
     remediation,
+    confidence: details.confidence || undefined,
   });
 }
 
-function addInfo(report, rule, file, line, message, remediation) {
-  addFinding(report, 'info', rule, file, line, message, remediation);
+function addInfo(report, rule, file, line, message, remediation, details = {}) {
+  addFinding(report, 'info', rule, file, line, message, remediation, details);
 }
 
-function addWarning(report, rule, file, line, message, remediation) {
-  addFinding(report, 'warning', rule, file, line, message, remediation);
+function addWarning(report, rule, file, line, message, remediation, details = {}) {
+  addFinding(report, 'warning', rule, file, line, message, remediation, details);
 }
 
-function addError(report, rule, file, line, message, remediation) {
-  addFinding(report, 'error', rule, file, line, message, remediation);
+function addError(report, rule, file, line, message, remediation, details = {}) {
+  addFinding(report, 'error', rule, file, line, message, remediation, details);
 }
 
 function nearbyText(lines, lineIndex, before = 3, after = 3) {
@@ -162,6 +190,41 @@ function callWindow(lines, startIndex, maxLines = 80) {
   }
 
   return collected.join('\n');
+}
+
+function countTopLevelCommas(callText) {
+  let depth = 0;
+  let commas = 0;
+  let inString = null;
+  let escaped = false;
+
+  for (const char of callText) {
+    if (inString) {
+      if (escaped) {
+        escaped = false;
+      } else if (char === '\\') {
+        escaped = true;
+      } else if (char === inString) {
+        inString = null;
+      }
+      continue;
+    }
+
+    if (char === '"' || char === "'") {
+      inString = char;
+      continue;
+    }
+
+    if (char === '(' || char === '[' || char === '{') {
+      depth += 1;
+    } else if (char === ')' || char === ']' || char === '}') {
+      depth = Math.max(0, depth - 1);
+    } else if (char === ',' && depth <= 1) {
+      commas += 1;
+    }
+  }
+
+  return commas;
 }
 
 function parseJsonFile(report, file, rule) {
@@ -562,17 +625,601 @@ function auditReleaseFiles(report, rootDir, mainHeaders) {
   }
 }
 
-export function auditPlugin(pluginDir) {
+function addPerformanceFinding(report, severity, rule, file, line, message, why, remediation, confidence = 'medium') {
+  addFinding(report, severity, rule, file, line, message, remediation, {
+    category: 'performance',
+    why,
+    confidence,
+  });
+}
+
+function auditPerformanceHooks(report, phpFiles) {
+  for (const file of phpFiles) {
+    const content = readText(file);
+    const lines = content.split(/\r?\n/);
+
+    lines.forEach((line, index) => {
+      const lineNumber = index + 1;
+      const window = nearbyText(lines, index, 8, 12);
+
+      if (/flush_rewrite_rules\s*\(/.test(line) && !/register_(activation|deactivation|uninstall)_hook|activate|deactivate|uninstall/i.test(window)) {
+        addPerformanceFinding(
+          report,
+          'warning',
+          'performance.hooks.flush-rewrite-rules-on-request',
+          file,
+          lineNumber,
+          'flush_rewrite_rules() appears outside activation/deactivation/uninstall context.',
+          'Flushing rewrite rules is expensive and writes rewrite state; it should not run on normal requests.',
+          'Move rewrite flushing to activation/deactivation or a versioned migration after rewrite-dependent objects are registered.',
+          'high'
+        );
+      }
+
+      if (/wp_schedule_event\s*\(/.test(line) && !/wp_next_scheduled\s*\(/.test(window)) {
+        addPerformanceFinding(
+          report,
+          'warning',
+          'performance.hooks.cron-schedule-without-guard',
+          file,
+          lineNumber,
+          'wp_schedule_event() appears without a nearby wp_next_scheduled() guard.',
+          'Unconditional scheduling can create duplicate cron events or unnecessary option writes.',
+          'Schedule on activation or guard scheduling with wp_next_scheduled().',
+          'high'
+        );
+      }
+
+      if (/add_action\s*\(\s*['"]pre_get_posts['"]/.test(line)) {
+        const fileWindow = content;
+        if (!/is_admin\s*\(/.test(fileWindow) || !/is_main_query\s*\(/.test(fileWindow)) {
+          addPerformanceFinding(
+            report,
+            'warning',
+            'performance.hooks.unscoped-pre-get-posts',
+            file,
+            lineNumber,
+            'pre_get_posts hook has no obvious admin/main-query context guards.',
+            'Unscoped query mutation can affect unrelated frontend, admin, REST, and editor queries.',
+            'Gate with is_admin(), is_main_query(), query vars, post type, route, or another narrow context check.',
+            'medium'
+          );
+        }
+      }
+
+      if (/add_action\s*\(\s*['"](init|plugins_loaded|admin_init|wp)['"]/.test(line)) {
+        const hookWindow = callWindow(lines, index, 140);
+        if (PERFORMANCE_EXPENSIVE_RE.test(hookWindow) && !PERFORMANCE_SCOPE_RE.test(hookWindow)) {
+          addPerformanceFinding(
+            report,
+            'warning',
+            'performance.hooks.expensive-work-on-broad-hook',
+            file,
+            lineNumber,
+            'Broad lifecycle hook appears to run expensive work without an obvious scope guard.',
+            'Expensive work on broad hooks can slow every frontend/admin/editor/REST request.',
+            'Move setup to activation, lazy-load work, or gate the callback by request context before running expensive operations.',
+            'medium'
+          );
+        }
+      }
+
+      if (/\b(wp_remote_get|wp_remote_post)\s*\(/.test(line) && !CACHE_RE.test(window)) {
+        addPerformanceFinding(
+          report,
+          'warning',
+          'performance.hooks.remote-call-without-cache-nearby',
+          file,
+          lineNumber,
+          'Remote HTTP call has no nearby cache usage.',
+          'Remote calls during request handling can block page render and fail unpredictably.',
+          'Add a short timeout, cache successful public responses, short-cache failures, and move heavy sync to cron when suitable.',
+          'medium'
+        );
+      }
+    });
+  }
+}
+
+function auditPerformanceAssets(report, phpFiles) {
+  for (const file of phpFiles) {
+    const content = readText(file);
+    const lines = content.split(/\r?\n/);
+    const enqueueCount = (content.match(/\bwp_enqueue_(?:script|style)\s*\(/g) || []).length;
+
+    if (enqueueCount >= 8) {
+      addPerformanceFinding(
+        report,
+        'info',
+        'performance.assets.many-enqueues-in-file',
+        file,
+        1,
+        `File contains ${enqueueCount} enqueue calls.`,
+        'Many assets in one file can be legitimate, but often indicates global loading or missing asset boundaries.',
+        'Review whether admin, editor, frontend, and block assets can be split and scoped.',
+        'low'
+      );
+    }
+
+    lines.forEach((line, index) => {
+      const lineNumber = index + 1;
+      const window = callWindow(lines, index, 120);
+      const nearby = nearbyText(lines, index, 10, 14);
+
+      if (/add_action\s*\(\s*['"]admin_enqueue_scripts['"]/.test(line) && !/\$hook_suffix|get_current_screen\s*\(/.test(window + nearby)) {
+        addPerformanceFinding(
+          report,
+          'warning',
+          'performance.assets.admin-enqueue-without-screen-check',
+          file,
+          lineNumber,
+          'admin_enqueue_scripts callback has no obvious screen check.',
+          'Admin assets loaded on every wp-admin screen slow unrelated admin workflows.',
+          'Gate by $hook_suffix or get_current_screen()->id before enqueueing plugin-specific assets.',
+          'medium'
+        );
+      }
+
+      if (/add_action\s*\(\s*['"]wp_enqueue_scripts['"]/.test(line)) {
+        const hookWindow = callWindow(lines, index, 160);
+        if (/\bwp_enqueue_(?:script|style)\s*\(/.test(hookWindow) && !PERFORMANCE_SCOPE_RE.test(hookWindow)) {
+          addPerformanceFinding(
+            report,
+            'info',
+            'performance.assets.frontend-enqueue-without-context-check',
+            file,
+            lineNumber,
+            'Frontend enqueue callback has no obvious context check.',
+            'Global frontend assets increase bytes and parse/execute work on pages that may not use the plugin UI.',
+            'Scope by block presence, shortcode, route, template, post type, or feature state when practical.',
+            'low'
+          );
+        }
+      }
+
+      if (/\bwp_enqueue_script\s*\(/.test(line)) {
+        const enqueueWindow = callWindow(lines, index, 30);
+        if (/plugins_url\s*\(|plugin_dir_url\s*\(|content_url\s*\(/.test(enqueueWindow) && !/(PLUGIN_VERSION|VERSION|filemtime|asset\[['"]version['"]|wp_get_theme|time\s*\(|['"]\d+\.\d+(?:\.\d+)?['"])/i.test(enqueueWindow)) {
+          addPerformanceFinding(
+            report,
+            'info',
+            'performance.assets.script-missing-obvious-version',
+            file,
+            lineNumber,
+            'Script enqueue has no obvious version argument.',
+            'Missing versions can make cache invalidation unreliable for static assets.',
+            'Use plugin version or generated .asset.php metadata for dependencies and versioning.',
+            'low'
+          );
+        }
+
+        if (!/strategy\s*['"]?\s*=>|in_footer\s*['"]?\s*=>|true\s*\)/.test(enqueueWindow)) {
+          addPerformanceFinding(
+            report,
+            'info',
+            'performance.assets.consider-script-loading-strategy',
+            file,
+            lineNumber,
+            'Script enqueue does not show an explicit footer/strategy decision.',
+            'Non-critical frontend scripts can often avoid blocking render when loaded in the footer or with a safe loading strategy.',
+            'Verify target WordPress support and add a footer or loading strategy only when dependencies and behavior remain correct.',
+            'low'
+          );
+        }
+      }
+    });
+  }
+}
+
+function auditPerformanceQueries(report, phpFiles) {
+  for (const file of phpFiles) {
+    const content = readText(file);
+    const lines = content.split(/\r?\n/);
+
+    lines.forEach((line, index) => {
+      const lineNumber = index + 1;
+      const window = callWindow(lines, index, 120);
+      const nearbyBefore = nearbyText(lines, index, 6, 1);
+
+      if (/['"]posts_per_page['"]\s*=>\s*-1|['"]numberposts['"]\s*=>\s*-1/.test(line)) {
+        addPerformanceFinding(
+          report,
+          'warning',
+          'performance.query.unbounded-post-query',
+          file,
+          lineNumber,
+          'Query requests all matching posts with -1.',
+          'Unbounded post queries can load large datasets and exhaust memory on production sites.',
+          'Add pagination or a safe upper bound. Use fields => ids when only IDs are needed.',
+          'high'
+        );
+      }
+
+      if (/new\s+WP_Query\s*\(|get_posts\s*\(/.test(line)) {
+        if (!/no_found_rows\s*['"]?\s*=>/.test(window) && !/paged\s*['"]?\s*=>|pagination|paginate/i.test(window)) {
+          addPerformanceFinding(
+            report,
+            'info',
+            'performance.query.missing-no-found-rows',
+            file,
+            lineNumber,
+            'Query has no obvious no_found_rows setting.',
+            'When pagination totals are not needed, avoiding FOUND_ROWS-style totals can reduce database work.',
+            'Set no_found_rows => true for non-paginated queries where total counts are not needed.',
+            'low'
+          );
+        }
+
+        if (/foreach\s*\(|while\s*\(/.test(nearbyBefore)) {
+          addPerformanceFinding(
+            report,
+            'warning',
+            'performance.query.query-inside-loop',
+            file,
+            lineNumber,
+            'WP_Query/get_posts appears inside a loop.',
+            'Queries inside loops often create N+1 query patterns.',
+            'Prefetch data, batch IDs, prime caches, or move the query outside the loop.',
+            'medium'
+          );
+        }
+      }
+
+      if (/\$wpdb->(?:get_results|get_var|get_row|get_col|query)\s*\(/.test(line) && /SELECT/i.test(window) && !/\bLIMIT\b/i.test(window)) {
+        addPerformanceFinding(
+          report,
+          'warning',
+          'performance.query.direct-select-without-limit',
+          file,
+          lineNumber,
+          'Direct SQL SELECT has no obvious LIMIT.',
+          'Unbounded SQL can scan and return too many rows on production data.',
+          'Add LIMIT/OFFSET or use a paginated WordPress API. Keep using $wpdb->prepare() for variables.',
+          'medium'
+        );
+      }
+
+      if (/CREATE\s+TABLE/i.test(window) && !/\b(KEY|INDEX|PRIMARY\s+KEY)\b/i.test(window)) {
+        addPerformanceFinding(
+          report,
+          'warning',
+          'performance.query.custom-table-without-index',
+          file,
+          lineNumber,
+          'Custom table schema has no obvious key or index.',
+          'High-volume custom tables need indexes for lookup, joins, cleanup, and reporting queries.',
+          'Add PRIMARY KEY and targeted KEY/INDEX definitions for expected access patterns.',
+          'medium'
+        );
+      }
+    });
+  }
+}
+
+function auditPerformanceOptionsAndCache(report, phpFiles) {
+  for (const file of phpFiles) {
+    const content = readText(file);
+    const lines = content.split(/\r?\n/);
+
+    lines.forEach((line, index) => {
+      const lineNumber = index + 1;
+      const window = callWindow(lines, index, 80);
+      const nearby = nearbyText(lines, index, 6, 6);
+
+      if (/\b(add_option|update_option)\s*\(/.test(line) && /add_action\s*\(\s*['"](init|wp|plugins_loaded|template_redirect)['"]/.test(content)) {
+        addPerformanceFinding(
+          report,
+          'info',
+          'performance.options.option-write-in-request-context',
+          file,
+          lineNumber,
+          'Option write appears in a file with broad request hooks.',
+          'Option writes during normal page views can cause database writes, cache invalidations, and autoload bloat.',
+          'Ensure option writes happen only on explicit admin actions, activation, migrations, cron, or validated REST/admin requests.',
+          'low'
+        );
+      }
+
+      if (/set_transient\s*\(/.test(line) && countTopLevelCommas(window) < 2) {
+        addPerformanceFinding(
+          report,
+          'warning',
+          'performance.cache.transient-without-expiration',
+          file,
+          lineNumber,
+          'set_transient() appears without an expiration argument.',
+          'Non-expiring transients can persist indefinitely and may be autoloaded when stored in options.',
+          'Add an explicit TTL and an invalidation strategy.',
+          'medium'
+        );
+      }
+
+      if (/=\s*get_transient\s*\(/.test(line) && !/false\s*!==|false\s*===/.test(nearby)) {
+        addPerformanceFinding(
+          report,
+          'warning',
+          'performance.cache.transient-loose-miss-check',
+          file,
+          lineNumber,
+          'get_transient() result has no obvious strict false cache-miss check nearby.',
+          'Falsey cached values such as 0, empty string, or empty array can be mistaken for cache misses.',
+          'Use false === $cached or false !== $cached checks.',
+          'medium'
+        );
+      }
+
+      if (/set_transient\s*\(/.test(line) && !/delete_transient\s*\(/.test(content)) {
+        addPerformanceFinding(
+          report,
+          'info',
+          'performance.cache.no-obvious-transient-invalidation',
+          file,
+          lineNumber,
+          'Transient writes found with no delete_transient() in the same file.',
+          'Caches that depend on content/settings can serve stale output without invalidation hooks.',
+          'Add invalidation on relevant content, option, term, or plugin-specific change hooks, or document TTL-only behavior.',
+          'low'
+        );
+      }
+    });
+  }
+}
+
+function auditPerformanceRest(report, phpFiles) {
+  for (const file of phpFiles) {
+    const content = readText(file);
+    const lines = content.split(/\r?\n/);
+
+    lines.forEach((line, index) => {
+      if (!/register_rest_route\s*\(/.test(line)) {
+        return;
+      }
+
+      const lineNumber = index + 1;
+      const routeWindow = callWindow(lines, index, 180);
+      const fileWindow = content;
+
+      if (!/(page|paged|per_page|limit)\s*['"]?\s*=>/.test(routeWindow)) {
+        addPerformanceFinding(
+          report,
+          'info',
+          'performance.rest.collection-without-pagination-args',
+          file,
+          lineNumber,
+          'REST route has no obvious pagination/limit args.',
+          'Collection endpoints without pagination can return large payloads and run expensive queries.',
+          'Add page/per_page or limit args with validation and a safe maximum for collection endpoints.',
+          'low'
+        );
+      }
+
+      if (/(new\s+WP_Query|get_posts)\s*\(/.test(fileWindow) && /posts_per_page\s*['"]?\s*=>\s*-1/.test(fileWindow)) {
+        addPerformanceFinding(
+          report,
+          'warning',
+          'performance.rest.unbounded-query-near-route',
+          file,
+          lineNumber,
+          'REST route file contains an unbounded post query.',
+          'REST endpoints are often high-volume and should not return unbounded datasets.',
+          'Paginate, limit fields, and cache public safe responses when appropriate.',
+          'medium'
+        );
+      }
+
+      if (/permission_callback\s*['"]?\s*=>\s*['"]__return_true['"]/.test(routeWindow) && PERFORMANCE_EXPENSIVE_RE.test(fileWindow) && !CACHE_RE.test(fileWindow)) {
+        addPerformanceFinding(
+          report,
+          'warning',
+          'performance.rest.public-expensive-endpoint-without-cache',
+          file,
+          lineNumber,
+          'Public REST endpoint appears near expensive operations without cache usage.',
+          'Public endpoints can receive repeated anonymous traffic and amplify expensive work.',
+          'Cache safe public responses, paginate, and keep permission/validation semantics intact.',
+          'medium'
+        );
+      }
+
+      if (!/schema|properties|fields|context/.test(routeWindow)) {
+        addPerformanceFinding(
+          report,
+          'info',
+          'performance.rest.no-obvious-response-shape-control',
+          file,
+          lineNumber,
+          'REST route has no obvious schema or response shape control nearby.',
+          'Small response shapes reduce payload size and client-side work.',
+          'Return only required fields and add schema/field controls where practical.',
+          'low'
+        );
+      }
+    });
+  }
+}
+
+function auditPerformanceBlocks(report, files) {
+  const blockJsonFiles = files.filter((file) => basename(file) === 'block.json');
+  const blockLikeFiles = files.filter((file) => /[\\/]blocks[\\/].+\.(php|js|json)$/.test(file));
+  const blockDirsWithJson = new Set(blockJsonFiles.map((file) => dirname(file)));
+
+  for (const file of files.filter((candidate) => basename(candidate) === 'render.php' || extname(candidate).toLowerCase() === '.php')) {
+    if (!/[\\/]blocks[\\/]|render/i.test(file)) {
+      continue;
+    }
+
+    const content = readText(file);
+    const lines = content.split(/\r?\n/);
+
+    lines.forEach((line, index) => {
+      const lineNumber = index + 1;
+      const window = callWindow(lines, index, 120);
+
+      if (/(new\s+WP_Query|get_posts)\s*\(/.test(line)) {
+        if (!CACHE_RE.test(content)) {
+          addPerformanceFinding(
+            report,
+            'warning',
+            'performance.blocks.dynamic-render-query-without-cache',
+            file,
+            lineNumber,
+            'Dynamic block render code runs a query without obvious caching.',
+            'Dynamic block render callbacks can run on every page view where the block appears.',
+            'Bound the query and add fragment caching with invalidation when output is safe to cache.',
+            'medium'
+          );
+        }
+
+        if (!/posts_per_page\s*['"]?\s*=>/.test(window)) {
+          addPerformanceFinding(
+            report,
+            'warning',
+            'performance.blocks.dynamic-render-query-without-limit',
+            file,
+            lineNumber,
+            'Dynamic block render query has no obvious posts_per_page limit.',
+            'Unbounded render queries can slow high-traffic pages and archives.',
+            'Add a small upper bound and pagination or cache strategy as needed.',
+            'medium'
+          );
+        }
+      }
+    });
+  }
+
+  for (const file of blockJsonFiles) {
+    const block = parseJsonFile(report, file, 'performance.blocks.invalid-block-json');
+    if (!block) {
+      continue;
+    }
+
+    if (block.script || block.viewScript || block.viewScriptModule) {
+      addPerformanceFinding(
+        report,
+        'info',
+        'performance.blocks.review-frontend-block-assets',
+        file,
+        1,
+        'block.json declares frontend-capable script assets.',
+        'Frontend block scripts add bytes and runtime work to pages where the block appears.',
+        'Verify the script is needed on the frontend and keep editor/view scripts split.',
+        'low'
+      );
+    }
+  }
+
+  for (const file of blockLikeFiles) {
+    const dir = dirname(file);
+    if (!blockDirsWithJson.has(dir) && basename(file) !== 'block.json') {
+      addPerformanceFinding(
+        report,
+        'info',
+        'performance.blocks.block-files-without-block-json',
+        file,
+        1,
+        'Block-like files exist without block.json in the same directory.',
+        'Missing block metadata can lead to manual asset loading and less predictable block registration.',
+        'Use block.json as the block metadata source when this directory represents a block.',
+        'low'
+      );
+    }
+  }
+}
+
+function auditPerformanceCron(report, phpFiles) {
+  for (const file of phpFiles) {
+    const content = readText(file);
+    if (!/wp_schedule_event|wp_cron|cron|_scheduled|schedule/i.test(content)) {
+      continue;
+    }
+
+    const lines = content.split(/\r?\n/);
+
+    lines.forEach((line, index) => {
+      const lineNumber = index + 1;
+      const window = nearbyText(lines, index, 12, 24);
+
+      if (/(new\s+WP_Query|get_posts)\s*\(/.test(line) && /posts_per_page\s*['"]?\s*=>\s*-1/.test(window)) {
+        addPerformanceFinding(
+          report,
+          'warning',
+          'performance.cron.unbounded-query-in-cron',
+          file,
+          lineNumber,
+          'Cron/background code appears to run an unbounded post query.',
+          'Long cron runs can overlap, time out, or block other scheduled work.',
+          'Batch work with limits, offsets/cursors, locks, and idempotent processing.',
+          'medium'
+        );
+      }
+
+      if (PERFORMANCE_EXPENSIVE_RE.test(line) && !BATCH_RE.test(window)) {
+        addPerformanceFinding(
+          report,
+          'info',
+          'performance.cron.expensive-job-without-batching-indicator',
+          file,
+          lineNumber,
+          'Cron/background code has expensive work without an obvious batching indicator.',
+          'Large jobs should avoid doing all work in one request.',
+          'Add batching, locks, retry/backoff, and observability appropriate to the job.',
+          'low'
+        );
+      }
+
+      if (PERFORMANCE_EXPENSIVE_RE.test(line) && !/lock|get_transient|set_transient|wp_cache_add/i.test(window)) {
+        addPerformanceFinding(
+          report,
+          'info',
+          'performance.cron.expensive-job-without-lock-indicator',
+          file,
+          lineNumber,
+          'Expensive cron/background work has no obvious lock.',
+          'Without a lock, overlapping runs can duplicate work or increase load.',
+          'Use a short-lived transient/object-cache lock and make the job idempotent.',
+          'low'
+        );
+      }
+    });
+  }
+}
+
+function auditPerformanceHeuristics(report, files, phpFiles) {
+  report.performance = {
+    limitation:
+      'Performance findings are static heuristics. They can miss bottlenecks and produce false positives; verify with profiling, production-sized data, and current WordPress docs.',
+  };
+
+  auditPerformanceHooks(report, phpFiles);
+  auditPerformanceAssets(report, phpFiles);
+  auditPerformanceQueries(report, phpFiles);
+  auditPerformanceOptionsAndCache(report, phpFiles);
+  auditPerformanceRest(report, phpFiles);
+  auditPerformanceBlocks(report, files);
+  auditPerformanceCron(report, phpFiles);
+}
+
+export function auditPlugin(pluginDir, options = {}) {
   const targetPath = resolve(pluginDir);
   if (!existsSync(targetPath) || !statSync(targetPath).isDirectory()) {
     throw new Error(`Plugin directory not found: ${targetPath}`);
   }
 
+  const performance = Boolean(options.performance || options.performanceOnly);
+  const performanceOnly = Boolean(options.performanceOnly);
+
   const report = {
     tool: 'wordpress-plugin-dev audit-plugin',
     limitation:
-      'This is a heuristic scanner for agent review triage, not a security oracle. It can miss vulnerabilities and produce false positives; verify findings manually against current WordPress docs and project context.',
+      performance
+        ? 'This is a heuristic scanner for agent review triage, not a security or performance oracle. It can miss vulnerabilities and bottlenecks and produce false positives; verify findings manually against current WordPress docs, profiling, and project context.'
+        : 'This is a heuristic scanner for agent review triage, not a security oracle. It can miss vulnerabilities and produce false positives; verify findings manually against current WordPress docs and project context.',
     targetPath,
+    modes: {
+      security: !performanceOnly,
+      performance,
+      performanceOnly,
+    },
     summary: {
       phpFiles: 0,
       blockJsonFiles: 0,
@@ -584,18 +1231,30 @@ export function auditPlugin(pluginDir) {
   const files = walkFiles(targetPath);
   const phpFiles = files.filter((file) => extname(file).toLowerCase() === '.php');
   report.summary.phpFiles = phpFiles.length;
+  report.summary.blockJsonFiles = files.filter((file) => basename(file) === 'block.json').length;
 
-  const main = auditMainPluginFile(report, targetPath, phpFiles);
-  auditSecurityHeuristics(report, phpFiles);
-  auditBlocks(report, files);
-  auditBuildFiles(report, targetPath);
-  auditReleaseFiles(report, targetPath, main?.headers || null);
+  let main = null;
+  if (performanceOnly) {
+    main = findMainPluginFile(targetPath, phpFiles);
+    report.summary.mainPluginFile = main ? toDisplayPath(targetPath, main.file) : null;
+  } else {
+    main = auditMainPluginFile(report, targetPath, phpFiles);
+    auditSecurityHeuristics(report, phpFiles);
+    auditBlocks(report, files);
+    auditBuildFiles(report, targetPath);
+    auditReleaseFiles(report, targetPath, main?.headers || null);
+  }
+
+  if (performance) {
+    auditPerformanceHeuristics(report, files, phpFiles);
+  }
 
   report.summary.findings = {
     error: report.findings.filter((finding) => finding.severity === 'error').length,
     warning: report.findings.filter((finding) => finding.severity === 'warning').length,
     info: report.findings.filter((finding) => finding.severity === 'info').length,
   };
+  report.summary.performanceFindings = report.findings.filter((finding) => finding.category === 'performance').length;
 
   return report;
 }
@@ -610,6 +1269,9 @@ export function formatHumanReport(report) {
   lines.push(`- Main plugin file: ${report.summary.mainPluginFile || 'not found'}`);
   lines.push(`- PHP files scanned: ${report.summary.phpFiles}`);
   lines.push(`- block.json files scanned: ${report.summary.blockJsonFiles}`);
+  if (report.modes?.performance) {
+    lines.push(`- Performance findings: ${report.summary.performanceFindings}`);
+  }
   lines.push(
     `- Findings: ${report.summary.findings.error} error, ${report.summary.findings.warning} warning, ${report.summary.findings.info} info`
   );
@@ -636,7 +1298,13 @@ export function formatHumanReport(report) {
     const location = finding.file ? `${finding.file}${finding.line ? `:${finding.line}` : ''}` : 'global';
     lines.push(`- [${finding.severity.toUpperCase()}] ${location} ${finding.rule}`);
     lines.push(`  ${finding.message}`);
+    if (finding.why) {
+      lines.push(`  Why it matters: ${finding.why}`);
+    }
     lines.push(`  Remediation: ${finding.remediation}`);
+    if (finding.confidence) {
+      lines.push(`  Confidence: ${finding.confidence}`);
+    }
   }
 
   return `${lines.join('\n')}\n`;
@@ -646,8 +1314,29 @@ function printHelp() {
   console.log(`Usage:
   node skills/wordpress-plugin-dev/scripts/audit-plugin.mjs /path/to/plugin
   node skills/wordpress-plugin-dev/scripts/audit-plugin.mjs /path/to/plugin --json
+  node skills/wordpress-plugin-dev/scripts/audit-plugin.mjs /path/to/plugin --performance
+  node skills/wordpress-plugin-dev/scripts/audit-plugin.mjs /path/to/plugin --performance --json
+  node skills/wordpress-plugin-dev/scripts/audit-plugin.mjs /path/to/plugin --performance-only --fail-on=warning
+
+Options:
+  --performance       Include static performance heuristics.
+  --performance-only  Skip non-performance checks except basic file counting.
+  --json              Print structured JSON.
+  --fail-on=LEVEL     error, warning, or none. Default: error.
 
 The scanner is heuristic. Use it for agent triage, then verify findings manually.`);
+}
+
+function shouldFail(report, failOn) {
+  if (failOn === 'none') {
+    return false;
+  }
+
+  if (report.summary.findings.error > 0) {
+    return true;
+  }
+
+  return failOn === 'warning' && report.summary.findings.warning > 0;
 }
 
 function isDirectRun() {
@@ -672,14 +1361,17 @@ if (isDirectRun()) {
   }
 
   try {
-    const report = auditPlugin(args.target);
+    const report = auditPlugin(args.target, {
+      performance: args.performance,
+      performanceOnly: args.performanceOnly,
+    });
     if (args.json) {
       console.log(JSON.stringify(report, null, 2));
     } else {
       process.stdout.write(formatHumanReport(report));
     }
 
-    process.exit(report.summary.findings.error > 0 ? 1 : 0);
+    process.exit(shouldFail(report, args.failOn) ? 1 : 0);
   } catch (error) {
     if (args.json) {
       console.log(

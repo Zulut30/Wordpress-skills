@@ -1,6 +1,6 @@
 ---
 name: wordpress-plugin-dev
-description: "Helps agents develop, review, test, secure, package, and release modern WordPress plugins. Use for WordPress plugin architecture, Gutenberg block work, block.json, REST API, WP admin screens, shortcode implementation, Settings API, WP-CLI workflows, PHPUnit tests, wp-env environments, Plugin Check, WordPress.org release preparation, and security audit tasks."
+description: "Helps agents develop, review, test, secure, optimize, package, and release modern WordPress plugins. Use for WordPress plugin architecture, Gutenberg block work, block.json, REST API, WP admin screens, shortcode implementation, Settings API, WP-CLI workflows, PHPUnit tests, wp-env environments, Plugin Check, WordPress.org release preparation, security audit, and performance optimization tasks."
 license: MIT
 compatibility: "Designed for Codex, Cursor, Claude Code, and other Agent Skills-compatible tools."
 ---
@@ -19,6 +19,12 @@ Before planning or editing, identify the primary task type:
 - `security audit`
 - `Gutenberg/block work`
 - `REST/admin/settings work`
+- `performance optimization`
+- `performance audit`
+- `frontend asset optimization`
+- `database/query optimization`
+- `block render optimization`
+- `REST/admin performance review`
 - `testing/CI`
 - `release to WordPress.org`
 
@@ -34,6 +40,15 @@ Then inspect the plugin structure and load only the references needed for that t
 - Prefer `@wordpress/scripts` for JavaScript builds unless the existing project has a clear reason to use custom webpack, Vite, or another pipeline.
 - Use WordPress i18n functions for new public strings in PHP and JavaScript.
 - For public release, check `readme.txt`, plugin headers, licenses, assets, build artifacts, and Plugin Check output.
+- Do not optimize by removing security checks, validation, escaping, capability gates, or nonces.
+- Measure or identify hot paths before optimizing; avoid expensive work on every request.
+- Scope assets, hooks, queries, REST responses, admin screens, and block rendering.
+- Prefer bounded queries, pagination, `no_found_rows` when totals are not needed, and `fields => 'ids'` when only IDs are required.
+- Cache expensive safe operations with explicit TTL and invalidation. Do not cache private/user-specific data globally.
+- Do not store large rarely used data in autoloaded options.
+- Do not make remote HTTP calls during frontend render without caching, timeout, and fallback.
+- Do not call `flush_rewrite_rules()` on normal requests.
+- Use `block.json` and conditional block assets for Gutenberg where suitable.
 
 ## Reference Routing
 
@@ -43,6 +58,7 @@ Then inspect the plugin structure and load only the references needed for that t
 - Hooks, REST, admin menus, Settings API, CPTs, taxonomies: `references/hooks-rest-admin.md`
 - Gutenberg blocks, `block.json`, dynamic blocks, build tooling: `references/blocks-gutenberg.md`
 - Interactivity API and script modules: `references/interactivity-api.md`
+- Performance optimization, hot paths, queries, caching, assets, REST/admin/block performance: `references/performance-optimization.md`
 - i18n, accessibility, privacy, personal data workflows: `references/i18n-a11y-privacy.md`
 - `wp-env`, WP-CLI, PHPUnit, Plugin Check, CI: `references/testing-and-ci.md`
 - WordPress.org readme, assets, SVN/release workflow: `references/release-wordpress-org.md`
@@ -87,6 +103,43 @@ Then inspect the plugin structure and load only the references needed for that t
 2. Verify current official docs before relying on release, Plugin Check, or SVN details.
 3. Check plugin headers, `readme.txt`, stable tag, changelog, license compatibility, assets, built files, and excluded development files.
 4. Run Plugin Check and available test/build scripts; report unresolved warnings clearly.
+
+### audit-plugin-performance
+
+1. Read `references/performance-optimization.md` and the performance workflow in `references/review-checklists.md`.
+2. Identify plugin type and hot paths before recommending changes.
+3. Inspect hooks, assets, queries, options/autoload, transients/object cache, REST/AJAX, admin screens, blocks, cron, and external HTTP calls.
+4. Separate quick wins from changes that require profiling, cache invalidation tests, or rollout monitoring.
+
+### optimize-frontend-assets
+
+1. Find where frontend scripts/styles are registered and enqueued.
+2. Scope assets by route, shortcode, block presence, template, or feature state.
+3. Preserve dependencies, versions, i18n, and security behavior.
+
+### optimize-rest-endpoint-performance
+
+1. Keep `permission_callback`, validation, and sanitization intact.
+2. Add pagination, bounded queries, response shape limits, and safe caching only when data is public or correctly scoped.
+3. Return `WP_Error` for invalid or overly expensive requests.
+
+### optimize-dynamic-block-rendering
+
+1. Treat block attributes as untrusted and escape output.
+2. Bound render-time queries and avoid remote calls during render.
+3. Add fragment caching only with a clear TTL and invalidation hooks.
+
+### optimize-admin-screen-performance
+
+1. Scope admin assets by screen ID.
+2. Paginate tables, lazy-load expensive data, cache counts, and avoid synchronous remote calls in page render.
+3. Preserve capability checks and Settings API behavior.
+
+### optimize-database-queries
+
+1. Bound query size and avoid N+1 patterns.
+2. Use `fields => 'ids'`, `no_found_rows => true`, and cache priming where appropriate.
+3. Prefer WordPress APIs; use prepared SQL and indexes when custom tables are justified.
 
 ## When Unsure
 

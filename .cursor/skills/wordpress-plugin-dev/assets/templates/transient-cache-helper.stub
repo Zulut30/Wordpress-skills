@@ -1,0 +1,39 @@
+<?php
+/**
+ * Expiring transient cache helper for {{PLUGIN_NAME}}.
+ *
+ * Placeholders: {{PLUGIN_SLUG}}, {{TEXT_DOMAIN}}, {{VENDOR_NAMESPACE}}, {{PLUGIN_VERSION}}, {{CACHE_GROUP}}.
+ */
+
+namespace {{VENDOR_NAMESPACE}};
+
+defined( 'ABSPATH' ) || exit;
+
+function {{PLUGIN_SLUG}}_public_cache_key( string $context ): string {
+	return '{{PLUGIN_SLUG}}_' . md5( sanitize_key( $context ) );
+}
+
+function {{PLUGIN_SLUG}}_get_cached_public_items( string $context ): array {
+	$key    = {{PLUGIN_SLUG}}_public_cache_key( $context );
+	$cached = get_transient( $key );
+
+	if ( false !== $cached ) {
+		return is_array( $cached ) ? $cached : array();
+	}
+
+	$items = {{PLUGIN_SLUG}}_load_public_items( $context );
+
+	set_transient( $key, $items, 10 * MINUTE_IN_SECONDS );
+
+	return $items;
+}
+
+function {{PLUGIN_SLUG}}_invalidate_public_items_cache( int $post_id ): void {
+	if ( '{{PLUGIN_SLUG}}_item' !== get_post_type( $post_id ) ) {
+		return;
+	}
+
+	delete_transient( {{PLUGIN_SLUG}}_public_cache_key( 'default' ) );
+}
+
+add_action( 'save_post', __NAMESPACE__ . '\\{{PLUGIN_SLUG}}_invalidate_public_items_cache' );

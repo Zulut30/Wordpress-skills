@@ -1,0 +1,79 @@
+<?php
+/**
+ * Paginated REST controller for {{PLUGIN_NAME}}.
+ *
+ * Placeholders: {{PLUGIN_SLUG}}, {{TEXT_DOMAIN}}, {{VENDOR_NAMESPACE}}, {{PLUGIN_VERSION}}.
+ */
+
+namespace {{VENDOR_NAMESPACE}}\Rest;
+
+use WP_Error;
+use WP_Query;
+use WP_REST_Request;
+use WP_REST_Response;
+use WP_REST_Server;
+
+defined( 'ABSPATH' ) || exit;
+
+final class Items_Controller {
+	public function register_routes(): void {
+		register_rest_route(
+			'{{PLUGIN_SLUG}}/v1',
+			'/items',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'get_items' ),
+				'permission_callback' => '__return_true',
+				'args'                => array(
+					'page'     => array(
+						'type'              => 'integer',
+						'default'           => 1,
+						'sanitize_callback' => 'absint',
+					),
+					'per_page' => array(
+						'type'              => 'integer',
+						'default'           => 10,
+						'sanitize_callback' => 'absint',
+					),
+				),
+			)
+		);
+	}
+
+	public function get_items( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+		$page     = max( 1, absint( $request['page'] ) );
+		$per_page = min( 50, max( 1, absint( $request['per_page'] ) ) );
+		$cache_key = '{{PLUGIN_SLUG}}_rest_items_' . md5( $page . ':' . $per_page );
+		$cached    = get_transient( $cache_key );
+
+		if ( false !== $cached ) {
+			return new WP_REST_Response( $cached );
+		}
+
+		$query = new WP_Query(
+			array(
+				'post_type'              => '{{PLUGIN_SLUG}}_item',
+				'post_status'            => 'publish',
+				'paged'                  => $page,
+				'posts_per_page'         => $per_page,
+				'fields'                 => 'ids',
+				'update_post_meta_cache' => false,
+				'update_post_term_cache' => false,
+			)
+		);
+
+		$data = array_map(
+			static function ( int $post_id ): array {
+				return array(
+					'id'    => $post_id,
+					'title' => get_the_title( $post_id ),
+				);
+			},
+			array_map( 'absint', $query->posts )
+		);
+
+		set_transient( $cache_key, $data, 5 * MINUTE_IN_SECONDS );
+
+		return new WP_REST_Response( $data );
+	}
+}

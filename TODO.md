@@ -8,6 +8,8 @@ Realistic next improvements for the WordPress Plugin Dev Skill.
 - Add a short `references/custom-data-models.md` or expand architecture notes for custom tables, metadata, options, and migrations.
 - Add a small reference for uninstall/privacy/export/erase workflows with practical examples.
 - Review all official source links on a scheduled cadence and update `Last reviewed` dates only after actual review.
+- Expand performance docs with optional profiling workflow notes for Query Monitor, server traces, and manual before/after measurements.
+- Add more block performance examples for dynamic render caching and frontend asset splitting.
 
 ## Scripts
 
@@ -20,17 +22,26 @@ Realistic next improvements for the WordPress Plugin Dev Skill.
   - file upload/delete patterns
   - outbound HTTP/SSRF risk
 - Add optional JSON schema validation for `block.json`, `composer.json`, and `package.json` stubs.
+- Improve performance heuristics in `audit-plugin.mjs` for:
+  - fewer false positives around safe cache invalidation
+  - better callback resolution for hooks and REST routes
+  - custom table index checks
+  - large asset bundle hints when build output exists
+- Add an optional benchmark harness for fixtures without claiming production benchmark results.
 
 ## Fixtures
 
 - Add a clean sample plugin fixture that should produce zero error-level findings.
 - Add separate fixtures for unsafe AJAX, unsafe admin POST, unsafe SQL, and unsafe file operations.
 - Add a fixture with a static block and a fixture with an Interactivity API block.
+- Expand `test-fixtures/performance-plugin` with more REST, admin, cron, custom table, and block-render performance scenarios.
+- Add snapshot tests for performance JSON output.
 
 ## Packaging
 
 - Add a release packaging script that produces a clean archive of the skill repository.
 - Add CI for this repository that runs `npm run smoke`, markdown link checks, and sync-tree comparisons.
+- Keep the performance fixture audit in CI and validate JSON output.
 - Document exact manual test steps for Codex, Claude Code, and Cursor discovery after installing from a clean checkout.
 - Verify Cursor Agent Skill discovery paths and slash invocation against current official Cursor docs before making stronger install claims.
 - Add a repository release checklist that includes `FINAL_QA_REPORT.md`, synced install targets, fixture audit output, and source-map review status.

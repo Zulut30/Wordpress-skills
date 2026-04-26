@@ -23,6 +23,7 @@ Status: `v0.1.0` work in progress. Useful today, but intentionally honest about 
 - [Canonical Vs Generated Skill Folders](#canonical-vs-generated-skill-folders)
 - [Installation](#installation)
 - [Usage Examples](#usage-examples)
+- [Performance Optimization](#performance-optimization)
 - [Tool Support Matrix](#tool-support-matrix)
 - [Included References](#included-references)
 - [Templates](#templates)
@@ -88,6 +89,7 @@ Optional future improvement: add a short terminal GIF or screencast after the te
 
 - Modern plugin architecture guidance.
 - WordPress security review workflows.
+- WordPress plugin performance audit workflows.
 - REST API and admin/settings guidance.
 - Gutenberg and `block.json` workflows.
 - Interactivity API notes.
@@ -108,6 +110,7 @@ This skill gives the agent:
 - operational security and release workflows;
 - safe templates for common plugin surfaces;
 - a local audit script for quick triage;
+- performance heuristics for plugin hot paths;
 - fixture outputs that show what the tool actually reports.
 
 ## Repository Map
@@ -235,6 +238,62 @@ Use wordpress-plugin-dev to create a dynamic Gutenberg block registered with blo
 Use wordpress-plugin-dev to review this REST API endpoint for permission_callback, nonce handling, sanitization, escaping, and WP_Error responses.
 ```
 
+## Performance Optimization
+
+`wordpress-plugin-dev` can help audit and improve WordPress plugin performance without trading away security or correctness. It focuses on plugin hot paths rather than generic advice.
+
+It can inspect:
+
+- hooks and expensive work on every request;
+- database queries, `WP_Query`, `get_posts()`, custom tables, and N+1 patterns;
+- options/autoload usage;
+- transients and object cache strategy;
+- REST endpoints and response size;
+- admin screens and list/report pagination;
+- Gutenberg dynamic block rendering and `block.json` assets;
+- frontend/admin/editor asset loading;
+- AJAX handlers;
+- cron/background jobs;
+- external HTTP calls and filesystem work.
+
+Copy-paste prompts:
+
+```text
+Use wordpress-plugin-dev to audit this plugin for performance bottlenecks. Focus on hooks, queries, assets, REST endpoints, blocks, options/autoload, transients, cron jobs, and external HTTP calls. Do not change code yet; create PERFORMANCE_AUDIT_REPORT.md first.
+```
+
+```text
+Use wordpress-plugin-dev to optimize this dynamic Gutenberg block. Check render.php, block.json assets, query limits, cache strategy, invalidation, escaping, and frontend JS size.
+```
+
+```text
+Use wordpress-plugin-dev to optimize this REST endpoint for performance. Add pagination, args validation, bounded queries, small response shape, caching where safe, and a measurement plan.
+```
+
+Local commands:
+
+```bash
+npm run performance:audit
+npm run performance:audit:json
+node skills/wordpress-plugin-dev/scripts/audit-plugin.mjs /path/to/plugin --performance
+```
+
+References and examples:
+
+- [Performance optimization reference](skills/wordpress-plugin-dev/references/performance-optimization.md)
+- [Performance audit human output](docs/examples/performance-audit-human.md)
+- [Performance audit JSON output](docs/examples/performance-audit-json.json)
+- [Performance audit explanation](docs/examples/performance-audit-explanation.md)
+- [Performance fixture plugin](test-fixtures/performance-plugin/)
+
+Performance limitations:
+
+- Static performance audit is heuristic.
+- No scanner can replace profiling.
+- Actual speed depends on hosting, object cache, database size, traffic pattern, theme, and other plugins.
+- Cache changes require invalidation tests.
+- User-specific/private data must not be cached globally.
+
 ## Tool Support Matrix
 
 | Tool | What Works | Status |
@@ -255,6 +314,7 @@ Use wordpress-plugin-dev to review this REST API endpoint for permission_callbac
 | Hooks, REST, admin | `references/hooks-rest-admin.md` | Actions, filters, admin menus, Settings API, REST controllers, AJAX, and shortcodes. |
 | Blocks | `references/blocks-gutenberg.md` | `block.json`, dynamic blocks, server-side registration, and build workflow. |
 | Interactivity API | `references/interactivity-api.md` | When to use the Interactivity API, core concepts, warnings, and examples. |
+| Performance | `references/performance-optimization.md` | Hot paths, hooks, queries, caching, REST/admin/block performance, assets, cron, and remediation plans. |
 | i18n/a11y/privacy | `references/i18n-a11y-privacy.md` | Text domains, translations, labels, focus, privacy exports/erasure, and review checklist. |
 | Testing/CI | `references/testing-and-ci.md` | `wp-env`, WP-CLI scaffold tests, PHPUnit, JS tests, static analysis, Plugin Check, CI. |
 | Release | `references/release-wordpress-org.md` | `readme.txt`, Plugin Check, assets, packaging, and WordPress.org readiness. |
@@ -272,16 +332,27 @@ Use wordpress-plugin-dev to review this REST API endpoint for permission_callbac
 | `settings-page.stub` | Settings API page with capability checks, sanitize callback, escaping, and accessible labels. |
 | `readme-txt.stub` | WordPress.org-style `readme.txt` structure. |
 | `github-actions-ci.yml.stub` | Starter CI skeleton for real plugin repositories. |
+| `optimized-query.stub` | Bounded `WP_Query` pattern with IDs and `no_found_rows`. |
+| `transient-cache-helper.stub` | Expiring transient helper with strict miss checks and invalidation. |
+| `object-cache-helper.stub` | Object cache helper with cache group and `$found` flag. |
+| `scoped-assets.stub` | Frontend/admin asset loading scoped by context and screen. |
+| `performant-rest-controller.stub` | Paginated REST collection controller with validation and optional cache. |
+| `dynamic-block-fragment-cache.stub` | Dynamic block render fragment cache pattern. |
+| `cron-batch-job.stub` | Activation-scheduled, locked, batched cron job pattern. |
 
 ## Scripts
 
 | Command | Purpose |
 | --- | --- |
 | `npm run validate:skill` | Validate `SKILL.md`, metadata, references, templates, scripts, and README install docs. |
-| `npm run smoke` | Run validation, source-map check, markdown link check, audit unit tests, and demo fixture audit. |
+| `npm run smoke` | Run validation, source-map check, markdown link check, audit unit tests, demo fixture audit, and performance fixture audit. |
 | `npm run sync` | Copy canonical skill into `.agents`, `.claude`, and `.cursor` install targets. |
+| `npm run performance:audit` | Run performance heuristics against `test-fixtures/performance-plugin`. |
+| `npm run performance:audit:json` | Run performance heuristics against the performance fixture in JSON mode. |
 | `node skills/wordpress-plugin-dev/scripts/audit-plugin.mjs /path/to/plugin` | Run the heuristic plugin audit in human-readable mode. |
 | `node skills/wordpress-plugin-dev/scripts/audit-plugin.mjs /path/to/plugin --json` | Run the heuristic plugin audit with structured JSON output. |
+| `node skills/wordpress-plugin-dev/scripts/audit-plugin.mjs /path/to/plugin --performance` | Include static performance heuristics. |
+| `node skills/wordpress-plugin-dev/scripts/audit-plugin.mjs /path/to/plugin --performance-only --fail-on=warning` | Run only performance heuristics and exit non-zero on warnings. |
 
 ## Testing And Fixtures
 
@@ -294,16 +365,20 @@ Current coverage:
 - markdown local link validation;
 - audit script unit tests;
 - demo fixture audit;
+- performance fixture audit;
 - intentionally unsafe sample fixture for expected scanner findings.
 
 ## Limitations
 
 - The audit script is heuristic and can miss vulnerabilities.
+- The performance scanner is heuristic and can miss bottlenecks or report false positives.
 - A clean audit output is not proof that a plugin is secure.
+- A clean performance audit is not proof that a plugin is fast under production data and traffic.
 - Cursor install paths and slash invocation are version/workflow-dependent.
 - Live WordPress runtime checks are not part of the default local workflow yet.
 - Composer/PHPStan/PHPCS checks are documented but not wired into the root CI matrix yet.
 - Release-sensitive guidance should be verified against current official docs.
+- Performance-sensitive changes need profiling, cache invalidation tests, and rollout monitoring.
 - The project is `v0.1.0`; it does not claim broad production adoption.
 
 ## Security Model

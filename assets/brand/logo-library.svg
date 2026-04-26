@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="960" viewBox="0 0 1440 960" role="img" aria-labelledby="title desc">
+  <title id="title">WordPress Plugin Dev Skill logo library</title>
+  <desc id="desc">A local SVG logo concept sheet for the WordPress Plugin Dev Skill project.</desc>
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; }
+      .panel { fill: #ffffff; stroke: #dbe3ea; stroke-width: 2; }
+      .ink { fill: #111827; }
+      .muted { fill: #64748b; }
+      .blue { fill: #21759b; }
+      .green { fill: #16a34a; }
+      .amber { fill: #d97706; }
+      .line { stroke: #111827; stroke-width: 10; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+      .line-blue { stroke: #21759b; stroke-width: 10; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+      .word { font-family: Arial, Helvetica, sans-serif; font-weight: 700; letter-spacing: 0; }
+      .copy { font-family: Arial, Helvetica, sans-serif; letter-spacing: 0; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1440" height="960"/>
+  <text class="word ink" x="64" y="78" font-size="42">WordPress Plugin Dev Skill</text>
+  <text class="copy muted" x="64" y="118" font-size="22">Logo library: project-native concepts, no third-party marks</text>
+
+  <g transform="translate(64 164)">
+    <rect class="panel" width="620" height="260" rx="24"/>
+    <g transform="translate(44 44)">
+      <rect x="0" y="0" width="132" height="132" rx="28" class="blue"/>
+      <path d="M36 40h18l12 54 14-54h16l14 54 12-54h18l-22 82h-18l-12-50-14 50h-18z" fill="#ffffff"/>
+      <circle cx="112" cy="32" r="12" class="green"/>
+      <path d="M106 32h12M112 26v12" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
+    </g>
+    <text class="word ink" x="210" y="94" font-size="34">WordPress Plugin</text>
+    <text class="word blue" x="210" y="135" font-size="34">Dev Skill</text>
+    <text class="copy muted" x="210" y="178" font-size="20">Primary horizontal lockup</text>
+  </g>
+
+  <g transform="translate(756 164)">
+    <rect class="panel" width="620" height="260" rx="24"/>
+    <g transform="translate(52 48)">
+      <circle cx="68" cy="68" r="66" fill="#e0f2fe"/>
+      <path d="M35 43h15l9 48 12-48h13l12 48 9-48h15l-17 66h-16l-10-42-12 42H50z" class="blue"/>
+      <path d="M94 33l24 24-24 24" class="line-blue"/>
+    </g>
+    <text class="word ink" x="216" y="98" font-size="40">WPDS</text>
+    <text class="copy muted" x="216" y="140" font-size="21">Compact acronym lockup</text>
+    <text class="copy muted" x="216" y="174" font-size="18">Good for small repository cards and docs headers</text>
+  </g>
+
+  <g transform="translate(64 476)">
+    <rect class="panel" width="392" height="312" rx="24"/>
+    <g transform="translate(96 54)">
+      <rect width="200" height="200" rx="44" class="blue"/>
+      <path d="M58 62h24l18 78 20-78h22l20 78 18-78h24l-34 124h-24l-18-70-20 70h-24z" fill="#ffffff"/>
+      <rect x="134" y="34" width="46" height="46" rx="12" class="green"/>
+      <path d="M146 57h22M157 46v22" stroke="#ffffff" stroke-width="8" stroke-linecap="round"/>
+    </g>
+    <text class="copy muted" x="112" y="282" font-size="20">Mark only</text>
+  </g>
+
+  <g transform="translate(524 476)">
+    <rect class="panel" width="392" height="312" rx="24"/>
+    <g transform="translate(94 58)">
+      <rect width="204" height="204" rx="46" fill="#111827"/>
+      <path d="M60 64h24l17 76 20-76h22l20 76 17-76h24l-34 120h-24l-17-68-20 68h-24z" fill="#ffffff"/>
+      <path d="M139 54l35 35-35 35" stroke="#ffffff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </g>
+    <text class="copy muted" x="113" y="282" font-size="20">Monochrome dark</text>
+  </g>
+
+  <g transform="translate(984 476)">
+    <rect class="panel" width="392" height="312" rx="24"/>
+    <g transform="translate(70 82)">
+      <path d="M0 0h246v148H0z" fill="#f8fafc" stroke="#cbd5e1" stroke-width="3" rx="22"/>
+      <path d="M40 44h20l13 60 16-60h18l16 60 13-60h20l-25 88h-20l-13-52-16 52H62z" class="blue"/>
+      <path d="M174 50l35 35-35 35" class="line"/>
+      <circle cx="214" cy="34" r="16" class="amber"/>
+    </g>
+    <text class="copy muted" x="108" y="282" font-size="20">Light badge concept</text>
+  </g>
+
+  <text class="copy muted" x="64" y="872" font-size="18">Palette: #21759b, #16a34a, #d97706, #111827, #f8fafc. Keep security/performance claims in copy factual.</text>
+</svg>

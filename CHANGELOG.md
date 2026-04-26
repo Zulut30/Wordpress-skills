@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- Performance optimization reference for WordPress plugin hot paths, queries, caching, assets, REST/admin/block behavior, cron, and external HTTP calls.
+- Static performance audit mode in `audit-plugin.mjs` via `--performance` and `--performance-only`.
+- Performance templates, examples, fixture plugin, sample outputs, npm scripts, validation checks, and CI coverage.
+
 ### Planned
 
 - Stronger fixture coverage for AJAX, admin POST, SQL, filesystem, SSRF, and REST callback cases.

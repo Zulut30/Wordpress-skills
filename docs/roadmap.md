@@ -20,6 +20,7 @@ Experimental or version-dependent:
 - deep Plugin Check automation;
 - live WordPress runtime testing;
 - broad security scanner coverage.
+- static performance checks are heuristic and do not replace profiling.
 
 ## v0.2.0 Candidates
 
@@ -29,6 +30,13 @@ Experimental or version-dependent:
 - Optional docs refresh workflow that verifies official source links and review dates.
 - Clearer Cursor installation documentation by version/workflow.
 - Optional PHP/Composer CI matrix if the repository gains real PHP package checks.
+- Optional profiling workflow with Query Monitor/manual profiling notes.
+- Richer performance fixture coverage for REST, admin screens, cron, block render, custom tables, and assets.
+- More block performance examples with before/after render and asset-loading patterns.
+- CI checks for the performance audit fixture.
+- Optional benchmark harness for sample plugins without publishing fake benchmark claims.
+- More precise false-positive handling in `audit-plugin.mjs` performance rules.
+- Docs refresh against current WordPress performance APIs.
 
 ## Collaboration Entry Points
 

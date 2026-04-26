@@ -1,0 +1,34 @@
+<?php
+/**
+ * Object cache helper for {{PLUGIN_NAME}}.
+ *
+ * Persistent object cache availability depends on hosting/cache drop-ins.
+ *
+ * Placeholders: {{PLUGIN_SLUG}}, {{TEXT_DOMAIN}}, {{VENDOR_NAMESPACE}}, {{PLUGIN_VERSION}}, {{CACHE_GROUP}}.
+ */
+
+namespace {{VENDOR_NAMESPACE}};
+
+defined( 'ABSPATH' ) || exit;
+
+function {{PLUGIN_SLUG}}_get_cached_item( int $item_id ): array {
+	$item_id   = absint( $item_id );
+	$cache_key = '{{PLUGIN_SLUG}}_item_' . $item_id;
+	$item      = wp_cache_get( $cache_key, '{{CACHE_GROUP}}', false, $found );
+
+	if ( $found ) {
+		return is_array( $item ) ? $item : array();
+	}
+
+	$item = {{PLUGIN_SLUG}}_load_item( $item_id );
+	wp_cache_set( $cache_key, $item, '{{CACHE_GROUP}}', 10 * MINUTE_IN_SECONDS );
+
+	return $item;
+}
+
+function {{PLUGIN_SLUG}}_invalidate_cached_item( int $item_id ): void {
+	wp_cache_delete( '{{PLUGIN_SLUG}}_item_' . absint( $item_id ), '{{CACHE_GROUP}}' );
+}
+
+add_action( 'save_post_{{PLUGIN_SLUG}}_item', __NAMESPACE__ . '\\{{PLUGIN_SLUG}}_invalidate_cached_item' );
+add_action( 'delete_post', __NAMESPACE__ . '\\{{PLUGIN_SLUG}}_invalidate_cached_item' );

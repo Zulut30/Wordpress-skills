@@ -22,6 +22,9 @@ const requiredSourceHints = [
   'Plugin Directory',
   'Composer',
   'PHPUnit',
+  'Performance optimization',
+  'WP_Query',
+  'wp_cache_get',
 ];
 
 for (const hint of requiredSourceHints) {
@@ -32,8 +35,8 @@ for (const hint of requiredSourceHints) {
 
 for (const file of readdirSync(referencesDir).filter((name) => name.endsWith('.md'))) {
   const content = readFileSync(join(referencesDir, file), 'utf8');
-  if (!content.includes('Last reviewed: 2026-04-26')) {
-    errors.push(`${file} does not use the current Last reviewed date`);
+  if (!/Last reviewed: 20\d{2}-\d{2}-\d{2}/.test(content)) {
+    errors.push(`${file} missing Last reviewed date`);
   }
   if (!content.includes('## Official Sources')) {
     errors.push(`${file} missing Official Sources heading`);

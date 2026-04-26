@@ -1,0 +1,242 @@
+{
+  "tool": "wordpress-plugin-dev audit-plugin",
+  "limitation": "This is a heuristic scanner for agent review triage, not a security or performance oracle. It can miss vulnerabilities and bottlenecks and produce false positives; verify findings manually against current WordPress docs, profiling, and project context.",
+  "targetPath": "test-fixtures/performance-plugin",
+  "modes": {
+    "security": true,
+    "performance": true,
+    "performanceOnly": false
+  },
+  "summary": {
+    "phpFiles": 4,
+    "blockJsonFiles": 1,
+    "mainPluginFile": "performance-plugin.php",
+    "findings": {
+      "error": 0,
+      "warning": 9,
+      "info": 11
+    },
+    "performanceFindings": 18
+  },
+  "findings": [
+    {
+      "severity": "info",
+      "category": "security",
+      "rule": "security.rest-route-public-permission-callback",
+      "file": "src/SafeExamples.php",
+      "line": 66,
+      "message": "REST route uses __return_true as permission_callback.",
+      "remediation": "Confirm the endpoint is intentionally public and does not expose private data or mutation operations."
+    },
+    {
+      "severity": "info",
+      "category": "blocks",
+      "rule": "blocks.dynamic-render-reminder",
+      "file": "blocks/expensive-block/block.json",
+      "line": 1,
+      "message": "Dynamic block render output should be validated and escaped.",
+      "remediation": "Treat attributes as untrusted in render.php or render callbacks; validate, sanitize, authorize if needed, and escape late."
+    },
+    {
+      "severity": "warning",
+      "category": "performance",
+      "rule": "performance.hooks.flush-rewrite-rules-on-request",
+      "file": "src/PerformanceSmells.php",
+      "line": 23,
+      "message": "flush_rewrite_rules() appears outside activation/deactivation/uninstall context.",
+      "why": "Flushing rewrite rules is expensive and writes rewrite state; it should not run on normal requests.",
+      "remediation": "Move rewrite flushing to activation/deactivation or a versioned migration after rewrite-dependent objects are registered.",
+      "confidence": "high"
+    },
+    {
+      "severity": "warning",
+      "category": "performance",
+      "rule": "performance.assets.admin-enqueue-without-screen-check",
+      "file": "src/PerformanceSmells.php",
+      "line": 17,
+      "message": "admin_enqueue_scripts callback has no obvious screen check.",
+      "why": "Admin assets loaded on every wp-admin screen slow unrelated admin workflows.",
+      "remediation": "Gate by $hook_suffix or get_current_screen()->id before enqueueing plugin-specific assets.",
+      "confidence": "medium"
+    },
+    {
+      "severity": "info",
+      "category": "performance",
+      "rule": "performance.assets.script-missing-obvious-version",
+      "file": "src/PerformanceSmells.php",
+      "line": 27,
+      "message": "Script enqueue has no obvious version argument.",
+      "why": "Missing versions can make cache invalidation unreliable for static assets.",
+      "remediation": "Use plugin version or generated .asset.php metadata for dependencies and versioning.",
+      "confidence": "low"
+    },
+    {
+      "severity": "info",
+      "category": "performance",
+      "rule": "performance.assets.consider-script-loading-strategy",
+      "file": "src/PerformanceSmells.php",
+      "line": 27,
+      "message": "Script enqueue does not show an explicit footer/strategy decision.",
+      "why": "Non-critical frontend scripts can often avoid blocking render when loaded in the footer or with a safe loading strategy.",
+      "remediation": "Verify target WordPress support and add a footer or loading strategy only when dependencies and behavior remain correct.",
+      "confidence": "low"
+    },
+    {
+      "severity": "info",
+      "category": "performance",
+      "rule": "performance.query.missing-no-found-rows",
+      "file": "blocks/expensive-block/render.php",
+      "line": 10,
+      "message": "Query has no obvious no_found_rows setting.",
+      "why": "When pagination totals are not needed, avoiding FOUND_ROWS-style totals can reduce database work.",
+      "remediation": "Set no_found_rows => true for non-paginated queries where total counts are not needed.",
+      "confidence": "low"
+    },
+    {
+      "severity": "warning",
+      "category": "performance",
+      "rule": "performance.query.unbounded-post-query",
+      "file": "blocks/expensive-block/render.php",
+      "line": 13,
+      "message": "Query requests all matching posts with -1.",
+      "why": "Unbounded post queries can load large datasets and exhaust memory on production sites.",
+      "remediation": "Add pagination or a safe upper bound. Use fields => ids when only IDs are needed.",
+      "confidence": "high"
+    },
+    {
+      "severity": "info",
+      "category": "performance",
+      "rule": "performance.query.missing-no-found-rows",
+      "file": "src/PerformanceSmells.php",
+      "line": 31,
+      "message": "Query has no obvious no_found_rows setting.",
+      "why": "When pagination totals are not needed, avoiding FOUND_ROWS-style totals can reduce database work.",
+      "remediation": "Set no_found_rows => true for non-paginated queries where total counts are not needed.",
+      "confidence": "low"
+    },
+    {
+      "severity": "warning",
+      "category": "performance",
+      "rule": "performance.query.unbounded-post-query",
+      "file": "src/PerformanceSmells.php",
+      "line": 34,
+      "message": "Query requests all matching posts with -1.",
+      "why": "Unbounded post queries can load large datasets and exhaust memory on production sites.",
+      "remediation": "Add pagination or a safe upper bound. Use fields => ids when only IDs are needed.",
+      "confidence": "high"
+    },
+    {
+      "severity": "info",
+      "category": "performance",
+      "rule": "performance.query.missing-no-found-rows",
+      "file": "src/PerformanceSmells.php",
+      "line": 51,
+      "message": "Query has no obvious no_found_rows setting.",
+      "why": "When pagination totals are not needed, avoiding FOUND_ROWS-style totals can reduce database work.",
+      "remediation": "Set no_found_rows => true for non-paginated queries where total counts are not needed.",
+      "confidence": "low"
+    },
+    {
+      "severity": "warning",
+      "category": "performance",
+      "rule": "performance.query.query-inside-loop",
+      "file": "src/PerformanceSmells.php",
+      "line": 51,
+      "message": "WP_Query/get_posts appears inside a loop.",
+      "why": "Queries inside loops often create N+1 query patterns.",
+      "remediation": "Prefetch data, batch IDs, prime caches, or move the query outside the loop.",
+      "confidence": "medium"
+    },
+    {
+      "severity": "warning",
+      "category": "performance",
+      "rule": "performance.query.direct-select-without-limit",
+      "file": "src/PerformanceSmells.php",
+      "line": 64,
+      "message": "Direct SQL SELECT has no obvious LIMIT.",
+      "why": "Unbounded SQL can scan and return too many rows on production data.",
+      "remediation": "Add LIMIT/OFFSET or use a paginated WordPress API. Keep using $wpdb->prepare() for variables.",
+      "confidence": "medium"
+    },
+    {
+      "severity": "warning",
+      "category": "performance",
+      "rule": "performance.cache.transient-without-expiration",
+      "file": "src/PerformanceSmells.php",
+      "line": 42,
+      "message": "set_transient() appears without an expiration argument.",
+      "why": "Non-expiring transients can persist indefinitely and may be autoloaded when stored in options.",
+      "remediation": "Add an explicit TTL and an invalidation strategy.",
+      "confidence": "medium"
+    },
+    {
+      "severity": "info",
+      "category": "performance",
+      "rule": "performance.cache.no-obvious-transient-invalidation",
+      "file": "src/PerformanceSmells.php",
+      "line": 42,
+      "message": "Transient writes found with no delete_transient() in the same file.",
+      "why": "Caches that depend on content/settings can serve stale output without invalidation hooks.",
+      "remediation": "Add invalidation on relevant content, option, term, or plugin-specific change hooks, or document TTL-only behavior.",
+      "confidence": "low"
+    },
+    {
+      "severity": "info",
+      "category": "performance",
+      "rule": "performance.rest.no-obvious-response-shape-control",
+      "file": "src/SafeExamples.php",
+      "line": 66,
+      "message": "REST route has no obvious schema or response shape control nearby.",
+      "why": "Small response shapes reduce payload size and client-side work.",
+      "remediation": "Return only required fields and add schema/field controls where practical.",
+      "confidence": "low"
+    },
+    {
+      "severity": "warning",
+      "category": "performance",
+      "rule": "performance.blocks.dynamic-render-query-without-cache",
+      "file": "blocks/expensive-block/render.php",
+      "line": 10,
+      "message": "Dynamic block render code runs a query without obvious caching.",
+      "why": "Dynamic block render callbacks can run on every page view where the block appears.",
+      "remediation": "Bound the query and add fragment caching with invalidation when output is safe to cache.",
+      "confidence": "medium"
+    },
+    {
+      "severity": "info",
+      "category": "performance",
+      "rule": "performance.blocks.review-frontend-block-assets",
+      "file": "blocks/expensive-block/block.json",
+      "line": 1,
+      "message": "block.json declares frontend-capable script assets.",
+      "why": "Frontend block scripts add bytes and runtime work to pages where the block appears.",
+      "remediation": "Verify the script is needed on the frontend and keep editor/view scripts split.",
+      "confidence": "low"
+    },
+    {
+      "severity": "warning",
+      "category": "performance",
+      "rule": "performance.cron.unbounded-query-in-cron",
+      "file": "src/PerformanceSmells.php",
+      "line": 31,
+      "message": "Cron/background code appears to run an unbounded post query.",
+      "why": "Long cron runs can overlap, time out, or block other scheduled work.",
+      "remediation": "Batch work with limits, offsets/cursors, locks, and idempotent processing.",
+      "confidence": "medium"
+    },
+    {
+      "severity": "info",
+      "category": "performance",
+      "rule": "performance.cron.expensive-job-without-lock-indicator",
+      "file": "src/PerformanceSmells.php",
+      "line": 64,
+      "message": "Expensive cron/background work has no obvious lock.",
+      "why": "Without a lock, overlapping runs can duplicate work or increase load.",
+      "remediation": "Use a short-lived transient/object-cache lock and make the job idempotent.",
+      "confidence": "low"
+    }
+  ],
+  "performance": {
+    "limitation": "Performance findings are static heuristics. They can miss bottlenecks and produce false positives; verify with profiling, production-sized data, and current WordPress docs."
+  }
+}

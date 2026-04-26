@@ -1,0 +1,30 @@
+<?php
+/**
+ * Optimized bounded query helper for {{PLUGIN_NAME}}.
+ *
+ * Placeholders: {{PLUGIN_SLUG}}, {{TEXT_DOMAIN}}, {{VENDOR_NAMESPACE}}, {{PLUGIN_VERSION}}.
+ */
+
+namespace {{VENDOR_NAMESPACE}};
+
+use WP_Query;
+
+defined( 'ABSPATH' ) || exit;
+
+function {{PLUGIN_SLUG}}_get_item_ids( mixed $raw_limit = 10 ): array {
+	$limit = min( 50, max( 1, absint( $raw_limit ) ) );
+
+	$query = new WP_Query(
+		array(
+			'post_type'              => '{{PLUGIN_SLUG}}_item',
+			'post_status'            => 'publish',
+			'posts_per_page'         => $limit,
+			'fields'                 => 'ids',
+			'no_found_rows'          => true,
+			'update_post_meta_cache' => false,
+			'update_post_term_cache' => false,
+		)
+	);
+
+	return array_map( 'absint', $query->posts );
+}

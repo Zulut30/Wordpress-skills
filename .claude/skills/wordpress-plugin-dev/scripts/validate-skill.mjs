@@ -20,6 +20,13 @@ const REQUIRED_TEMPLATES = [
   'settings-page.stub',
   'readme-txt.stub',
   'github-actions-ci.yml.stub',
+  'optimized-query.stub',
+  'transient-cache-helper.stub',
+  'object-cache-helper.stub',
+  'scoped-assets.stub',
+  'performant-rest-controller.stub',
+  'dynamic-block-fragment-cache.stub',
+  'cron-batch-job.stub',
 ];
 const REQUIRED_SCRIPTS = [
   'audit-plugin.mjs',
@@ -27,6 +34,18 @@ const REQUIRED_SCRIPTS = [
   'sync-install-targets.mjs',
   'validate-skill.mjs',
   'smoke-test.sh',
+];
+const REQUIRED_PERFORMANCE_EXAMPLES = [
+  'performance-audit-report.md',
+  'optimized-rest-endpoint.md',
+  'optimized-dynamic-block.md',
+  'scoped-asset-loading.md',
+  'cache-invalidation-patterns.md',
+];
+const REQUIRED_PERFORMANCE_DOC_EXAMPLES = [
+  'performance-audit-human.md',
+  'performance-audit-json.json',
+  'performance-audit-explanation.md',
 ];
 const SUSPICIOUS_ALLOWED_TOOLS = [
   '*',
@@ -199,6 +218,65 @@ function validateTemplates() {
   }
 }
 
+function validatePerformanceModule(skillContent) {
+  const performanceReference = join(skillDir, 'references', 'performance-optimization.md');
+  if (existsSync(performanceReference)) {
+    pass('Performance reference exists: references/performance-optimization.md');
+  } else {
+    fail('Missing performance reference: references/performance-optimization.md');
+  }
+
+  if (skillContent.includes('references/performance-optimization.md')) {
+    pass('SKILL.md routes performance tasks to references/performance-optimization.md.');
+  } else {
+    fail('SKILL.md does not reference references/performance-optimization.md.');
+  }
+
+  const examplesDir = join(skillDir, 'assets', 'examples');
+  for (const example of REQUIRED_PERFORMANCE_EXAMPLES) {
+    const file = join(examplesDir, example);
+    if (existsSync(file)) {
+      pass(`Performance example exists: assets/examples/${example}`);
+    } else {
+      fail(`Missing performance example: assets/examples/${example}`);
+    }
+  }
+
+  const fixtureDir = join(repoRoot, 'test-fixtures', 'performance-plugin');
+  if (existsSync(fixtureDir)) {
+    pass('Performance fixture exists: test-fixtures/performance-plugin');
+  } else {
+    fail('Missing performance fixture: test-fixtures/performance-plugin');
+  }
+
+  const docsExamplesDir = join(repoRoot, 'docs', 'examples');
+  for (const example of REQUIRED_PERFORMANCE_DOC_EXAMPLES) {
+    const file = join(docsExamplesDir, example);
+    if (existsSync(file)) {
+      pass(`Performance audit doc example exists: docs/examples/${example}`);
+    } else {
+      fail(`Missing performance audit doc example: docs/examples/${example}`);
+    }
+  }
+
+  const jsonExample = join(docsExamplesDir, 'performance-audit-json.json');
+  if (existsSync(jsonExample)) {
+    try {
+      JSON.parse(readText(jsonExample));
+      pass('Performance audit JSON example parses.');
+    } catch (error) {
+      fail(`Performance audit JSON example is invalid JSON: ${error.message}`);
+    }
+  }
+
+  const auditScript = join(skillDir, 'scripts', 'audit-plugin.mjs');
+  if (existsSync(auditScript) && readText(auditScript).includes('--performance')) {
+    pass('audit-plugin.mjs supports --performance.');
+  } else {
+    fail('audit-plugin.mjs does not appear to support --performance.');
+  }
+}
+
 function validateScripts() {
   const scriptDir = join(skillDir, 'scripts');
 
@@ -322,6 +400,7 @@ function validateSkill() {
   validateReferences(skillContent);
   validateTemplates();
   validateScripts();
+  validatePerformanceModule(skillContent);
   validateReadmeInstallInstructions();
 }
 

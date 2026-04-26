@@ -111,3 +111,39 @@ defined( 'ABSPATH' ) || exit;
     }
   );
 });
+
+test('auditPlugin detects performance heuristics only when requested', () => {
+  withPlugin(
+    {
+      'example.php': `<?php
+/**
+ * Plugin Name: Example
+ * Version: 1.0.0
+ * Text Domain: example
+ */
+defined( 'ABSPATH' ) || exit;
+add_action( 'init', static function () {
+	flush_rewrite_rules();
+	$query = new WP_Query(
+		array(
+			'post_type'      => 'post',
+			'posts_per_page' => -1,
+		)
+	);
+} );
+`,
+    },
+    (root) => {
+      const normalReport = auditPlugin(root);
+      assert.equal(normalReport.findings.some((finding) => finding.category === 'performance'), false);
+
+      const performanceReport = auditPlugin(root, { performance: true });
+      assert.ok(
+        performanceReport.findings.some(
+          (finding) => finding.rule === 'performance.hooks.flush-rewrite-rules-on-request'
+        )
+      );
+      assert.ok(performanceReport.findings.some((finding) => finding.rule === 'performance.query.unbounded-post-query'));
+    }
+  );
+});

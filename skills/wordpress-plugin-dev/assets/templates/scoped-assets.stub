@@ -1,0 +1,45 @@
+<?php
+/**
+ * Scoped asset loading for {{PLUGIN_NAME}}.
+ *
+ * Placeholders: {{PLUGIN_SLUG}}, {{TEXT_DOMAIN}}, {{VENDOR_NAMESPACE}}, {{PLUGIN_VERSION}}.
+ */
+
+namespace {{VENDOR_NAMESPACE}};
+
+defined( 'ABSPATH' ) || exit;
+
+add_action(
+	'wp_enqueue_scripts',
+	static function (): void {
+		$post = is_singular() ? get_post() : null;
+
+		if ( ! $post || ! has_shortcode( (string) $post->post_content, '{{PLUGIN_SLUG}}' ) ) {
+			return;
+		}
+
+		wp_enqueue_script(
+			'{{PLUGIN_SLUG}}-frontend',
+			plugins_url( 'build/frontend.js', __FILE__ ),
+			array(),
+			'{{PLUGIN_VERSION}}',
+			array( 'strategy' => 'defer' )
+		);
+	}
+);
+
+add_action(
+	'admin_enqueue_scripts',
+	static function ( string $hook_suffix ): void {
+		if ( 'settings_page_{{PLUGIN_SLUG}}' !== $hook_suffix ) {
+			return;
+		}
+
+		wp_enqueue_style(
+			'{{PLUGIN_SLUG}}-admin',
+			plugins_url( 'build/admin.css', __FILE__ ),
+			array(),
+			'{{PLUGIN_VERSION}}'
+		);
+	}
+);

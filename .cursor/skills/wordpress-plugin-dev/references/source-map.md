@@ -1,6 +1,6 @@
 # Source Map
 
-Last reviewed: 2026-04-26
+Last reviewed: 2026-04-27
 
 Use this file as the factual routing map for WordPress plugin work. It tells the agent where to verify claims, which source owns which topic, and when online verification is required. Do not copy official documentation into generated work; summarize briefly and link to the source.
 
@@ -243,7 +243,79 @@ This map uses official WordPress Developer Resources, WordPress.org Plugin Direc
 - Last reviewed: 2026-04-26
 - Notes for agent behavior: Plugin Check supports review but does not replace manual review. Treat false positives carefully and document unresolved findings.
 
-## 21. WordPress.org `readme.txt` and release process
+## 21. Performance optimization
+
+- Title: WordPress Advanced Administration Performance / Optimization
+- Official URL: https://developer.wordpress.org/advanced-administration/performance/optimization/
+- What to use it for: Broad WordPress performance context, performance factors, testing mindset, caching, database tuning, and autoloaded options.
+- When to verify online: Before giving hosting, caching, database, autoload, or version-sensitive performance recommendations.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Use as context, then inspect plugin-specific hot paths. Do not reduce performance advice to "install a cache plugin."
+
+- Title: WordPress Core Performance Team Handbook
+- Official URL: https://make.wordpress.org/performance/handbook/
+- What to use it for: Current Core performance team guidance, terminology, and performance project context.
+- When to verify online: Before citing current Core priorities or tool recommendations.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Use for orientation and current-doc verification; do not claim Core benchmark results for a plugin without measuring.
+
+- Title: `wp_enqueue_script()`
+- Official URL: https://developer.wordpress.org/reference/functions/wp_enqueue_script/
+- What to use it for: Script handles, dependencies, versions, footer loading, and current script loading strategy parameters.
+- When to verify online: Before adding `defer`/`async` strategies, script module assumptions, or version-sensitive enqueue behavior.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Scope assets by frontend/admin/editor/block context and preserve dependencies/versions.
+
+- Title: Transients API / `set_transient()`
+- Official URL: https://developer.wordpress.org/reference/functions/set_transient/
+- What to use it for: Transient writes, expiration behavior, key limits, object-cache interaction, and autoload implications for non-expiring transients.
+- When to verify online: Before changing cache expiration, cache key strategy, or transient hook behavior.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Prefer explicit TTLs and invalidation. Never cache private/user-specific data globally.
+
+- Title: Transients API / `get_transient()`
+- Official URL: https://developer.wordpress.org/reference/functions/get_transient/
+- What to use it for: Transient reads and cache miss handling.
+- When to verify online: Before changing falsey cache handling or transient fallback logic.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Use strict `false` checks; cached values can be `0`, `''`, or empty arrays.
+
+- Title: Object Cache / `wp_cache_get()`
+- Official URL: https://developer.wordpress.org/reference/functions/wp_cache_get/
+- What to use it for: Object cache reads, cache groups, and the `$found` flag.
+- When to verify online: Before using advanced object-cache parameters or group behavior.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Use `$found` to distinguish cache misses from falsey cached values.
+
+- Title: Object Cache / `wp_cache_set()`
+- Official URL: https://developer.wordpress.org/reference/functions/wp_cache_set/
+- What to use it for: Object cache writes, cache groups, and expirations.
+- When to verify online: Before relying on persistent object-cache behavior.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Persistence depends on hosting/object-cache drop-ins; document assumptions.
+
+- Title: `WP_Query`
+- Official URL: https://developer.wordpress.org/reference/classes/wp_query/
+- What to use it for: Query arguments, pagination, return fields, caching parameters, and post data reset behavior.
+- When to verify online: Before using less common query flags or optimizing query parameters for a specific WordPress version.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Bound results, avoid unnecessary totals, use IDs when possible, and do not query inside loops without justification.
+
+- Title: Block Metadata / `block.json`
+- Official URL: https://developer.wordpress.org/block-editor/reference-guides/block-api/block-metadata/
+- What to use it for: Block asset fields, render metadata, and block-scoped asset loading.
+- When to verify online: Before relying on newer metadata fields, script modules, or conditional asset behavior.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Prefer metadata-driven registration and block-scoped frontend assets.
+
+- Title: REST API route registration
+- Official URL: https://developer.wordpress.org/reference/functions/register_rest_route/
+- What to use it for: Route args, namespace/versioning, permissions, and REST callback structure.
+- When to verify online: Before changing REST route behavior, args, schema, or permission semantics.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Performance fixes must keep `permission_callback`, validation, sanitization, and response safety intact.
+
+## 22. WordPress.org `readme.txt` and release process
 
 - Title: Plugin Readmes
 - Official URL: https://developer.wordpress.org/plugins/wordpress-org/how-your-readme-txt-works/

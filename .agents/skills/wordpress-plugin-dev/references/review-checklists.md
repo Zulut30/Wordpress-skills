@@ -334,48 +334,106 @@ Not ready. Fix version alignment, escaping, and build artifacts, then rerun Plug
 
 ### When To Use
 
-Use when reviewing slow admin pages, frontend asset loading, expensive queries, cron jobs, REST endpoints, block render callbacks, or database changes.
+Use when:
+
+- a plugin is slow;
+- admin/editor screens feel slow;
+- REST endpoints are slow or high-volume;
+- frontend loads too many assets;
+- dynamic blocks are expensive;
+- a plugin is preparing for public release;
+- the plugin affects high-traffic pages.
 
 ### Files To Inspect
 
-- Asset enqueue code, block registration metadata, render callbacks, REST callbacks, queries, cron tasks, and transients/cache usage.
-- Database access using `WP_Query`, `get_posts()`, `$wpdb`, meta queries, taxonomy queries, and custom tables.
-- Admin screens that load lists, reports, remote data, or large option payloads.
+- Main plugin bootstrap.
+- Hook registration classes and service providers.
+- Asset enqueue files.
+- REST controllers and AJAX handlers.
+- Admin screens, list tables, dashboard widgets, and settings pages.
+- Block `render.php` files and `render_callback` code.
+- `package.json`, build output, and generated `.asset.php` files.
+- Custom table schema and migrations.
+- Cron/background job code.
+- Options, transients, object cache, and external HTTP usage.
 
 ### Questions To Ask
 
-- Does this code run on every request, only in admin, only on target screens, or only when the block is present?
-- Are queries bounded, indexed, cached, and paginated?
-- Are remote requests deferred, cached, and timeout-limited?
-- Are autoloaded options small and appropriate?
-- Does the plugin avoid frontend JavaScript/CSS when not needed?
+- What runs on every request?
+- What runs only in admin?
+- What runs only in the editor?
+- What runs only on target screens?
+- What queries are unbounded?
+- What data is cached?
+- How is cache invalidated?
+- What assets are loaded globally?
+- What REST endpoints can be paginated?
+- What needs profiling before changing?
 
 ### Must-Pass Checks
 
-- Assets are enqueued conditionally with correct dependencies and versions.
-- Expensive work is not performed during bootstrap or on every page load.
-- Queries avoid unbounded `posts_per_page = -1` on large data sets unless justified.
-- Remote calls have timeouts and do not block normal page rendering unnecessarily.
-- Cron jobs are idempotent and cannot pile up duplicate scheduled events.
+- No `flush_rewrite_rules()` on normal requests.
+- No remote HTTP call during frontend render without timeout, cache, and fallback.
+- No unbounded `WP_Query`, `get_posts()`, REST collection, admin table, or cron batch on hot paths.
+- No global frontend/admin/editor assets when a narrower screen, route, shortcode, or block scope exists.
+- Dynamic block render callbacks validate attributes, escape output, bound queries, and cache expensive safe fragments.
+- REST collection endpoints validate args, paginate, limit response shape, and preserve `permission_callback`.
+- Cron schedules are registered on activation or versioned setup, guarded with `wp_next_scheduled()`, batched, and idempotent.
+- Large rarely used data is not stored in autoloaded options.
+- Caches have TTLs, safe keys, context separation, and invalidation hooks.
+- Custom tables used for high-volume data have appropriate keys/indexes.
 
 ### Common Fixes
 
-- Gate admin assets by screen ID and frontend assets by shortcode/block presence where practical.
-- Cache computed results in transients or persistent object cache compatible patterns.
-- Add pagination, indexes for custom tables, or narrower query args.
-- Move expensive upgrade/migration work to background batches or explicit admin actions.
-- Replace repeated option lookups with a normalized settings object per request.
+- Gate hooks by request type, screen ID, route, capability, post type, shortcode, or block presence.
+- Move setup, rewrite flushing, and cron scheduling to activation/versioned migrations.
+- Add pagination and upper bounds to queries and REST/admin collections.
+- Use `no_found_rows => true` when totals are not needed.
+- Use `fields => 'ids'` when only IDs are needed.
+- Cache safe expensive results with explicit TTL and invalidation on `save_post`, option updates, term changes, or plugin-specific events.
+- Split admin, editor, frontend, and block view assets.
+- Use `block.json` asset fields and generated `.asset.php` files.
+- Add locks and batching to cron/background jobs.
+- Add measurement notes instead of guessing at production impact.
 
 ### Example Final Response Format For The Agent
 
 ```text
-Performance Findings
-- [P1] The plugin calls a remote API during every frontend request.
-- [P2] Admin report loads all orders with `posts_per_page => -1`.
-- [P2] Block frontend script is enqueued site-wide.
+Executive Summary
+The plugin has high performance risk on frontend and REST hot paths. Most impact comes from unbounded queries, global asset loading, and an uncached dynamic block render.
 
-Performance Plan
-Cache the remote response, paginate the report query, and move the frontend script to block metadata.
+Performance Risk Score
+High
+
+Hot Paths Inspected
+- Frontend `wp_enqueue_scripts`
+- REST `/example/v1/items`
+- `blocks/featured/render.php`
+- Admin report screen
+
+Findings
+- [P1] src/Rest/Items_Controller.php:74 returns an unpaginated collection using `posts_per_page => -1`.
+  Fix: add `page`/`per_page`, cap `per_page`, use `fields => ids`, and return a small response shape.
+- [P2] includes/assets.php:19 enqueues frontend JS globally.
+  Fix: enqueue only when the shortcode/block/route is present.
+- [P2] blocks/featured/render.php:31 performs a fresh query on every render without cache.
+  Fix: bound the query and add fragment cache with invalidation on content changes.
+
+Measurement Plan
+- Capture baseline request time, query count, memory, asset transfer size, and cache hit rate.
+- Use Query Monitor or server traces on production-sized data.
+
+Safe Rollout Plan
+- Add output parity tests.
+- Ship cache invalidation with the cache.
+- Monitor slow requests and errors after deployment.
+
+What Requires Profiling
+- Exact cost of meta queries on production data.
+- Object cache hit rate under traffic.
+
+What Not To Optimize Yet
+- Low-traffic admin-only UI until profiling shows measurable impact.
 ```
 
 ## Workflow: Accessibility/i18n Review

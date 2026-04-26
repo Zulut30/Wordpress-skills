@@ -36,6 +36,13 @@ jobs:
       - name: Smoke test
         run: npm run smoke
 
+      - name: Performance audit fixture
+        shell: bash
+        run: |
+          npm run performance:audit
+          npm run --silent performance:audit:json > performance-audit-output.json
+          node -e "JSON.parse(require('fs').readFileSync('performance-audit-output.json', 'utf8')); console.log('Performance audit JSON parsed.')"
+
       - name: Audit sample fixture
         shell: bash
         run: |

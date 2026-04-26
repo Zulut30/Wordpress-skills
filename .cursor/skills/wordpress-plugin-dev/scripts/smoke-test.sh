@@ -45,6 +45,7 @@ references=(
 	"testing-and-ci.md"
 	"release-wordpress-org.md"
 	"review-checklists.md"
+	"performance-optimization.md"
 )
 
 for reference in "${references[@]}"; do
@@ -55,6 +56,7 @@ require_file "$SKILL_DIR/assets/templates/github-actions-ci.yml.stub"
 require_file "$SKILL_DIR/scripts/validate-skill.mjs"
 require_file "$SKILL_DIR/scripts/check-source-map.mjs"
 require_file "$SKILL_DIR/scripts/audit-plugin.mjs"
+require_dir "$ROOT/test-fixtures/performance-plugin"
 
 if ! command -v node >/dev/null 2>&1; then
 	log "Node.js is not available. Next step: install Node.js LTS, then run npm install or npm ci."
@@ -83,6 +85,15 @@ if [ -d "$SKILL_DIR/fixtures/demo-plugin" ]; then
 	node "$SKILL_DIR/scripts/audit-plugin.mjs" "$SKILL_DIR/fixtures/demo-plugin"
 else
 	log "Fixture plugin missing. Next step: add fixtures/demo-plugin for audit smoke coverage."
+fi
+
+if [ -d "$ROOT/test-fixtures/performance-plugin" ]; then
+	log "Running performance audit smoke check"
+	node "$SKILL_DIR/scripts/audit-plugin.mjs" "$ROOT/test-fixtures/performance-plugin" --performance
+	node "$SKILL_DIR/scripts/audit-plugin.mjs" "$ROOT/test-fixtures/performance-plugin" --performance --json >/tmp/wordpress-plugin-dev-performance-audit.json
+	node -e "JSON.parse(require('fs').readFileSync('/tmp/wordpress-plugin-dev-performance-audit.json', 'utf8')); console.log('Performance JSON parsed.')"
+else
+	log "Performance fixture missing. Next step: add test-fixtures/performance-plugin."
 fi
 
 log "Smoke test passed."

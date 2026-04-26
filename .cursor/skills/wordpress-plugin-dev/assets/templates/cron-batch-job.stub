@@ -1,0 +1,44 @@
+<?php
+/**
+ * Batched cron job pattern for {{PLUGIN_NAME}}.
+ *
+ * Placeholders: {{PLUGIN_SLUG}}, {{TEXT_DOMAIN}}, {{VENDOR_NAMESPACE}}, {{PLUGIN_VERSION}}.
+ */
+
+namespace {{VENDOR_NAMESPACE}};
+
+defined( 'ABSPATH' ) || exit;
+
+function {{PLUGIN_SLUG}}_activate(): void {
+	if ( ! wp_next_scheduled( '{{PLUGIN_SLUG}}_process_batch' ) ) {
+		wp_schedule_event( time() + MINUTE_IN_SECONDS, 'hourly', '{{PLUGIN_SLUG}}_process_batch' );
+	}
+}
+
+function {{PLUGIN_SLUG}}_deactivate(): void {
+	wp_clear_scheduled_hook( '{{PLUGIN_SLUG}}_process_batch' );
+}
+
+function {{PLUGIN_SLUG}}_process_batch(): void {
+	$lock_key = '{{PLUGIN_SLUG}}_batch_lock';
+	if ( false !== get_transient( $lock_key ) ) {
+		return;
+	}
+
+	set_transient( $lock_key, 1, 10 * MINUTE_IN_SECONDS );
+
+	try {
+		$ids = {{PLUGIN_SLUG}}_get_pending_item_ids( 25 );
+
+		foreach ( $ids as $item_id ) {
+			{{PLUGIN_SLUG}}_process_single_item( absint( $item_id ) );
+		}
+	} finally {
+		delete_transient( $lock_key );
+	}
+}
+
+add_action( '{{PLUGIN_SLUG}}_process_batch', __NAMESPACE__ . '\\{{PLUGIN_SLUG}}_process_batch' );
+
+register_activation_hook( __FILE__, __NAMESPACE__ . '\\{{PLUGIN_SLUG}}_activate' );
+register_deactivation_hook( __FILE__, __NAMESPACE__ . '\\{{PLUGIN_SLUG}}_deactivate' );
