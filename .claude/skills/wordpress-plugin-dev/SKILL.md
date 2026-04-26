@@ -1,6 +1,6 @@
 ---
 name: wordpress-plugin-dev
-description: "Helps agents develop, review, test, secure, optimize, package, and release modern WordPress plugins. Use for WordPress plugin architecture, Gutenberg block work, block.json, REST API, WP admin screens, shortcode implementation, Settings API, WP-CLI workflows, PHPUnit tests, wp-env environments, Plugin Check, WordPress.org release preparation, security audit, and performance optimization tasks."
+description: "Helps agents develop, review, test, secure, optimize, design, package, and release modern WordPress plugins. Use for WordPress plugin architecture, Gutenberg block work, block.json, REST API, WP admin screens, shortcode implementation, Settings API, WP-CLI workflows, PHPUnit tests, wp-env environments, Plugin Check, WordPress.org release preparation, security audit, performance optimization, and plugin UI/UX design tasks."
 license: MIT
 compatibility: "Designed for Codex, Cursor, Claude Code, and other Agent Skills-compatible tools."
 ---
@@ -25,6 +25,15 @@ Before planning or editing, identify the primary task type:
 - `database/query optimization`
 - `block render optimization`
 - `REST/admin performance review`
+- `admin UI design`
+- `settings page UX`
+- `plugin dashboard design`
+- `frontend output design`
+- `Gutenberg block UI design`
+- `onboarding/setup wizard`
+- `UX/accessibility review`
+- `visual polish`
+- `design system alignment`
 - `testing/CI`
 - `release to WordPress.org`
 
@@ -49,6 +58,14 @@ Then inspect the plugin structure and load only the references needed for that t
 - Do not make remote HTTP calls during frontend render without caching, timeout, and fallback.
 - Do not call `flush_rewrite_rules()` on normal requests.
 - Use `block.json` and conditional block assets for Gutenberg where suitable.
+- Design must fit WordPress unless a custom branded experience is explicitly justified.
+- Prefer WordPress-native UI patterns and components for admin/editor UI.
+- Never improve visuals by reducing accessibility, security, performance, or i18n quality.
+- Every generated UI should consider empty, loading, success, error, and edge states.
+- Frontend output should inherit theme styles where possible and scope plugin CSS.
+- Do not use placeholders as labels, do not rely on color alone, and give destructive actions clear labels plus confirmation.
+- Admin assets must be scoped to relevant screens, and generated UI text must be translation-ready.
+- If using experimental WordPress UI packages, verify current docs first.
 
 ## Reference Routing
 
@@ -59,10 +76,11 @@ Then inspect the plugin structure and load only the references needed for that t
 - Gutenberg blocks, `block.json`, dynamic blocks, build tooling: `references/blocks-gutenberg.md`
 - Interactivity API and script modules: `references/interactivity-api.md`
 - Performance optimization, hot paths, queries, caching, assets, REST/admin/block performance: `references/performance-optimization.md`
+- Design, admin UX, frontend output, Gutenberg UI, visual review, and a11y-aware polish: `references/design-ux-ui.md`
 - i18n, accessibility, privacy, personal data workflows: `references/i18n-a11y-privacy.md`
 - `wp-env`, WP-CLI, PHPUnit, Plugin Check, CI: `references/testing-and-ci.md`
 - WordPress.org readme, assets, SVN/release workflow: `references/release-wordpress-org.md`
-- Review workflows and acceptance checklists for architecture, security, blocks, REST, admin settings, release, performance, and a11y/i18n: `references/review-checklists.md`
+- Review workflows and acceptance checklists for architecture, security, blocks, REST, admin settings, release, performance, design/UX/UI, and a11y/i18n: `references/review-checklists.md`
 - Official source index and version-sensitive verification: `references/source-map.md`
 
 ## Common Workflows
@@ -140,6 +158,48 @@ Then inspect the plugin structure and load only the references needed for that t
 1. Bound query size and avoid N+1 patterns.
 2. Use `fields => 'ids'`, `no_found_rows => true`, and cache priming where appropriate.
 3. Prefer WordPress APIs; use prepared SQL and indexes when custom tables are justified.
+
+### design-admin-settings-page
+
+1. Read `references/design-ux-ui.md`, `references/hooks-rest-admin.md`, and `references/i18n-a11y-privacy.md`.
+2. Use WordPress-native layout, clear labels/help text, Settings API save flow, capability checks, nonces, and scoped admin assets.
+3. Include empty, loading, success, error, validation, RTL, text expansion, and keyboard/focus states.
+
+### improve-plugin-dashboard-ux
+
+1. Identify the dashboard's primary user, job, status signals, and next actions.
+2. Reduce clutter, paginate heavy data, avoid global assets, and keep troubleshooting/status visible.
+3. Use cards/sections only when they improve scanning and keep the screen native to wp-admin.
+
+### design-frontend-output
+
+1. Respect the active theme by inheriting typography, colors, and spacing where practical.
+2. Use semantic HTML, scoped wrapper classes, escaped output, accessible controls, responsive CSS, and RTL-friendly logical properties.
+3. Avoid global resets, hardcoded fonts, and large frontend bundles unless explicitly justified.
+
+### design-gutenberg-block-ui
+
+1. Use the canvas for primary content, toolbar for important contextual actions, and InspectorControls for advanced settings.
+2. Prefer `@wordpress/components`, i18n-ready labels, placeholders for setup, and stable selected/unselected states.
+3. Keep frontend output close to editor preview without adding unnecessary editor or frontend weight.
+
+### audit-plugin-ui-ux
+
+1. Read `references/design-ux-ui.md` and the design workflow in `references/review-checklists.md`.
+2. Inspect admin screens, block UI, frontend output, CSS, forms, notices, and dynamic states.
+3. Report UX blockers, accessibility blockers, security/performance intersections, and manual visual review needs.
+
+### create-onboarding-flow
+
+1. Keep setup steps short, optional where appropriate, and reversible.
+2. Provide progress, back/skip/finish behavior, accessible headings, clear microcopy, and safe defaults.
+3. Do not use dark patterns or hide consequences.
+
+### improve-empty-loading-error-states
+
+1. Define what the user sees before data exists, while work is in progress, after success, after failure, and at edge cases.
+2. Preserve user input on errors and announce important async updates where appropriate.
+3. Keep messages actionable, translatable, and safe.
 
 ## When Unsure
 

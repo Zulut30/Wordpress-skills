@@ -1,0 +1,20 @@
+<?php
+/**
+ * Empty state template for {{PLUGIN_NAME}}.
+ */
+
+defined( 'ABSPATH' ) || exit;
+?>
+<section class="{{ROOT_CLASS}}__empty" aria-labelledby="{{PLUGIN_SLUG}}-empty-title">
+	<div class="{{ROOT_CLASS}}__empty-icon" aria-hidden="true"></div>
+	<h2 id="{{PLUGIN_SLUG}}-empty-title"><?php echo esc_html__( 'Nothing to show yet', '{{TEXT_DOMAIN}}' ); ?></h2>
+	<p><?php echo esc_html__( 'Complete setup to start seeing useful plugin information here.', '{{TEXT_DOMAIN}}' ); ?></p>
+	<p class="{{ROOT_CLASS}}__empty-actions">
+		<a class="button button-primary" href="<?php echo esc_url( admin_url( 'admin.php?page={{ADMIN_PAGE_SLUG}}&action=setup' ) ); ?>">
+			<?php echo esc_html__( 'Start setup', '{{TEXT_DOMAIN}}' ); ?>
+		</a>
+		<a class="button button-link" href="<?php echo esc_url( 'https://example.com/docs' ); ?>">
+			<?php echo esc_html__( 'Read documentation', '{{TEXT_DOMAIN}}' ); ?>
+		</a>
+	</p>
+</section>

@@ -1,0 +1,24 @@
+<?php
+/**
+ * Admin notice template for {{PLUGIN_NAME}}.
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+$notice_type = isset( $notice_type ) ? sanitize_key( $notice_type ) : 'info';
+$allowed     = array( 'success', 'error', 'warning', 'info' );
+if ( ! in_array( $notice_type, $allowed, true ) ) {
+	$notice_type = 'info';
+}
+
+$message       = isset( $message ) ? (string) $message : '';
+$is_dismissible = ! empty( $is_dismissible );
+?>
+<div class="notice notice-<?php echo esc_attr( $notice_type ); ?> <?php echo $is_dismissible ? 'is-dismissible' : ''; ?>">
+	<p>
+		<?php if ( 'error' === $notice_type ) : ?>
+			<span class="screen-reader-text"><?php echo esc_html__( 'Error:', '{{TEXT_DOMAIN}}' ); ?></span>
+		<?php endif; ?>
+		<?php echo esc_html( $message ); ?>
+	</p>
+</div>

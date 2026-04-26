@@ -25,6 +25,10 @@ const requiredSourceHints = [
   'Performance optimization',
   'WP_Query',
   'wp_cache_get',
+  'Design, UX, and UI',
+  '@wordpress/components',
+  '@wordpress/admin-ui',
+  '@wordpress/ui',
 ];
 
 for (const hint of requiredSourceHints) {

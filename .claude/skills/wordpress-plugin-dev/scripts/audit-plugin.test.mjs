@@ -147,3 +147,45 @@ add_action( 'init', static function () {
     }
   );
 });
+
+test('auditPlugin detects design heuristics only when requested', () => {
+  withPlugin(
+    {
+      'example.php': `<?php
+/**
+ * Plugin Name: Example
+ * Version: 1.0.0
+ * Text Domain: example
+ */
+defined( 'ABSPATH' ) || exit;
+add_action( 'admin_menu', static function () {
+	add_menu_page( 'Example', 'Example', 'manage_options', 'example', 'example_render_page' );
+} );
+function example_render_page() {
+	?>
+	<form method="post">
+		<input type="text" name="example_name" placeholder="Name" />
+		<button type="submit">Submit</button>
+	</form>
+	<?php
+}
+`,
+      'assets/bad-admin.css': `body {
+	color: #111;
+}
+.example button:focus {
+	outline: none;
+}
+`,
+    },
+    (root) => {
+      const normalReport = auditPlugin(root);
+      assert.equal(normalReport.findings.some((finding) => finding.category === 'design'), false);
+
+      const designReport = auditPlugin(root, { design: true });
+      assert.ok(designReport.findings.some((finding) => finding.rule === 'design.admin.form-without-obvious-nonce-flow'));
+      assert.ok(designReport.findings.some((finding) => finding.rule === 'design.forms.placeholder-used-as-label'));
+      assert.ok(designReport.findings.some((finding) => finding.rule === 'design.admin.global-css-selector'));
+    }
+  );
+});

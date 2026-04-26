@@ -1,0 +1,8 @@
+.design-fixture-admin {
+	max-width: 960px;
+}
+
+.design-fixture-admin input:focus-visible {
+	outline: 2px solid #2271b1;
+	outline-offset: 2px;
+}

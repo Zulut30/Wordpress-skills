@@ -10,6 +10,10 @@ Realistic next improvements for the WordPress Plugin Dev Skill.
 - Review all official source links on a scheduled cadence and update `Last reviewed` dates only after actual review.
 - Expand performance docs with optional profiling workflow notes for Query Monitor, server traces, and manual before/after measurements.
 - Add more block performance examples for dynamic render caching and frontend asset splitting.
+- Expand design docs with richer admin UI examples for settings pages, dashboards, onboarding, notices, and state handling.
+- Add screenshot-based manual review workflow for wp-admin, editor, and frontend output.
+- Add Figma/WordPress Design System notes while clearly marking experimental UI packages.
+- Add more Gutenberg block UI examples for Placeholder, ToolbarButton, InspectorControls, and mobile editor behavior.
 
 ## Scripts
 
@@ -28,6 +32,12 @@ Realistic next improvements for the WordPress Plugin Dev Skill.
   - custom table index checks
   - large asset bundle hints when build output exists
 - Add an optional benchmark harness for fixtures without claiming production benchmark results.
+- Improve design heuristics in `audit-plugin.mjs` for:
+  - fewer false positives around labels and fieldsets
+  - better block component label detection
+  - optional contrast checks where static analysis is feasible
+  - screenshot metadata support for manual review
+  - frontend theme-compatibility hints
 
 ## Fixtures
 
@@ -36,12 +46,16 @@ Realistic next improvements for the WordPress Plugin Dev Skill.
 - Add a fixture with a static block and a fixture with an Interactivity API block.
 - Expand `test-fixtures/performance-plugin` with more REST, admin, cron, custom table, and block-render performance scenarios.
 - Add snapshot tests for performance JSON output.
+- Expand `test-fixtures/design-plugin` with more admin settings, dashboard, onboarding, block UI, modal, and frontend shortcode scenarios.
+- Add snapshot tests for design JSON output.
+- Add accessibility fixture coverage for focus management, field errors, live regions, and keyboard-only controls.
 
 ## Packaging
 
 - Add a release packaging script that produces a clean archive of the skill repository.
 - Add CI for this repository that runs `npm run smoke`, markdown link checks, and sync-tree comparisons.
 - Keep the performance fixture audit in CI and validate JSON output.
+- Keep the design fixture audit in CI and validate JSON output.
 - Document exact manual test steps for Codex, Claude Code, and Cursor discovery after installing from a clean checkout.
 - Verify Cursor Agent Skill discovery paths and slash invocation against current official Cursor docs before making stronger install claims.
 - Add a repository release checklist that includes `FINAL_QA_REPORT.md`, synced install targets, fixture audit output, and source-map review status.

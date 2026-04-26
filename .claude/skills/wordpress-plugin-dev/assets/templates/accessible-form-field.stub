@@ -1,0 +1,38 @@
+<?php
+/**
+ * Accessible form field template for {{PLUGIN_NAME}}.
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+$field_id    = '{{PLUGIN_SLUG}}_example';
+$value       = isset( $value ) ? (string) $value : '';
+$description = __( 'Explain what this setting changes and any important consequence.', '{{TEXT_DOMAIN}}' );
+$error       = isset( $error ) ? (string) $error : '';
+?>
+<tr class="{{ROOT_CLASS}}__field">
+	<th scope="row">
+		<label for="<?php echo esc_attr( $field_id ); ?>">
+			<?php echo esc_html__( 'Example setting', '{{TEXT_DOMAIN}}' ); ?>
+			<span class="description"><?php echo esc_html__( '(required)', '{{TEXT_DOMAIN}}' ); ?></span>
+		</label>
+	</th>
+	<td>
+		<input
+			id="<?php echo esc_attr( $field_id ); ?>"
+			name="<?php echo esc_attr( $field_id ); ?>"
+			type="text"
+			value="<?php echo esc_attr( $value ); ?>"
+			aria-describedby="<?php echo esc_attr( $field_id ); ?>-description <?php echo esc_attr( $field_id ); ?>-error"
+			required
+		/>
+		<p id="<?php echo esc_attr( $field_id ); ?>-description" class="description">
+			<?php echo esc_html( $description ); ?>
+		</p>
+		<?php if ( '' !== $error ) : ?>
+			<p id="<?php echo esc_attr( $field_id ); ?>-error" class="notice notice-error" role="alert">
+				<?php echo esc_html( $error ); ?>
+			</p>
+		<?php endif; ?>
+	</td>
+</tr>

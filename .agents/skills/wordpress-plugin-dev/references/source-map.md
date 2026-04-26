@@ -315,7 +315,95 @@ This map uses official WordPress Developer Resources, WordPress.org Plugin Direc
 - Last reviewed: 2026-04-27
 - Notes for agent behavior: Performance fixes must keep `permission_callback`, validation, sanitization, and response safety intact.
 
-## 22. WordPress.org `readme.txt` and release process
+## 22. Design, UX, and UI
+
+- Title: Make WordPress Design Handbook
+- Official URL: https://make.wordpress.org/design/handbook/
+- What to use it for: WordPress ecosystem design foundations, interface design context, inclusion, and design-team orientation.
+- When to verify online: Before claiming current WordPress design-system direction, colors, typography, iconography, or design-team guidance.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Use as context for WordPress-native feel. Do not copy official branding or use WordPress marks as plugin branding.
+
+- Title: `@wordpress/admin-ui`
+- Official URL: https://developer.wordpress.org/block-editor/reference-guides/packages/packages-admin-ui/
+- What to use it for: Consistent admin page layout primitives for React-based admin pages.
+- When to verify online: Before production use because package status, APIs, and CSS requirements can change.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: It can help with consistent admin page layouts, but classic Settings API pages may not need it.
+
+- Title: Component Reference / `@wordpress/components`
+- Official URL: https://developer.wordpress.org/block-editor/reference-guides/components/
+- What to use it for: WordPress editor/admin controls such as Button, Notice, TextControl, ToggleControl, SelectControl, Placeholder, PanelBody, Modal, Spinner, and ToolbarButton.
+- When to verify online: Before relying on specific component props, newer components, or behavior not already used in the project.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: This is the safer default for many editor/admin UI elements.
+
+- Title: `@wordpress/ui`
+- Official URL: https://developer.wordpress.org/block-editor/reference-guides/packages/packages-ui/
+- What to use it for: Low-level UI primitives for custom WordPress/Gutenberg interfaces.
+- When to verify online: Always verify current docs and package maturity before production use.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Treat as experimental/evolving for plugin work. Prefer `@wordpress/components` unless the project already uses it or current docs justify it.
+
+- Title: Block Design
+- Official URL: https://developer.wordpress.org/block-editor/explanations/user-interface/block-design/
+- What to use it for: Gutenberg block UI decisions, canvas/sidebar balance, block controls, and user task flow.
+- When to verify online: Before implementing block editor UI or citing current editor patterns.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Keep primary content work on the canvas and avoid overloading InspectorControls.
+
+- Title: Block Editor Accessibility
+- Official URL: https://developer.wordpress.org/block-editor/how-to-guides/accessibility/
+- What to use it for: Accessibility guidance for block editor extensions, landmarks, keyboard behavior, and dynamic UI.
+- When to verify online: Before implementing complex editor interactions, modals, keyboard flows, or live updates.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Accessibility requirements are design requirements, not optional polish.
+
+- Title: `@wordpress/a11y`
+- Official URL: https://developer.wordpress.org/block-editor/reference-guides/packages/packages-a11y/
+- What to use it for: Screen-reader announcements and accessibility helpers for dynamic updates.
+- When to verify online: Before importing helpers or adding spoken messages.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Announce meaningful async status changes; do not spam assistive technologies.
+
+- Title: Administration Menus
+- Official URL: https://developer.wordpress.org/plugins/administration-menus/
+- What to use it for: Admin menu placement, capabilities, top-level vs submenu decisions, and admin screen registration.
+- When to verify online: Before adding new wp-admin navigation or moving plugin screens.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Avoid unnecessary top-level menus. Navigation design must respect capabilities and context.
+
+- Title: Settings API
+- Official URL: https://developer.wordpress.org/plugins/settings/settings-api/
+- What to use it for: WordPress-native settings screens, forms, sections, fields, nonce flow, and sanitization.
+- When to verify online: Before creating or refactoring settings pages.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Design improvements must preserve sanitize callbacks, nonces, capability checks, and save feedback.
+
+- Title: HTML Coding Standards
+- Official URL: https://developer.wordpress.org/coding-standards/wordpress-coding-standards/html/
+- What to use it for: Semantic, maintainable WordPress HTML.
+- When to verify online: Before reviewing HTML standards or changing templates.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Prefer semantic HTML and escaped output over decorative markup.
+
+- Title: CSS Coding Standards
+- Official URL: https://developer.wordpress.org/coding-standards/wordpress-coding-standards/css/
+- What to use it for: CSS selector quality, admin CSS cautions, media queries, and maintainable stylesheet structure.
+- When to verify online: Before adding style rules, linting guidance, or CSS standards advice.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Scope plugin CSS and do not override global wp-admin or theme elements by default.
+
+- Title: Internationalization
+- Official URL: https://developer.wordpress.org/apis/internationalization/
+- What to use it for: PHP/JS translations, text domains, translator comments, and text expansion.
+- When to verify online: Before changing i18n setup or generated UI strings.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: UI copy must be translation-ready and resilient to longer strings.
+
+- Design guidance must not override security, accessibility, performance, or i18n rules.
+
+## 23. WordPress.org `readme.txt` and release process
 
 - Title: Plugin Readmes
 - Official URL: https://developer.wordpress.org/plugins/wordpress-org/how-your-readme-txt-works/

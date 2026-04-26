@@ -1,0 +1,44 @@
+<?php
+/**
+ * Accessible Settings API tabs template for {{PLUGIN_NAME}}.
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+if ( ! current_user_can( 'manage_options' ) ) {
+	wp_die( esc_html__( 'You do not have permission to access this page.', '{{TEXT_DOMAIN}}' ) );
+}
+
+$tabs = array(
+	'general'  => __( 'General', '{{TEXT_DOMAIN}}' ),
+	'advanced' => __( 'Advanced', '{{TEXT_DOMAIN}}' ),
+);
+
+$active_tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : 'general';
+if ( ! isset( $tabs[ $active_tab ] ) ) {
+	$active_tab = 'general';
+}
+?>
+<div class="wrap {{ROOT_CLASS}}">
+	<h1><?php echo esc_html__( '{{PLUGIN_NAME}} Settings', '{{TEXT_DOMAIN}}' ); ?></h1>
+
+	<nav class="nav-tab-wrapper" aria-label="<?php echo esc_attr__( '{{PLUGIN_NAME}} settings sections', '{{TEXT_DOMAIN}}' ); ?>">
+		<?php foreach ( $tabs as $tab_key => $tab_label ) : ?>
+			<a
+				class="nav-tab <?php echo $active_tab === $tab_key ? 'nav-tab-active' : ''; ?>"
+				href="<?php echo esc_url( add_query_arg( 'tab', $tab_key, menu_page_url( '{{ADMIN_PAGE_SLUG}}', false ) ) ); ?>"
+				<?php echo $active_tab === $tab_key ? 'aria-current="page"' : ''; ?>
+			>
+				<?php echo esc_html( $tab_label ); ?>
+			</a>
+		<?php endforeach; ?>
+	</nav>
+
+	<form method="post" action="options.php">
+		<?php
+		settings_fields( '{{PLUGIN_SLUG}}_' . $active_tab );
+		do_settings_sections( '{{ADMIN_PAGE_SLUG}}_' . $active_tab );
+		submit_button( __( 'Save settings', '{{TEXT_DOMAIN}}' ) );
+		?>
+	</form>
+</div>

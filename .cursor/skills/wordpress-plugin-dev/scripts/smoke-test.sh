@@ -46,6 +46,7 @@ references=(
 	"release-wordpress-org.md"
 	"review-checklists.md"
 	"performance-optimization.md"
+	"design-ux-ui.md"
 )
 
 for reference in "${references[@]}"; do
@@ -57,6 +58,7 @@ require_file "$SKILL_DIR/scripts/validate-skill.mjs"
 require_file "$SKILL_DIR/scripts/check-source-map.mjs"
 require_file "$SKILL_DIR/scripts/audit-plugin.mjs"
 require_dir "$ROOT/test-fixtures/performance-plugin"
+require_dir "$ROOT/test-fixtures/design-plugin"
 
 if ! command -v node >/dev/null 2>&1; then
 	log "Node.js is not available. Next step: install Node.js LTS, then run npm install or npm ci."
@@ -94,6 +96,15 @@ if [ -d "$ROOT/test-fixtures/performance-plugin" ]; then
 	node -e "JSON.parse(require('fs').readFileSync('/tmp/wordpress-plugin-dev-performance-audit.json', 'utf8')); console.log('Performance JSON parsed.')"
 else
 	log "Performance fixture missing. Next step: add test-fixtures/performance-plugin."
+fi
+
+if [ -d "$ROOT/test-fixtures/design-plugin" ]; then
+	log "Running design audit smoke check"
+	node "$SKILL_DIR/scripts/audit-plugin.mjs" "$ROOT/test-fixtures/design-plugin" --design
+	node "$SKILL_DIR/scripts/audit-plugin.mjs" "$ROOT/test-fixtures/design-plugin" --design --json >/tmp/wordpress-plugin-dev-design-audit.json
+	node -e "JSON.parse(require('fs').readFileSync('/tmp/wordpress-plugin-dev-design-audit.json', 'utf8')); console.log('Design JSON parsed.')"
+else
+	log "Design fixture missing. Next step: add test-fixtures/design-plugin."
 fi
 
 log "Smoke test passed."

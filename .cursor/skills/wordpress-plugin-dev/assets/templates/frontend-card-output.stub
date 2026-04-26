@@ -1,0 +1,26 @@
+<?php
+/**
+ * Theme-friendly frontend card output for {{PLUGIN_NAME}}.
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+$title       = isset( $title ) ? (string) $title : '';
+$description = isset( $description ) ? (string) $description : '';
+$url         = isset( $url ) ? esc_url( $url ) : '';
+?>
+<article class="{{ROOT_CLASS}} {{ROOT_CLASS}}--card">
+	<header class="{{ROOT_CLASS}}__header">
+		<h2 class="{{ROOT_CLASS}}__title"><?php echo esc_html( $title ); ?></h2>
+	</header>
+	<div class="{{ROOT_CLASS}}__content">
+		<p><?php echo esc_html( $description ); ?></p>
+	</div>
+	<?php if ( '' !== $url ) : ?>
+		<footer class="{{ROOT_CLASS}}__footer">
+			<a class="{{ROOT_CLASS}}__link" href="<?php echo esc_url( $url ); ?>">
+				<?php echo esc_html__( 'Learn more', '{{TEXT_DOMAIN}}' ); ?>
+			</a>
+		</footer>
+	<?php endif; ?>
+</article>

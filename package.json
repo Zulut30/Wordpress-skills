@@ -12,10 +12,12 @@
     "audit:fixture": "node skills/wordpress-plugin-dev/scripts/audit-plugin.mjs skills/wordpress-plugin-dev/fixtures/demo-plugin",
     "performance:audit": "node skills/wordpress-plugin-dev/scripts/audit-plugin.mjs test-fixtures/performance-plugin --performance",
     "performance:audit:json": "node skills/wordpress-plugin-dev/scripts/audit-plugin.mjs test-fixtures/performance-plugin --performance --json",
+    "design:audit": "node skills/wordpress-plugin-dev/scripts/audit-plugin.mjs test-fixtures/design-plugin --design",
+    "design:audit:json": "node skills/wordpress-plugin-dev/scripts/audit-plugin.mjs test-fixtures/design-plugin --design --json",
     "test:audit": "node skills/wordpress-plugin-dev/scripts/audit-plugin.test.mjs",
     "sync:targets": "node skills/wordpress-plugin-dev/scripts/sync-install-targets.mjs",
     "sync": "node skills/wordpress-plugin-dev/scripts/sync-install-targets.mjs",
-    "smoke": "npm run validate:skill && npm run check:sources && npm run check:links && npm run test:audit && npm run audit:fixture && npm run performance:audit && npm run performance:audit:json"
+    "smoke": "npm run validate:skill && npm run check:sources && npm run check:links && npm run test:audit && npm run audit:fixture && npm run performance:audit && npm run performance:audit:json && npm run design:audit && npm run design:audit:json"
   },
   "engines": {
     "node": ">=18"

@@ -27,6 +27,18 @@ const REQUIRED_TEMPLATES = [
   'performant-rest-controller.stub',
   'dynamic-block-fragment-cache.stub',
   'cron-batch-job.stub',
+  'admin-page-layout.stub',
+  'settings-tabs-page.stub',
+  'admin-card-grid.stub',
+  'empty-state.stub',
+  'admin-notice.stub',
+  'accessible-form-field.stub',
+  'frontend-card-output.stub',
+  'block-inspector-controls.stub',
+  'block-placeholder.stub',
+  'onboarding-step.stub',
+  'css-scoped-admin-ui.stub',
+  'frontend-scoped-css.stub',
 ];
 const REQUIRED_SCRIPTS = [
   'audit-plugin.mjs',
@@ -46,6 +58,20 @@ const REQUIRED_PERFORMANCE_DOC_EXAMPLES = [
   'performance-audit-human.md',
   'performance-audit-json.json',
   'performance-audit-explanation.md',
+];
+const REQUIRED_DESIGN_EXAMPLES = [
+  'admin-settings-before-after.md',
+  'plugin-dashboard-layout.md',
+  'gutenberg-block-ui-before-after.md',
+  'frontend-output-design.md',
+  'empty-loading-error-states.md',
+  'onboarding-flow.md',
+  'design-audit-report.md',
+];
+const REQUIRED_DESIGN_DOC_EXAMPLES = [
+  'design-audit-human.md',
+  'design-audit-json.json',
+  'design-audit-explanation.md',
 ];
 const SUSPICIOUS_ALLOWED_TOOLS = [
   '*',
@@ -277,6 +303,72 @@ function validatePerformanceModule(skillContent) {
   }
 }
 
+function validateDesignModule(skillContent) {
+  const designReference = join(skillDir, 'references', 'design-ux-ui.md');
+  if (existsSync(designReference)) {
+    pass('Design reference exists: references/design-ux-ui.md');
+  } else {
+    fail('Missing design reference: references/design-ux-ui.md');
+  }
+
+  if (skillContent.includes('references/design-ux-ui.md')) {
+    pass('SKILL.md routes design tasks to references/design-ux-ui.md.');
+  } else {
+    fail('SKILL.md does not reference references/design-ux-ui.md.');
+  }
+
+  const sourceMap = join(skillDir, 'references', 'source-map.md');
+  if (existsSync(sourceMap) && /Design, UX, and UI/i.test(readText(sourceMap))) {
+    pass('source-map.md contains a Design, UX, and UI section.');
+  } else {
+    fail('source-map.md does not contain a Design, UX, and UI section.');
+  }
+
+  const examplesDir = join(skillDir, 'assets', 'examples');
+  for (const example of REQUIRED_DESIGN_EXAMPLES) {
+    const file = join(examplesDir, example);
+    if (existsSync(file)) {
+      pass(`Design example exists: assets/examples/${example}`);
+    } else {
+      fail(`Missing design example: assets/examples/${example}`);
+    }
+  }
+
+  const fixtureDir = join(repoRoot, 'test-fixtures', 'design-plugin');
+  if (existsSync(fixtureDir)) {
+    pass('Design fixture exists: test-fixtures/design-plugin');
+  } else {
+    fail('Missing design fixture: test-fixtures/design-plugin');
+  }
+
+  const docsExamplesDir = join(repoRoot, 'docs', 'examples');
+  for (const example of REQUIRED_DESIGN_DOC_EXAMPLES) {
+    const file = join(docsExamplesDir, example);
+    if (existsSync(file)) {
+      pass(`Design audit doc example exists: docs/examples/${example}`);
+    } else {
+      fail(`Missing design audit doc example: docs/examples/${example}`);
+    }
+  }
+
+  const jsonExample = join(docsExamplesDir, 'design-audit-json.json');
+  if (existsSync(jsonExample)) {
+    try {
+      JSON.parse(readText(jsonExample));
+      pass('Design audit JSON example parses.');
+    } catch (error) {
+      fail(`Design audit JSON example is invalid JSON: ${error.message}`);
+    }
+  }
+
+  const auditScript = join(skillDir, 'scripts', 'audit-plugin.mjs');
+  if (existsSync(auditScript) && readText(auditScript).includes('--design')) {
+    pass('audit-plugin.mjs supports --design.');
+  } else {
+    fail('audit-plugin.mjs does not appear to support --design.');
+  }
+}
+
 function validateScripts() {
   const scriptDir = join(skillDir, 'scripts');
 
@@ -401,6 +493,7 @@ function validateSkill() {
   validateTemplates();
   validateScripts();
   validatePerformanceModule(skillContent);
+  validateDesignModule(skillContent);
   validateReadmeInstallInstructions();
 }
 

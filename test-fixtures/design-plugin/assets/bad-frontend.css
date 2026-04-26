@@ -1,0 +1,15 @@
+/**
+ * Fixture only. Do not copy into production.
+ */
+body {
+	font-family: "Inter", sans-serif;
+}
+
+button {
+	padding: 20px !important;
+}
+
+.bad-shortcode {
+	width: 760px;
+	margin-left: 20px;
+}

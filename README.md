@@ -24,6 +24,7 @@ Status: `v0.1.0` work in progress. Useful today, but intentionally honest about 
 - [Installation](#installation)
 - [Usage Examples](#usage-examples)
 - [Performance Optimization](#performance-optimization)
+- [Design, UX, And UI](#design-ux-and-ui)
 - [Tool Support Matrix](#tool-support-matrix)
 - [Included References](#included-references)
 - [Templates](#templates)
@@ -90,6 +91,7 @@ Optional future improvement: add a short terminal GIF or screencast after the te
 - Modern plugin architecture guidance.
 - WordPress security review workflows.
 - WordPress plugin performance audit workflows.
+- WordPress-native design, UX, and UI review workflows.
 - REST API and admin/settings guidance.
 - Gutenberg and `block.json` workflows.
 - Interactivity API notes.
@@ -111,6 +113,7 @@ This skill gives the agent:
 - safe templates for common plugin surfaces;
 - a local audit script for quick triage;
 - performance heuristics for plugin hot paths;
+- design/UX heuristics for admin, editor, and frontend UI;
 - fixture outputs that show what the tool actually reports.
 
 ## Repository Map
@@ -294,6 +297,65 @@ Performance limitations:
 - Cache changes require invalidation tests.
 - User-specific/private data must not be cached globally.
 
+## Design, UX, And UI
+
+`wordpress-plugin-dev` can help design and review WordPress plugin interfaces while keeping them native to WordPress. It is meant for practical UI work, not decoration for its own sake.
+
+It covers:
+
+- admin settings pages;
+- plugin dashboards;
+- onboarding/setup flows;
+- Gutenberg block UI;
+- frontend block, shortcode, and widget output;
+- empty, loading, error, and success states;
+- accessibility;
+- RTL and i18n;
+- scoped CSS;
+- WordPress-native UI patterns.
+
+Copy-paste prompts:
+
+```text
+Use wordpress-plugin-dev to redesign this plugin settings page. Make it feel native to WordPress, improve hierarchy, labels, empty/error states, accessibility, scoped assets, and save feedback. Do not change business logic yet; create UI_UX_REVIEW.md first.
+```
+
+```text
+Use wordpress-plugin-dev to improve this Gutenberg block UI. Review canvas controls, toolbar actions, InspectorControls, placeholders, i18n, accessibility, mobile editor behavior, and frontend/editor consistency.
+```
+
+```text
+Use wordpress-plugin-dev to improve this frontend shortcode output. Keep it theme-friendly, semantic, responsive, accessible, escaped, and scoped. Avoid global CSS and hardcoded fonts.
+```
+
+```text
+Use wordpress-plugin-dev to create a clean WordPress-native onboarding flow for this plugin with setup steps, skip/back/finish actions, accessible headings, clear microcopy, and safe defaults.
+```
+
+Local commands:
+
+```bash
+npm run design:audit
+npm run design:audit:json
+node skills/wordpress-plugin-dev/scripts/audit-plugin.mjs /path/to/plugin --design
+```
+
+References and examples:
+
+- [Design, UX, and UI reference](skills/wordpress-plugin-dev/references/design-ux-ui.md)
+- [Design audit human output](docs/examples/design-audit-human.md)
+- [Design audit JSON output](docs/examples/design-audit-json.json)
+- [Design audit explanation](docs/examples/design-audit-explanation.md)
+- [Design fixture plugin](test-fixtures/design-plugin/)
+
+Design limitations:
+
+- Static design audit is heuristic.
+- Visual quality still needs human review.
+- The scanner cannot fully verify contrast, layout, responsiveness, keyboard behavior, screen-reader behavior, or usability.
+- Final UI should be tested in real WordPress admin, editor, and frontend contexts.
+- Experimental UI packages must be verified against current official docs.
+
 ## Tool Support Matrix
 
 | Tool | What Works | Status |
@@ -315,6 +377,7 @@ Performance limitations:
 | Blocks | `references/blocks-gutenberg.md` | `block.json`, dynamic blocks, server-side registration, and build workflow. |
 | Interactivity API | `references/interactivity-api.md` | When to use the Interactivity API, core concepts, warnings, and examples. |
 | Performance | `references/performance-optimization.md` | Hot paths, hooks, queries, caching, REST/admin/block performance, assets, cron, and remediation plans. |
+| Design/UX/UI | `references/design-ux-ui.md` | WordPress-native admin UI, settings pages, dashboards, block UI, frontend output, states, a11y, RTL, and scoped CSS. |
 | i18n/a11y/privacy | `references/i18n-a11y-privacy.md` | Text domains, translations, labels, focus, privacy exports/erasure, and review checklist. |
 | Testing/CI | `references/testing-and-ci.md` | `wp-env`, WP-CLI scaffold tests, PHPUnit, JS tests, static analysis, Plugin Check, CI. |
 | Release | `references/release-wordpress-org.md` | `readme.txt`, Plugin Check, assets, packaging, and WordPress.org readiness. |
@@ -339,6 +402,18 @@ Performance limitations:
 | `performant-rest-controller.stub` | Paginated REST collection controller with validation and optional cache. |
 | `dynamic-block-fragment-cache.stub` | Dynamic block render fragment cache pattern. |
 | `cron-batch-job.stub` | Activation-scheduled, locked, batched cron job pattern. |
+| `admin-page-layout.stub` | Classic WordPress admin page layout with `.wrap`, heading, status, and primary action. |
+| `settings-tabs-page.stub` | Settings API tabs with sanitized active tab and accessible tab nav. |
+| `admin-card-grid.stub` | Responsive admin card grid with semantic headings and scoped classes. |
+| `empty-state.stub` | Short empty state with explanation and next action. |
+| `admin-notice.stub` | Escaped admin notice pattern. |
+| `accessible-form-field.stub` | Label/help/error association for form fields. |
+| `frontend-card-output.stub` | Theme-friendly semantic frontend card markup. |
+| `block-inspector-controls.stub` | Small Gutenberg InspectorControls pattern using WordPress components. |
+| `block-placeholder.stub` | Gutenberg Placeholder with loading/error/setup states. |
+| `onboarding-step.stub` | Simple accessible onboarding step. |
+| `css-scoped-admin-ui.stub` | Scoped wp-admin CSS with focus states and responsive grid. |
+| `frontend-scoped-css.stub` | Scoped frontend CSS with logical/responsive patterns. |
 
 ## Scripts
 
@@ -349,10 +424,14 @@ Performance limitations:
 | `npm run sync` | Copy canonical skill into `.agents`, `.claude`, and `.cursor` install targets. |
 | `npm run performance:audit` | Run performance heuristics against `test-fixtures/performance-plugin`. |
 | `npm run performance:audit:json` | Run performance heuristics against the performance fixture in JSON mode. |
+| `npm run design:audit` | Run design/UX/UI heuristics against `test-fixtures/design-plugin`. |
+| `npm run design:audit:json` | Run design/UX/UI heuristics against the design fixture in JSON mode. |
 | `node skills/wordpress-plugin-dev/scripts/audit-plugin.mjs /path/to/plugin` | Run the heuristic plugin audit in human-readable mode. |
 | `node skills/wordpress-plugin-dev/scripts/audit-plugin.mjs /path/to/plugin --json` | Run the heuristic plugin audit with structured JSON output. |
 | `node skills/wordpress-plugin-dev/scripts/audit-plugin.mjs /path/to/plugin --performance` | Include static performance heuristics. |
 | `node skills/wordpress-plugin-dev/scripts/audit-plugin.mjs /path/to/plugin --performance-only --fail-on=warning` | Run only performance heuristics and exit non-zero on warnings. |
+| `node skills/wordpress-plugin-dev/scripts/audit-plugin.mjs /path/to/plugin --design` | Include static design/UX/UI/a11y heuristics. |
+| `node skills/wordpress-plugin-dev/scripts/audit-plugin.mjs /path/to/plugin --design-only --fail-on=warning` | Run only design heuristics and exit non-zero on warnings. |
 
 ## Testing And Fixtures
 
@@ -366,19 +445,23 @@ Current coverage:
 - audit script unit tests;
 - demo fixture audit;
 - performance fixture audit;
+- design fixture audit;
 - intentionally unsafe sample fixture for expected scanner findings.
 
 ## Limitations
 
 - The audit script is heuristic and can miss vulnerabilities.
 - The performance scanner is heuristic and can miss bottlenecks or report false positives.
+- The design scanner is heuristic and can miss usability/accessibility issues or report false positives.
 - A clean audit output is not proof that a plugin is secure.
 - A clean performance audit is not proof that a plugin is fast under production data and traffic.
+- A clean design audit is not proof that UI is accessible, responsive, or usable in real WordPress contexts.
 - Cursor install paths and slash invocation are version/workflow-dependent.
 - Live WordPress runtime checks are not part of the default local workflow yet.
 - Composer/PHPStan/PHPCS checks are documented but not wired into the root CI matrix yet.
 - Release-sensitive guidance should be verified against current official docs.
 - Performance-sensitive changes need profiling, cache invalidation tests, and rollout monitoring.
+- Design-sensitive changes need manual visual review, keyboard testing, and real admin/editor/frontend checks.
 - The project is `v0.1.0`; it does not claim broad production adoption.
 
 ## Security Model

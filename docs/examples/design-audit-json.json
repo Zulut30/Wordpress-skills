@@ -1,0 +1,414 @@
+{
+    "tool":  "wordpress-plugin-dev audit-plugin",
+    "limitation":  "This is a heuristic scanner for agent review triage, not a security, performance, accessibility, or design oracle. It can miss issues and produce false positives; verify findings manually against current WordPress docs, profiling, and real UI review.",
+    "targetPath":  "test-fixtures/design-plugin",
+    "modes":  {
+                  "security":  true,
+                  "performance":  false,
+                  "performanceOnly":  false,
+                  "design":  true,
+                  "designOnly":  false
+              },
+    "summary":  {
+                    "phpFiles":  5,
+                    "blockJsonFiles":  2,
+                    "mainPluginFile":  "design-plugin.php",
+                    "findings":  {
+                                     "error":  0,
+                                     "warning":  18,
+                                     "info":  17
+                                 },
+                    "performanceFindings":  0,
+                    "designFindings":  35
+                },
+    "findings":  [
+                     {
+                         "severity":  "info",
+                         "category":  "design",
+                         "rule":  "design.admin.top-level-menu-review",
+                         "file":  "src/BadAdminPage.php",
+                         "line":  16,
+                         "message":  "Plugin registers a top-level admin menu.",
+                         "why":  "Top-level menus add navigation weight and should be reserved for primary plugin workflows.",
+                         "remediation":  "Confirm the feature deserves top-level placement; otherwise prefer an appropriate submenu such as Settings, Tools, or a product-specific parent.",
+                         "confidence":  "low"
+                     },
+                     {
+                         "severity":  "warning",
+                         "category":  "design",
+                         "rule":  "design.admin.form-without-obvious-nonce-flow",
+                         "file":  "src/BadAdminPage.php",
+                         "line":  36,
+                         "message":  "Admin form has no obvious Settings API or nonce flow.",
+                         "why":  "Good UI must preserve secure save behavior and clear state-changing intent.",
+                         "remediation":  "Use Settings API with settings_fields() or add wp_nonce_field() plus a capability and nonce check in the handler.",
+                         "confidence":  "medium"
+                     },
+                     {
+                         "severity":  "info",
+                         "category":  "design",
+                         "rule":  "design.admin.page-without-wrap",
+                         "file":  "src/BadAdminPage.php",
+                         "line":  36,
+                         "message":  "Admin page markup has no obvious .wrap container.",
+                         "why":  "Classic WordPress admin pages feel more native and inherit spacing when using the standard wrap structure.",
+                         "remediation":  "Render the page inside \u003cdiv class=\"wrap plugin-root-class\"\u003e unless a custom app shell is explicitly justified.",
+                         "confidence":  "low"
+                     },
+                     {
+                         "severity":  "info",
+                         "category":  "design",
+                         "rule":  "design.admin.missing-page-heading",
+                         "file":  "src/BadAdminPage.php",
+                         "line":  1,
+                         "message":  "Admin UI file has no obvious page h1.",
+                         "why":  "A clear page heading anchors the screen for visual, keyboard, and screen-reader users.",
+                         "remediation":  "Add one escaped, translatable \u003ch1\u003e that describes the current admin screen.",
+                         "confidence":  "low"
+                     },
+                     {
+                         "severity":  "warning",
+                         "category":  "design",
+                         "rule":  "design.admin.assets-not-screen-scoped",
+                         "file":  "src/BadAdminPage.php",
+                         "line":  12,
+                         "message":  "Admin assets are enqueued without an obvious screen check.",
+                         "why":  "Unscoped admin CSS/JS can alter unrelated WordPress screens and slow the admin experience.",
+                         "remediation":  "Gate admin assets by $hook_suffix or get_current_screen()-\u003eid.",
+                         "confidence":  "medium"
+                     },
+                     {
+                         "severity":  "info",
+                         "category":  "design",
+                         "rule":  "design.admin.vague-action-label",
+                         "file":  "src/BadAdminPage.php",
+                         "line":  39,
+                         "message":  "Action label is vague.",
+                         "why":  "Specific button text reduces mistakes and helps users predict what will happen.",
+                         "remediation":  "Use task-specific labels such as Save settings, Connect account, Regenerate cache, or Import items.",
+                         "confidence":  "low"
+                     },
+                     {
+                         "severity":  "warning",
+                         "category":  "design",
+                         "rule":  "design.forms.control-without-label",
+                         "file":  "src/BadAdminPage.php",
+                         "line":  37,
+                         "message":  "Form control has no obvious label or accessible name nearby.",
+                         "why":  "Controls without names are difficult or impossible to use with assistive technology.",
+                         "remediation":  "Add a visible \u003clabel for=\"...\"\u003e or a justified aria-label/aria-labelledby association.",
+                         "confidence":  "medium"
+                     },
+                     {
+                         "severity":  "warning",
+                         "category":  "design",
+                         "rule":  "design.forms.placeholder-used-as-label",
+                         "file":  "src/BadAdminPage.php",
+                         "line":  37,
+                         "message":  "Placeholder appears to be used without a real label.",
+                         "why":  "Placeholder text disappears as users type and is not a reliable accessible name.",
+                         "remediation":  "Keep the placeholder optional and add a persistent visible label.",
+                         "confidence":  "medium"
+                     },
+                     {
+                         "severity":  "info",
+                         "category":  "design",
+                         "rule":  "design.forms.required-field-not-explained",
+                         "file":  "src/BadAdminPage.php",
+                         "line":  37,
+                         "message":  "Required field has no obvious visible or screen-reader explanation nearby.",
+                         "why":  "Users need to know which fields are required before submission.",
+                         "remediation":  "Add text or screen-reader text that explains required fields and keep server-side validation.",
+                         "confidence":  "low"
+                     },
+                     {
+                         "severity":  "warning",
+                         "category":  "design",
+                         "rule":  "design.forms.control-without-label",
+                         "file":  "src/BadAdminPage.php",
+                         "line":  38,
+                         "message":  "Form control has no obvious label or accessible name nearby.",
+                         "why":  "Controls without names are difficult or impossible to use with assistive technology.",
+                         "remediation":  "Add a visible \u003clabel for=\"...\"\u003e or a justified aria-label/aria-labelledby association.",
+                         "confidence":  "medium"
+                     },
+                     {
+                         "severity":  "info",
+                         "category":  "design",
+                         "rule":  "design.forms.choice-group-without-fieldset",
+                         "file":  "src/BadAdminPage.php",
+                         "line":  38,
+                         "message":  "Checkbox/radio control has no nearby fieldset/legend.",
+                         "why":  "Grouped choices need context so users understand what the selection controls.",
+                         "remediation":  "Wrap related checkbox/radio controls in a fieldset with a concise legend.",
+                         "confidence":  "low"
+                     },
+                     {
+                         "severity":  "info",
+                         "category":  "design",
+                         "rule":  "design.forms.error-not-programmatically-associated",
+                         "file":  "src/BadAdminPage.php",
+                         "line":  40,
+                         "message":  "Error message is not obviously associated with a field or live region.",
+                         "why":  "Users should be able to find and hear validation errors near the affected control.",
+                         "remediation":  "Connect field errors with aria-describedby and use role=\"alert\" or wp.a11y.speak() for dynamic errors when appropriate.",
+                         "confidence":  "low"
+                     },
+                     {
+                         "severity":  "warning",
+                         "category":  "design",
+                         "rule":  "design.forms.control-without-label",
+                         "file":  "src/BadFrontendOutput.php",
+                         "line":  15,
+                         "message":  "Form control has no obvious label or accessible name nearby.",
+                         "why":  "Controls without names are difficult or impossible to use with assistive technology.",
+                         "remediation":  "Add a visible \u003clabel for=\"...\"\u003e or a justified aria-label/aria-labelledby association.",
+                         "confidence":  "medium"
+                     },
+                     {
+                         "severity":  "warning",
+                         "category":  "design",
+                         "rule":  "design.forms.placeholder-used-as-label",
+                         "file":  "src/BadFrontendOutput.php",
+                         "line":  15,
+                         "message":  "Placeholder appears to be used without a real label.",
+                         "why":  "Placeholder text disappears as users type and is not a reliable accessible name.",
+                         "remediation":  "Keep the placeholder optional and add a persistent visible label.",
+                         "confidence":  "medium"
+                     },
+                     {
+                         "severity":  "warning",
+                         "category":  "design",
+                         "rule":  "design.frontend.global-css-selector",
+                         "file":  "assets/bad-frontend.css",
+                         "line":  4,
+                         "message":  "Frontend stylesheet contains a broad global selector.",
+                         "why":  "Plugin frontend CSS should not override theme typography, spacing, or controls globally.",
+                         "remediation":  "Scope selectors under the plugin wrapper or block class.",
+                         "confidence":  "medium"
+                     },
+                     {
+                         "severity":  "info",
+                         "category":  "design",
+                         "rule":  "design.frontend.hardcoded-font-family",
+                         "file":  "assets/bad-frontend.css",
+                         "line":  5,
+                         "message":  "Frontend CSS sets a font family.",
+                         "why":  "Plugin output should usually inherit the active theme typography unless branding is explicitly configured.",
+                         "remediation":  "Remove the hardcoded font-family or make it an opt-in branded setting.",
+                         "confidence":  "low"
+                     },
+                     {
+                         "severity":  "warning",
+                         "category":  "design",
+                         "rule":  "design.frontend.global-css-selector",
+                         "file":  "assets/bad-frontend.css",
+                         "line":  8,
+                         "message":  "Frontend stylesheet contains a broad global selector.",
+                         "why":  "Plugin frontend CSS should not override theme typography, spacing, or controls globally.",
+                         "remediation":  "Scope selectors under the plugin wrapper or block class.",
+                         "confidence":  "medium"
+                     },
+                     {
+                         "severity":  "warning",
+                         "category":  "design",
+                         "rule":  "design.frontend.form-without-labels",
+                         "file":  "src/BadFrontendOutput.php",
+                         "line":  15,
+                         "message":  "Frontend form has no obvious labels or accessible names.",
+                         "why":  "Public forms must be understandable to keyboard and screen-reader users.",
+                         "remediation":  "Add labels, descriptions, error states, and semantic form structure.",
+                         "confidence":  "medium"
+                     },
+                     {
+                         "severity":  "warning",
+                         "category":  "design",
+                         "rule":  "design.blocks.overloaded-inspector-controls",
+                         "file":  "blocks/bad-block/edit.js",
+                         "line":  1,
+                         "message":  "Block editor file contains many inspector controls (11).",
+                         "why":  "Overloaded sidebars hide the primary editing task and increase cognitive load.",
+                         "remediation":  "Move primary content controls onto the canvas, group advanced settings, and remove controls that can use block supports.",
+                         "confidence":  "medium"
+                     },
+                     {
+                         "severity":  "info",
+                         "category":  "design",
+                         "rule":  "design.blocks.no-obvious-placeholder",
+                         "file":  "blocks/bad-block/edit.js",
+                         "line":  1,
+                         "message":  "Block edit UI has no obvious Placeholder component.",
+                         "why":  "Blocks that require setup should explain the next step before content exists.",
+                         "remediation":  "Add a concise Placeholder with a primary setup action when the block starts empty or disconnected.",
+                         "confidence":  "low"
+                     },
+                     {
+                         "severity":  "info",
+                         "category":  "design",
+                         "rule":  "design.blocks.editor-string-not-i18n",
+                         "file":  "blocks/bad-block/edit.js",
+                         "line":  11,
+                         "message":  "Editor UI string is not obviously wrapped in @wordpress/i18n.",
+                         "why":  "Block editor UI text should be translation-ready.",
+                         "remediation":  "Wrap strings with __(), _x(), or related @wordpress/i18n helpers and use the plugin text domain.",
+                         "confidence":  "low"
+                     },
+                     {
+                         "severity":  "info",
+                         "category":  "design",
+                         "rule":  "design.blocks.editor-string-not-i18n",
+                         "file":  "blocks/bad-block/edit.js",
+                         "line":  17,
+                         "message":  "Editor UI string is not obviously wrapped in @wordpress/i18n.",
+                         "why":  "Block editor UI text should be translation-ready.",
+                         "remediation":  "Wrap strings with __(), _x(), or related @wordpress/i18n helpers and use the plugin text domain.",
+                         "confidence":  "low"
+                     },
+                     {
+                         "severity":  "warning",
+                         "category":  "design",
+                         "rule":  "design.blocks.control-without-label",
+                         "file":  "blocks/bad-block/edit.js",
+                         "line":  18,
+                         "message":  "Block editor control has no obvious label prop.",
+                         "why":  "Editor controls need labels for usability, accessibility, and translation context.",
+                         "remediation":  "Add a concise translatable label prop.",
+                         "confidence":  "medium"
+                     },
+                     {
+                         "severity":  "warning",
+                         "category":  "design",
+                         "rule":  "design.blocks.control-without-label",
+                         "file":  "blocks/bad-block/edit.js",
+                         "line":  19,
+                         "message":  "Block editor control has no obvious label prop.",
+                         "why":  "Editor controls need labels for usability, accessibility, and translation context.",
+                         "remediation":  "Add a concise translatable label prop.",
+                         "confidence":  "medium"
+                     },
+                     {
+                         "severity":  "warning",
+                         "category":  "design",
+                         "rule":  "design.blocks.control-without-label",
+                         "file":  "blocks/bad-block/edit.js",
+                         "line":  20,
+                         "message":  "Block editor control has no obvious label prop.",
+                         "why":  "Editor controls need labels for usability, accessibility, and translation context.",
+                         "remediation":  "Add a concise translatable label prop.",
+                         "confidence":  "medium"
+                     },
+                     {
+                         "severity":  "warning",
+                         "category":  "design",
+                         "rule":  "design.blocks.control-without-label",
+                         "file":  "blocks/bad-block/edit.js",
+                         "line":  21,
+                         "message":  "Block editor control has no obvious label prop.",
+                         "why":  "Editor controls need labels for usability, accessibility, and translation context.",
+                         "remediation":  "Add a concise translatable label prop.",
+                         "confidence":  "medium"
+                     },
+                     {
+                         "severity":  "info",
+                         "category":  "design",
+                         "rule":  "design.blocks.toolbar-button-without-label",
+                         "file":  "blocks/bad-block/edit.js",
+                         "line":  24,
+                         "message":  "ToolbarButton has no obvious accessible label/title.",
+                         "why":  "Icon-only toolbar controls need accessible names.",
+                         "remediation":  "Add a translatable label/title or aria-label that names the action.",
+                         "confidence":  "low"
+                     },
+                     {
+                         "severity":  "warning",
+                         "category":  "design",
+                         "rule":  "design.admin.global-css-selector",
+                         "file":  "assets/bad-admin.css",
+                         "line":  4,
+                         "message":  "Admin stylesheet contains a broad/global selector.",
+                         "why":  "Plugin admin CSS should not override unrelated WordPress admin screens.",
+                         "remediation":  "Scope selectors under the plugin admin root class.",
+                         "confidence":  "medium"
+                     },
+                     {
+                         "severity":  "warning",
+                         "category":  "design",
+                         "rule":  "design.admin.global-css-selector",
+                         "file":  "assets/bad-admin.css",
+                         "line":  8,
+                         "message":  "Admin stylesheet contains a broad/global selector.",
+                         "why":  "Plugin admin CSS should not override unrelated WordPress admin screens.",
+                         "remediation":  "Scope selectors under the plugin admin root class.",
+                         "confidence":  "medium"
+                     },
+                     {
+                         "severity":  "warning",
+                         "category":  "design",
+                         "rule":  "design.css.removes-focus-without-replacement",
+                         "file":  "assets/bad-admin.css",
+                         "line":  13,
+                         "message":  "CSS removes outline without an obvious replacement focus style.",
+                         "why":  "Visible focus is required for keyboard users.",
+                         "remediation":  "Add a strong :focus or :focus-visible style when removing the browser default.",
+                         "confidence":  "high"
+                     },
+                     {
+                         "severity":  "info",
+                         "category":  "design",
+                         "rule":  "design.css.fixed-width-review",
+                         "file":  "assets/bad-admin.css",
+                         "line":  17,
+                         "message":  "CSS uses a fixed pixel width.",
+                         "why":  "Fixed widths can break mobile admin, narrow editor sidebars, or theme layouts.",
+                         "remediation":  "Use max-width, minmax(), flex/grid, or responsive constraints where possible.",
+                         "confidence":  "low"
+                     },
+                     {
+                         "severity":  "info",
+                         "category":  "design",
+                         "rule":  "design.css.physical-direction-property",
+                         "file":  "assets/bad-admin.css",
+                         "line":  18,
+                         "message":  "CSS uses physical left/right properties.",
+                         "why":  "Physical direction assumptions can make RTL layouts harder to support.",
+                         "remediation":  "Prefer logical properties such as margin-inline-start, inset-inline-end, or text-align: start where practical.",
+                         "confidence":  "low"
+                     },
+                     {
+                         "severity":  "info",
+                         "category":  "design",
+                         "rule":  "design.css.motion-without-reduced-motion",
+                         "file":  "assets/bad-admin.css",
+                         "line":  1,
+                         "message":  "Stylesheet uses animation/transition without a prefers-reduced-motion branch.",
+                         "why":  "Some users prefer reduced motion, and admin UI should respect that preference.",
+                         "remediation":  "Add a @media (prefers-reduced-motion: reduce) override when motion is not essential.",
+                         "confidence":  "low"
+                     },
+                     {
+                         "severity":  "info",
+                         "category":  "design",
+                         "rule":  "design.css.fixed-width-review",
+                         "file":  "assets/bad-frontend.css",
+                         "line":  13,
+                         "message":  "CSS uses a fixed pixel width.",
+                         "why":  "Fixed widths can break mobile admin, narrow editor sidebars, or theme layouts.",
+                         "remediation":  "Use max-width, minmax(), flex/grid, or responsive constraints where possible.",
+                         "confidence":  "low"
+                     },
+                     {
+                         "severity":  "info",
+                         "category":  "design",
+                         "rule":  "design.css.physical-direction-property",
+                         "file":  "assets/bad-frontend.css",
+                         "line":  14,
+                         "message":  "CSS uses physical left/right properties.",
+                         "why":  "Physical direction assumptions can make RTL layouts harder to support.",
+                         "remediation":  "Prefer logical properties such as margin-inline-start, inset-inline-end, or text-align: start where practical.",
+                         "confidence":  "low"
+                     }
+                 ],
+    "design":  {
+                   "limitation":  "Design findings are static heuristics. They cannot fully judge visual quality, contrast, responsiveness, usability, or real WordPress admin/editor behavior; verify with manual UI review and assistive-technology checks."
+               }
+}

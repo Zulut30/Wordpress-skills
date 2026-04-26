@@ -1,0 +1,40 @@
+<?php
+/**
+ * Admin page layout template for {{PLUGIN_NAME}}.
+ *
+ * Placeholders: {{PLUGIN_SLUG}}, {{PLUGIN_NAME}}, {{TEXT_DOMAIN}}, {{VENDOR_NAMESPACE}},
+ * {{PLUGIN_VERSION}}, {{ADMIN_PAGE_SLUG}}, {{ROOT_CLASS}}.
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+if ( ! current_user_can( 'manage_options' ) ) {
+	wp_die( esc_html__( 'You do not have permission to access this page.', '{{TEXT_DOMAIN}}' ) );
+}
+
+$status_message = isset( $status_message ) ? (string) $status_message : '';
+?>
+<div class="wrap {{ROOT_CLASS}}">
+	<h1><?php echo esc_html__( '{{PLUGIN_NAME}}', '{{TEXT_DOMAIN}}' ); ?></h1>
+
+	<p class="description">
+		<?php echo esc_html__( 'Manage the settings and status for this plugin.', '{{TEXT_DOMAIN}}' ); ?>
+	</p>
+
+	<?php if ( '' !== $status_message ) : ?>
+		<div class="notice notice-success">
+			<p><?php echo esc_html( $status_message ); ?></p>
+		</div>
+	<?php endif; ?>
+
+	<div class="{{ROOT_CLASS}}__header-actions">
+		<a class="button button-primary" href="<?php echo esc_url( admin_url( 'admin.php?page={{ADMIN_PAGE_SLUG}}&action=setup' ) ); ?>">
+			<?php echo esc_html__( 'Start setup', '{{TEXT_DOMAIN}}' ); ?>
+		</a>
+	</div>
+
+	<section class="{{ROOT_CLASS}}__section" aria-labelledby="{{PLUGIN_SLUG}}-overview-title">
+		<h2 id="{{PLUGIN_SLUG}}-overview-title"><?php echo esc_html__( 'Overview', '{{TEXT_DOMAIN}}' ); ?></h2>
+		<p><?php echo esc_html__( 'Use this section for status, next actions, and short guidance.', '{{TEXT_DOMAIN}}' ); ?></p>
+	</section>
+</div>

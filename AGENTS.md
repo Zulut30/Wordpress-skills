@@ -13,6 +13,8 @@ npm run test:audit
 npm run audit:fixture
 npm run performance:audit
 npm run performance:audit:json
+npm run design:audit
+npm run design:audit:json
 npm run smoke
 ```
 
@@ -38,3 +40,19 @@ Treat `audit-plugin.mjs` findings as triage signals, not proof of security. Veri
 - Avoid large autoloaded options.
 - Do not call `flush_rewrite_rules()` on normal requests.
 - Treat static scanner output as heuristic.
+
+## Design Defaults
+
+- Prefer WordPress-native UI in wp-admin.
+- Do not add heavy UI frameworks by default.
+- Use clear labels and accessible form structure.
+- Do not use placeholder text as a label.
+- Design empty, loading, success, error, and edge states.
+- Keep one clear primary action per screen/section.
+- Use progressive disclosure for advanced settings.
+- Scope admin and frontend CSS.
+- Frontend output should inherit theme styles where practical.
+- Never remove security checks or escaping for visual polish.
+- UI text must be i18n-ready.
+- Consider keyboard navigation, focus, contrast, RTL, and text expansion.
+- Treat design scanner output as heuristic.

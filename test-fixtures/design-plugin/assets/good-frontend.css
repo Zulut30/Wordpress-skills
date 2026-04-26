@@ -1,0 +1,9 @@
+.design-fixture-card {
+	max-width: 100%;
+	margin-block: 1.5rem;
+}
+
+.design-fixture-card a:focus-visible {
+	outline: 2px solid currentColor;
+	outline-offset: 2px;
+}

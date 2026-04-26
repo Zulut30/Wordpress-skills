@@ -1,0 +1,40 @@
+<?php
+/**
+ * Simple onboarding step template for {{PLUGIN_NAME}}.
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+$current_step = isset( $current_step ) ? max( 1, absint( $current_step ) ) : 1;
+$total_steps  = isset( $total_steps ) ? max( 1, absint( $total_steps ) ) : 3;
+?>
+<section class="{{ROOT_CLASS}}__onboarding" aria-labelledby="{{PLUGIN_SLUG}}-setup-title">
+	<p class="{{ROOT_CLASS}}__progress">
+		<?php
+		printf(
+			esc_html__( 'Step %1$d of %2$d', '{{TEXT_DOMAIN}}' ),
+			esc_html( (string) $current_step ),
+			esc_html( (string) $total_steps )
+		);
+		?>
+	</p>
+	<h1 id="{{PLUGIN_SLUG}}-setup-title"><?php echo esc_html__( 'Set up {{PLUGIN_NAME}}', '{{TEXT_DOMAIN}}' ); ?></h1>
+	<p><?php echo esc_html__( 'Configure the essentials now. You can change these settings later.', '{{TEXT_DOMAIN}}' ); ?></p>
+
+	<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+		<?php wp_nonce_field( '{{PLUGIN_SLUG}}_onboarding' ); ?>
+		<input type="hidden" name="action" value="{{PLUGIN_SLUG}}_onboarding" />
+
+		<p class="{{ROOT_CLASS}}__actions">
+			<button type="submit" class="button button-primary">
+				<?php echo esc_html__( 'Continue setup', '{{TEXT_DOMAIN}}' ); ?>
+			</button>
+			<a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page={{ADMIN_PAGE_SLUG}}&step=' . max( 1, $current_step - 1 ) ) ); ?>">
+				<?php echo esc_html__( 'Back', '{{TEXT_DOMAIN}}' ); ?>
+			</a>
+			<a class="button button-link" href="<?php echo esc_url( admin_url( 'admin.php?page={{ADMIN_PAGE_SLUG}}&skip_setup=1' ) ); ?>">
+				<?php echo esc_html__( 'Skip for now', '{{TEXT_DOMAIN}}' ); ?>
+			</a>
+		</p>
+	</form>
+</section>

@@ -1,0 +1,20 @@
+/**
+ * Fixture only. Do not copy into production.
+ */
+body {
+	font-family: Arial, sans-serif;
+}
+
+button {
+	border-radius: 99px !important;
+}
+
+.bad-design button:focus {
+	outline: none;
+}
+
+.bad-design-panel {
+	width: 980px;
+	margin-left: 40px;
+	transition: all 200ms ease;
+}

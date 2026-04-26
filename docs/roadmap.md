@@ -21,6 +21,7 @@ Experimental or version-dependent:
 - live WordPress runtime testing;
 - broad security scanner coverage.
 - static performance checks are heuristic and do not replace profiling.
+- static design/UX checks are heuristic and do not replace manual visual, keyboard, and assistive-technology review.
 
 ## v0.2.0 Candidates
 
@@ -37,6 +38,15 @@ Experimental or version-dependent:
 - Optional benchmark harness for sample plugins without publishing fake benchmark claims.
 - More precise false-positive handling in `audit-plugin.mjs` performance rules.
 - Docs refresh against current WordPress performance APIs.
+- Richer admin UI examples for settings pages, dashboards, notices, and onboarding flows.
+- More Gutenberg block UI patterns for placeholders, toolbar actions, InspectorControls, and mobile editor constraints.
+- Screenshot-based manual review workflow for wp-admin, editor, and frontend output.
+- Optional Playwright visual smoke tests if the project adds browser-test infrastructure.
+- Figma/WordPress Design System notes that clearly mark experimental packages and current-doc verification needs.
+- Better accessibility fixture coverage for labels, focus, field errors, modals, live regions, and keyboard flows.
+- Contrast helper/checker where feasible without overclaiming static certainty.
+- Support for design audit screenshots as optional evidence.
+- More frontend theme-compatibility examples for blocks, shortcodes, and widgets.
 
 ## Collaboration Entry Points
 

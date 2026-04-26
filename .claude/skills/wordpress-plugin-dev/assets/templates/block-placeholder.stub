@@ -1,0 +1,37 @@
+import { Placeholder, Button, Spinner, Notice } from '@wordpress/components';
+import { __ } from '@wordpress/i18n';
+
+export default function {{BLOCK_NAME}}Placeholder( { isLoading, error, onSetup } ) {
+	if ( isLoading ) {
+		return (
+			<Placeholder label={ __( '{{PLUGIN_NAME}}', '{{TEXT_DOMAIN}}' ) }>
+				<Spinner />
+				<span>{ __( 'Loading settings...', '{{TEXT_DOMAIN}}' ) }</span>
+			</Placeholder>
+		);
+	}
+
+	if ( error ) {
+		return (
+			<Placeholder label={ __( '{{PLUGIN_NAME}}', '{{TEXT_DOMAIN}}' ) }>
+				<Notice status="error" isDismissible={ false }>
+					{ __( 'The block could not load. Check the plugin settings and try again.', '{{TEXT_DOMAIN}}' ) }
+				</Notice>
+				<Button variant="primary" onClick={ onSetup }>
+					{ __( 'Open settings', '{{TEXT_DOMAIN}}' ) }
+				</Button>
+			</Placeholder>
+		);
+	}
+
+	return (
+		<Placeholder
+			label={ __( '{{PLUGIN_NAME}}', '{{TEXT_DOMAIN}}' ) }
+			instructions={ __( 'Connect or configure the plugin before this block can display content.', '{{TEXT_DOMAIN}}' ) }
+		>
+			<Button variant="primary" onClick={ onSetup }>
+				{ __( 'Configure block', '{{TEXT_DOMAIN}}' ) }
+			</Button>
+		</Placeholder>
+	);
+}

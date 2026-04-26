@@ -1,0 +1,14 @@
+{
+  "name": "wordpress-plugin-dev-skill/design-fixture-plugin",
+  "description": "Fixture plugin for design audit checks.",
+  "type": "wordpress-plugin",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "DesignFixture\\": "src/"
+    }
+  },
+  "scripts": {
+    "lint": "phpcs"
+  }
+}

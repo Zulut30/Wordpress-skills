@@ -17,7 +17,7 @@ const EXCLUDED_DIRS = new Set([
 ]);
 
 const SAFE_OUTPUT_RE =
-  /\b(esc_html|esc_attr|esc_url|esc_js|esc_textarea|esc_xml|wp_kses|wp_kses_post|wp_json_encode|get_block_wrapper_attributes|checked|selected|disabled|readonly)\s*\(/;
+  /\b(esc_html|esc_attr|esc_url|esc_js|esc_textarea|esc_xml|esc_html__|esc_attr__|esc_html_e|esc_attr_e|wp_kses|wp_kses_post|wp_json_encode|get_block_wrapper_attributes|checked|selected|disabled|readonly)\s*\(/;
 
 const SANITIZE_OR_VALIDATE_RE =
   /\b(sanitize_[a-z0-9_]+|rest_sanitize_[a-z0-9_]+|rest_validate_[a-z0-9_]+|validate_[a-z0-9_]+|absint|intval|floatval|boolval|filter_input|wp_unslash|map_deep|preg_match|wp_verify_nonce|check_admin_referer|check_ajax_referer)\s*\(/;
@@ -30,12 +30,15 @@ const PERFORMANCE_SCOPE_RE =
   /\b(is_admin|wp_doing_ajax|REST_REQUEST|get_current_screen|is_singular|is_page|is_post_type_archive|has_shortcode|has_block|is_main_query|current_user_can|wp_is_serving_rest_request)\s*\(/;
 const CACHE_RE = /\b(get_transient|set_transient|wp_cache_get|wp_cache_set)\s*\(/;
 const BATCH_RE = /\b(batch|limit|offset|paged|per_page|posts_per_page|numberposts)\b/i;
+const BROAD_CSS_SELECTOR_RE = /^\s*(body|html|h[1-6]|p|a|button|input|select|textarea|table|tr|td|th|ul|ol|li|\*)\s*[{,]/i;
 
 export function parseArgs(argv) {
   const args = [...argv];
   const json = args.includes('--json');
   const performance = args.includes('--performance') || args.includes('--performance-only');
   const performanceOnly = args.includes('--performance-only');
+  const design = args.includes('--design') || args.includes('--design-only');
+  const designOnly = args.includes('--design-only');
   const help = args.includes('--help') || args.includes('-h');
   const failOnArg = args.find((arg) => arg.startsWith('--fail-on='));
   const failOn = failOnArg ? failOnArg.split('=')[1] : 'error';
@@ -44,6 +47,8 @@ export function parseArgs(argv) {
       arg !== '--json' &&
       arg !== '--performance' &&
       arg !== '--performance-only' &&
+      arg !== '--design' &&
+      arg !== '--design-only' &&
       arg !== '--help' &&
       arg !== '-h' &&
       !arg.startsWith('--fail-on=')
@@ -53,6 +58,8 @@ export function parseArgs(argv) {
     json,
     performance,
     performanceOnly,
+    design,
+    designOnly,
     failOn: ['error', 'warning', 'none'].includes(failOn) ? failOn : 'error',
     help,
     target: filtered[0] ? resolve(filtered[0]) : null,
@@ -1199,6 +1206,592 @@ function auditPerformanceHeuristics(report, files, phpFiles) {
   auditPerformanceCron(report, phpFiles);
 }
 
+function addDesignFinding(report, severity, rule, file, line, message, why, remediation, confidence = 'medium') {
+  addFinding(report, severity, rule, file, line, message, remediation, {
+    category: 'design',
+    why,
+    confidence,
+  });
+}
+
+function isAdminUiFile(file, content) {
+  return (
+    /admin|settings|dashboard|notice|onboard/i.test(file) ||
+    /\b(add_menu_page|add_submenu_page|register_setting|settings_fields|admin_enqueue_scripts)\s*\(/.test(content)
+  );
+}
+
+function lineHasTranslatableString(line) {
+  return /(__|_x|_n|sprintf|esc_html__|esc_attr__)\s*\(/.test(line);
+}
+
+function hasNearbyLabel(lines, index) {
+  const nearby = nearbyText(lines, index, 8, 3);
+  return /<label\b|aria-label\s*=|aria-labelledby\s*=|<fieldset\b|<legend\b/i.test(nearby);
+}
+
+function auditDesignAdmin(report, phpFiles) {
+  for (const file of phpFiles) {
+    const content = readText(file);
+    if (!isAdminUiFile(file, content)) {
+      continue;
+    }
+
+    const lines = content.split(/\r?\n/);
+
+    if (/\b(add_menu_page)\s*\(/.test(content)) {
+      addDesignFinding(
+        report,
+        'info',
+        'design.admin.top-level-menu-review',
+        file,
+        lineNumberForIndex(content, content.search(/\badd_menu_page\s*\(/)),
+        'Plugin registers a top-level admin menu.',
+        'Top-level menus add navigation weight and should be reserved for primary plugin workflows.',
+        'Confirm the feature deserves top-level placement; otherwise prefer an appropriate submenu such as Settings, Tools, or a product-specific parent.',
+        'low'
+      );
+    }
+
+    if (/<form\b/i.test(content) && !/\b(settings_fields|wp_nonce_field|check_admin_referer)\s*\(/.test(content)) {
+      addDesignFinding(
+        report,
+        'warning',
+        'design.admin.form-without-obvious-nonce-flow',
+        file,
+        lineNumberForIndex(content, content.search(/<form\b/i)),
+        'Admin form has no obvious Settings API or nonce flow.',
+        'Good UI must preserve secure save behavior and clear state-changing intent.',
+        'Use Settings API with settings_fields() or add wp_nonce_field() plus a capability and nonce check in the handler.',
+        'medium'
+      );
+    }
+
+    if (/<form\b/i.test(content) && !/class\s*=\s*["'][^"']*\bwrap\b/.test(content)) {
+      addDesignFinding(
+        report,
+        'info',
+        'design.admin.page-without-wrap',
+        file,
+        lineNumberForIndex(content, content.search(/<form\b/i)),
+        'Admin page markup has no obvious .wrap container.',
+        'Classic WordPress admin pages feel more native and inherit spacing when using the standard wrap structure.',
+        'Render the page inside <div class="wrap plugin-root-class"> unless a custom app shell is explicitly justified.',
+        'low'
+      );
+    }
+
+    if (isAdminUiFile(file, content) && /<form\b|class\s*=\s*["'][^"']*\bwrap\b/.test(content) && !/<h1\b/i.test(content)) {
+      addDesignFinding(
+        report,
+        'info',
+        'design.admin.missing-page-heading',
+        file,
+        1,
+        'Admin UI file has no obvious page h1.',
+        'A clear page heading anchors the screen for visual, keyboard, and screen-reader users.',
+        'Add one escaped, translatable <h1> that describes the current admin screen.',
+        'low'
+      );
+    }
+
+    lines.forEach((line, index) => {
+      const lineNumber = index + 1;
+      const window = nearbyText(lines, index, 8, 8);
+
+      if (/add_action\s*\(\s*['"]admin_enqueue_scripts['"]/.test(line) && !/\$hook_suffix|get_current_screen\s*\(/.test(window + content)) {
+        addDesignFinding(
+          report,
+          'warning',
+          'design.admin.assets-not-screen-scoped',
+          file,
+          lineNumber,
+          'Admin assets are enqueued without an obvious screen check.',
+          'Unscoped admin CSS/JS can alter unrelated WordPress screens and slow the admin experience.',
+          'Gate admin assets by $hook_suffix or get_current_screen()->id.',
+          'medium'
+        );
+      }
+
+      if (/\b(submit_button)\s*\(\s*['"](?:Submit|Go|OK)['"]|<button[^>]*>\s*(?:Submit|Go|OK)\s*<\/button>|value\s*=\s*['"](?:Submit|Go|OK)['"]/i.test(line)) {
+        addDesignFinding(
+          report,
+          'info',
+          'design.admin.vague-action-label',
+          file,
+          lineNumber,
+          'Action label is vague.',
+          'Specific button text reduces mistakes and helps users predict what will happen.',
+          'Use task-specific labels such as Save settings, Connect account, Regenerate cache, or Import items.',
+          'low'
+        );
+      }
+
+      if (/notice(?:-|_)(?:success|error|warning|info)|class\s*=\s*["'][^"']*\bnotice\b/.test(line) && /\becho\b/.test(line) && !SAFE_OUTPUT_RE.test(line)) {
+        addDesignFinding(
+          report,
+          'warning',
+          'design.admin.notice-output-not-escaped',
+          file,
+          lineNumber,
+          'Admin notice appears to echo content without obvious escaping.',
+          'Notices are high-visibility UI and often include request or option data.',
+          'Escape notice text with esc_html(), wp_kses_post(), or another context-appropriate escaping function.',
+          'medium'
+        );
+      }
+
+      if (/is-dismissible/.test(line) && !/dismiss|preference|user_meta|option/i.test(content)) {
+        addDesignFinding(
+          report,
+          'info',
+          'design.admin.dismissible-notice-without-persistence',
+          file,
+          lineNumber,
+          'Dismissible notice has no obvious persistence plan.',
+          'Dismissed notices that return unexpectedly create admin noise and reduce trust.',
+          'Persist dismissal when the notice is not tied to a transient event.',
+          'low'
+        );
+      }
+    });
+  }
+}
+
+function auditDesignForms(report, files) {
+  const formFiles = files.filter((file) => /\.(php|html|js|jsx|ts|tsx)$/i.test(file));
+
+  for (const file of formFiles) {
+    const content = readText(file);
+    if (!/<(?:input|select|textarea)\b|<(?:TextControl|SelectControl|ToggleControl|CheckboxControl|RadioControl)\b/.test(content)) {
+      continue;
+    }
+
+    const lines = content.split(/\r?\n/);
+
+    lines.forEach((line, index) => {
+      const lineNumber = index + 1;
+      const window = nearbyText(lines, index, 6, 6);
+
+      if (/<(?:input|select|textarea)\b/i.test(line) && !hasNearbyLabel(lines, index)) {
+        addDesignFinding(
+          report,
+          'warning',
+          'design.forms.control-without-label',
+          file,
+          lineNumber,
+          'Form control has no obvious label or accessible name nearby.',
+          'Controls without names are difficult or impossible to use with assistive technology.',
+          'Add a visible <label for="..."> or a justified aria-label/aria-labelledby association.',
+          'medium'
+        );
+      }
+
+      if (/<(?:input|textarea)\b/i.test(line) && /placeholder\s*=/.test(line) && !hasNearbyLabel(lines, index)) {
+        addDesignFinding(
+          report,
+          'warning',
+          'design.forms.placeholder-used-as-label',
+          file,
+          lineNumber,
+          'Placeholder appears to be used without a real label.',
+          'Placeholder text disappears as users type and is not a reliable accessible name.',
+          'Keep the placeholder optional and add a persistent visible label.',
+          'medium'
+        );
+      }
+
+      if (/type\s*=\s*["'](?:checkbox|radio)["']/.test(line) && !/<fieldset\b|<legend\b/i.test(window)) {
+        addDesignFinding(
+          report,
+          'info',
+          'design.forms.choice-group-without-fieldset',
+          file,
+          lineNumber,
+          'Checkbox/radio control has no nearby fieldset/legend.',
+          'Grouped choices need context so users understand what the selection controls.',
+          'Wrap related checkbox/radio controls in a fieldset with a concise legend.',
+          'low'
+        );
+      }
+
+      if (/class\s*=\s*["'][^"']*(error|invalid|notice-error)/i.test(line) && !/aria-describedby|role\s*=\s*["']alert|wp\.a11y|speak\(/.test(window)) {
+        addDesignFinding(
+          report,
+          'info',
+          'design.forms.error-not-programmatically-associated',
+          file,
+          lineNumber,
+          'Error message is not obviously associated with a field or live region.',
+          'Users should be able to find and hear validation errors near the affected control.',
+          'Connect field errors with aria-describedby and use role="alert" or wp.a11y.speak() for dynamic errors when appropriate.',
+          'low'
+        );
+      }
+
+      if (/<(?:input|select|textarea)\b/i.test(line) && /required\b/.test(line) && !/(required|aria-required|screen-reader-text|\*)/i.test(window.replace(line, ''))) {
+        addDesignFinding(
+          report,
+          'info',
+          'design.forms.required-field-not-explained',
+          file,
+          lineNumber,
+          'Required field has no obvious visible or screen-reader explanation nearby.',
+          'Users need to know which fields are required before submission.',
+          'Add text or screen-reader text that explains required fields and keep server-side validation.',
+          'low'
+        );
+      }
+    });
+  }
+}
+
+function auditDesignFrontend(report, files) {
+  const candidateFiles = files.filter((file) => /\.(php|html|css|scss)$/i.test(file));
+
+  for (const file of candidateFiles) {
+    const content = readText(file);
+    const lowerPath = file.toLowerCase();
+    const isFrontend = /frontend|public|shortcode|widget|block|render|view/.test(lowerPath) && !/admin/.test(lowerPath);
+    const lines = content.split(/\r?\n/);
+
+    if (/\.(css|scss)$/i.test(file)) {
+      lines.forEach((line, index) => {
+        const lineNumber = index + 1;
+
+        if (isFrontend && BROAD_CSS_SELECTOR_RE.test(line)) {
+          addDesignFinding(
+            report,
+            'warning',
+            'design.frontend.global-css-selector',
+            file,
+            lineNumber,
+            'Frontend stylesheet contains a broad global selector.',
+            'Plugin frontend CSS should not override theme typography, spacing, or controls globally.',
+            'Scope selectors under the plugin wrapper or block class.',
+            'medium'
+          );
+        }
+
+        if (isFrontend && /font-family\s*:/.test(line)) {
+          addDesignFinding(
+            report,
+            'info',
+            'design.frontend.hardcoded-font-family',
+            file,
+            lineNumber,
+            'Frontend CSS sets a font family.',
+            'Plugin output should usually inherit the active theme typography unless branding is explicitly configured.',
+            'Remove the hardcoded font-family or make it an opt-in branded setting.',
+            'low'
+          );
+        }
+      });
+    }
+
+    if (isFrontend && /<form\b/i.test(content) && !/<label\b|aria-label\s*=|aria-labelledby\s*=/i.test(content)) {
+      addDesignFinding(
+        report,
+        'warning',
+        'design.frontend.form-without-labels',
+        file,
+        lineNumberForIndex(content, content.search(/<form\b/i)),
+        'Frontend form has no obvious labels or accessible names.',
+        'Public forms must be understandable to keyboard and screen-reader users.',
+        'Add labels, descriptions, error states, and semantic form structure.',
+        'medium'
+      );
+    }
+
+    if (isFrontend && /style\s*=\s*["'][^"']*(?:<\?php\s+echo|\$\w+)/.test(content)) {
+      addDesignFinding(
+        report,
+        'warning',
+        'design.frontend.inline-style-from-dynamic-data',
+        file,
+        lineNumberForIndex(content, content.search(/style\s*=/)),
+        'Frontend inline style appears to include dynamic data.',
+        'Inline user-controlled styles can create sanitization, maintainability, and theme-compatibility problems.',
+        'Sanitize allowed style values strictly, prefer classes, and escape attributes.',
+        'medium'
+      );
+    }
+
+    if (isFrontend && (content.match(/<div\b/g) || []).length >= 8 && !/<(?:section|article|header|footer|nav|main|ul|ol|form)\b/i.test(content)) {
+      addDesignFinding(
+        report,
+        'info',
+        'design.frontend.div-heavy-markup',
+        file,
+        1,
+        'Frontend output appears div-heavy with little semantic structure.',
+        'Semantic HTML improves accessibility, theme styling, and maintainability.',
+        'Use section/article/list/form/headings where they match the content meaning.',
+        'low'
+      );
+    }
+  }
+}
+
+function auditDesignGutenberg(report, files) {
+  const blockJsFiles = files.filter((file) => /[\\/]blocks[\\/].+\.(js|jsx|ts|tsx)$/.test(file));
+
+  for (const file of blockJsFiles) {
+    const content = readText(file);
+    const lines = content.split(/\r?\n/);
+    const controlCount = (content.match(/<(?:TextControl|TextareaControl|ToggleControl|SelectControl|RangeControl|ColorPalette|PanelBody|ToolsPanelItem)\b/g) || []).length;
+
+    if (/InspectorControls/.test(content) && controlCount >= 10) {
+      addDesignFinding(
+        report,
+        'warning',
+        'design.blocks.overloaded-inspector-controls',
+        file,
+        1,
+        `Block editor file contains many inspector controls (${controlCount}).`,
+        'Overloaded sidebars hide the primary editing task and increase cognitive load.',
+        'Move primary content controls onto the canvas, group advanced settings, and remove controls that can use block supports.',
+        'medium'
+      );
+    }
+
+    if (!/Placeholder/.test(content) && /attributes|setAttributes|InspectorControls/.test(content)) {
+      addDesignFinding(
+        report,
+        'info',
+        'design.blocks.no-obvious-placeholder',
+        file,
+        1,
+        'Block edit UI has no obvious Placeholder component.',
+        'Blocks that require setup should explain the next step before content exists.',
+        'Add a concise Placeholder with a primary setup action when the block starts empty or disconnected.',
+        'low'
+      );
+    }
+
+    lines.forEach((line, index) => {
+      const lineNumber = index + 1;
+      const componentWindow = callWindow(lines, index, 60);
+
+      if (/<(?:TextControl|TextareaControl|ToggleControl|SelectControl|RangeControl)\b/.test(line) && !/label\s*=/.test(componentWindow)) {
+        addDesignFinding(
+          report,
+          'warning',
+          'design.blocks.control-without-label',
+          file,
+          lineNumber,
+          'Block editor control has no obvious label prop.',
+          'Editor controls need labels for usability, accessibility, and translation context.',
+          'Add a concise translatable label prop.',
+          'medium'
+        );
+      }
+
+      if (/(?:label|title|help|text|children)\s*=\s*["'][A-Z][^"']+["']/.test(line) && !lineHasTranslatableString(line)) {
+        addDesignFinding(
+          report,
+          'info',
+          'design.blocks.editor-string-not-i18n',
+          file,
+          lineNumber,
+          'Editor UI string is not obviously wrapped in @wordpress/i18n.',
+          'Block editor UI text should be translation-ready.',
+          'Wrap strings with __(), _x(), or related @wordpress/i18n helpers and use the plugin text domain.',
+          'low'
+        );
+      }
+
+      if (/<ToolbarButton\b/.test(line) && !/(label|title|aria-label)\s*=/.test(componentWindow)) {
+        addDesignFinding(
+          report,
+          'info',
+          'design.blocks.toolbar-button-without-label',
+          file,
+          lineNumber,
+          'ToolbarButton has no obvious accessible label/title.',
+          'Icon-only toolbar controls need accessible names.',
+          'Add a translatable label/title or aria-label that names the action.',
+          'low'
+        );
+      }
+
+      if (/<button\b/i.test(line) && !/(aria-label|aria-labelledby|>\s*{?\s*__\(|>\s*[A-Za-z])/.test(componentWindow)) {
+        addDesignFinding(
+          report,
+          'warning',
+          'design.blocks.custom-button-without-accessible-name',
+          file,
+          lineNumber,
+          'Custom button has no obvious accessible name.',
+          'Buttons need visible text or an accessible name to be operable by assistive technology.',
+          'Use @wordpress/components Button with translatable text or add a justified aria-label.',
+          'medium'
+        );
+      }
+    });
+  }
+}
+
+function auditDesignDynamicUi(report, files) {
+  const uiFiles = files.filter((file) => /\.(js|jsx|ts|tsx|php)$/i.test(file));
+
+  for (const file of uiFiles) {
+    const content = readText(file);
+    const lines = content.split(/\r?\n/);
+
+    lines.forEach((line, index) => {
+      const lineNumber = index + 1;
+      const window = nearbyText(lines, index, 6, 6);
+
+      if (/\b(textContent|innerText|innerHTML)\s*=/.test(line) && !/(wp\.a11y|speak\s*\(|aria-live|role\s*=\s*["']status)/.test(content)) {
+        addDesignFinding(
+          report,
+          'info',
+          'design.dynamic-update-without-announcement',
+          file,
+          lineNumber,
+          'Dynamic UI update has no obvious screen-reader announcement.',
+          'Important async status changes should be perceivable beyond visual changes.',
+          'Use @wordpress/a11y speak(), wp.a11y.speak(), or an appropriate live region for meaningful updates.',
+          'low'
+        );
+      }
+
+      if (/\b(error|exception)\.message\b|stack trace|var_dump\s*\(|print_r\s*\(/i.test(line) && !/debug|fixture/i.test(window)) {
+        addDesignFinding(
+          report,
+          'warning',
+          'design.errors.raw-error-exposed',
+          file,
+          lineNumber,
+          'Raw error details appear in user-facing UI.',
+          'Raw errors can confuse users and may expose internals.',
+          'Show a safe human-readable message and log detailed diagnostics privately.',
+          'medium'
+        );
+      }
+    });
+  }
+}
+
+function auditDesignCss(report, files) {
+  const cssFiles = files.filter((file) => /\.(css|scss)$/i.test(file));
+
+  for (const file of cssFiles) {
+    const content = readText(file);
+    const lines = content.split(/\r?\n/);
+    const importantCount = (content.match(/!important/g) || []).length;
+    const hasMotion = /\b(animation|transition)\s*:/.test(content);
+
+    if (/admin/i.test(file)) {
+      lines.forEach((line, index) => {
+        if (BROAD_CSS_SELECTOR_RE.test(line)) {
+          addDesignFinding(
+            report,
+            'warning',
+            'design.admin.global-css-selector',
+            file,
+            index + 1,
+            'Admin stylesheet contains a broad/global selector.',
+            'Plugin admin CSS should not override unrelated WordPress admin screens.',
+            'Scope selectors under the plugin admin root class.',
+            'medium'
+          );
+        }
+      });
+    }
+
+    if (importantCount >= 4) {
+      addDesignFinding(
+        report,
+        'info',
+        'design.css.excessive-important',
+        file,
+        1,
+        `Stylesheet contains ${importantCount} !important declarations.`,
+        'Heavy !important usage usually indicates specificity conflicts and can break themes/admin styles.',
+        'Reduce specificity conflicts by scoping CSS and using predictable component classes.',
+        'low'
+      );
+    }
+
+    lines.forEach((line, index) => {
+      const lineNumber = index + 1;
+      const window = nearbyText(lines, index, 2, 4);
+
+      if (/outline\s*:\s*none|outline\s*:\s*0/.test(line) && !/focus-visible|box-shadow|outline\s*:/i.test(window.replace(line, ''))) {
+        addDesignFinding(
+          report,
+          'warning',
+          'design.css.removes-focus-without-replacement',
+          file,
+          lineNumber,
+          'CSS removes outline without an obvious replacement focus style.',
+          'Visible focus is required for keyboard users.',
+          'Add a strong :focus or :focus-visible style when removing the browser default.',
+          'high'
+        );
+      }
+
+      if (/\b(left|right|margin-left|margin-right|padding-left|padding-right)\s*:/.test(line)) {
+        addDesignFinding(
+          report,
+          'info',
+          'design.css.physical-direction-property',
+          file,
+          lineNumber,
+          'CSS uses physical left/right properties.',
+          'Physical direction assumptions can make RTL layouts harder to support.',
+          'Prefer logical properties such as margin-inline-start, inset-inline-end, or text-align: start where practical.',
+          'low'
+        );
+      }
+
+      if (/(^|[;{\s])width\s*:\s*(?:\d{3,}|[4-9]\d)px/.test(line)) {
+        addDesignFinding(
+          report,
+          'info',
+          'design.css.fixed-width-review',
+          file,
+          lineNumber,
+          'CSS uses a fixed pixel width.',
+          'Fixed widths can break mobile admin, narrow editor sidebars, or theme layouts.',
+          'Use max-width, minmax(), flex/grid, or responsive constraints where possible.',
+          'low'
+        );
+      }
+    });
+
+    if (hasMotion && !/prefers-reduced-motion/.test(content)) {
+      addDesignFinding(
+        report,
+        'info',
+        'design.css.motion-without-reduced-motion',
+        file,
+        1,
+        'Stylesheet uses animation/transition without a prefers-reduced-motion branch.',
+        'Some users prefer reduced motion, and admin UI should respect that preference.',
+        'Add a @media (prefers-reduced-motion: reduce) override when motion is not essential.',
+        'low'
+      );
+    }
+  }
+}
+
+function auditDesignHeuristics(report, files, phpFiles) {
+  report.design = {
+    limitation:
+      'Design findings are static heuristics. They cannot fully judge visual quality, contrast, responsiveness, usability, or real WordPress admin/editor behavior; verify with manual UI review and assistive-technology checks.',
+  };
+
+  auditDesignAdmin(report, phpFiles);
+  auditDesignForms(report, files);
+  auditDesignFrontend(report, files);
+  auditDesignGutenberg(report, files);
+  auditDesignDynamicUi(report, files);
+  auditDesignCss(report, files);
+}
+
 export function auditPlugin(pluginDir, options = {}) {
   const targetPath = resolve(pluginDir);
   if (!existsSync(targetPath) || !statSync(targetPath).isDirectory()) {
@@ -1207,18 +1800,23 @@ export function auditPlugin(pluginDir, options = {}) {
 
   const performance = Boolean(options.performance || options.performanceOnly);
   const performanceOnly = Boolean(options.performanceOnly);
+  const design = Boolean(options.design || options.designOnly);
+  const designOnly = Boolean(options.designOnly);
+  const securityEnabled = !performanceOnly && !designOnly;
 
   const report = {
     tool: 'wordpress-plugin-dev audit-plugin',
     limitation:
-      performance
-        ? 'This is a heuristic scanner for agent review triage, not a security or performance oracle. It can miss vulnerabilities and bottlenecks and produce false positives; verify findings manually against current WordPress docs, profiling, and project context.'
+      performance || design
+        ? 'This is a heuristic scanner for agent review triage, not a security, performance, accessibility, or design oracle. It can miss issues and produce false positives; verify findings manually against current WordPress docs, profiling, and real UI review.'
         : 'This is a heuristic scanner for agent review triage, not a security oracle. It can miss vulnerabilities and produce false positives; verify findings manually against current WordPress docs and project context.',
     targetPath,
     modes: {
-      security: !performanceOnly,
+      security: securityEnabled,
       performance,
       performanceOnly,
+      design,
+      designOnly,
     },
     summary: {
       phpFiles: 0,
@@ -1234,7 +1832,7 @@ export function auditPlugin(pluginDir, options = {}) {
   report.summary.blockJsonFiles = files.filter((file) => basename(file) === 'block.json').length;
 
   let main = null;
-  if (performanceOnly) {
+  if (!securityEnabled) {
     main = findMainPluginFile(targetPath, phpFiles);
     report.summary.mainPluginFile = main ? toDisplayPath(targetPath, main.file) : null;
   } else {
@@ -1249,12 +1847,17 @@ export function auditPlugin(pluginDir, options = {}) {
     auditPerformanceHeuristics(report, files, phpFiles);
   }
 
+  if (design) {
+    auditDesignHeuristics(report, files, phpFiles);
+  }
+
   report.summary.findings = {
     error: report.findings.filter((finding) => finding.severity === 'error').length,
     warning: report.findings.filter((finding) => finding.severity === 'warning').length,
     info: report.findings.filter((finding) => finding.severity === 'info').length,
   };
   report.summary.performanceFindings = report.findings.filter((finding) => finding.category === 'performance').length;
+  report.summary.designFindings = report.findings.filter((finding) => finding.category === 'design').length;
 
   return report;
 }
@@ -1271,6 +1874,9 @@ export function formatHumanReport(report) {
   lines.push(`- block.json files scanned: ${report.summary.blockJsonFiles}`);
   if (report.modes?.performance) {
     lines.push(`- Performance findings: ${report.summary.performanceFindings}`);
+  }
+  if (report.modes?.design) {
+    lines.push(`- Design findings: ${report.summary.designFindings}`);
   }
   lines.push(
     `- Findings: ${report.summary.findings.error} error, ${report.summary.findings.warning} warning, ${report.summary.findings.info} info`
@@ -1317,10 +1923,15 @@ function printHelp() {
   node skills/wordpress-plugin-dev/scripts/audit-plugin.mjs /path/to/plugin --performance
   node skills/wordpress-plugin-dev/scripts/audit-plugin.mjs /path/to/plugin --performance --json
   node skills/wordpress-plugin-dev/scripts/audit-plugin.mjs /path/to/plugin --performance-only --fail-on=warning
+  node skills/wordpress-plugin-dev/scripts/audit-plugin.mjs /path/to/plugin --design
+  node skills/wordpress-plugin-dev/scripts/audit-plugin.mjs /path/to/plugin --design --json
+  node skills/wordpress-plugin-dev/scripts/audit-plugin.mjs /path/to/plugin --design-only --fail-on=warning
 
 Options:
   --performance       Include static performance heuristics.
   --performance-only  Skip non-performance checks except basic file counting.
+  --design            Include static design/UX/UI/a11y heuristics.
+  --design-only       Skip non-design checks except basic file counting.
   --json              Print structured JSON.
   --fail-on=LEVEL     error, warning, or none. Default: error.
 
@@ -1364,6 +1975,8 @@ if (isDirectRun()) {
     const report = auditPlugin(args.target, {
       performance: args.performance,
       performanceOnly: args.performanceOnly,
+      design: args.design,
+      designOnly: args.designOnly,
     });
     if (args.json) {
       console.log(JSON.stringify(report, null, 2));

@@ -436,6 +436,112 @@ What Not To Optimize Yet
 - Low-traffic admin-only UI until profiling shows measurable impact.
 ```
 
+## Workflow: Design / UX / UI Review
+
+### When To Use
+
+Use when:
+
+- plugin admin feels confusing;
+- settings page is too complex;
+- plugin dashboard needs better hierarchy;
+- Gutenberg block UI is hard to use;
+- frontend output looks broken or theme-incompatible;
+- onboarding/setup is missing;
+- accessibility review is needed;
+- plugin is preparing for public release.
+
+### Files To Inspect
+
+- Admin page PHP/templates.
+- Settings registration and custom form handlers.
+- React admin app files.
+- Block `edit.js`, `save.js`, `render.php`, and `block.json`.
+- Frontend templates, shortcode output, widget output, and block output.
+- CSS/SCSS for admin, editor, and frontend surfaces.
+- `package.json` and build output.
+- i18n files or text-domain usage.
+- README screenshots/examples, if present.
+
+### Questions To Ask
+
+- Who is the user?
+- What is the main task?
+- What is the first action the user should take?
+- What happens when there is no data?
+- What happens when loading fails?
+- What happens after save?
+- Is there one clear primary action?
+- Are destructive actions safe?
+- Is the UI keyboard accessible?
+- Are labels and errors clear?
+- Does the UI feel native to WordPress?
+- Are assets scoped?
+- Does frontend output respect the active theme?
+
+### Must-Pass Checks
+
+- Forms have visible labels or justified accessible names.
+- Keyboard users can reach and operate every important control.
+- Focus is visible and not removed without replacement.
+- Custom colors have acceptable contrast; color is not the only state signal.
+- Admin forms preserve `settings_fields()`/nonces, capability checks, sanitization, and escaped output.
+- Empty, loading, error, and success states exist for primary workflows.
+- UI text is translation-ready and can handle longer strings.
+- Layout works in narrow admin/editor contexts and on mobile where relevant.
+- RTL review is considered; CSS avoids unnecessary left/right assumptions.
+- CSS and assets are scoped to the plugin screen, block, shortcode, or wrapper.
+- Frontend output is escaped, semantic, theme-friendly, and does not apply global resets.
+
+### Common Fixes
+
+- Restructure settings into clear sections or a small set of meaningful tabs.
+- Add empty states with a concise explanation and next action.
+- Replace vague buttons with task-specific labels.
+- Add field-level help text that explains consequences.
+- Replace custom controls with WordPress components where appropriate.
+- Scope CSS under a plugin root class or block wrapper.
+- Add keyboard/focus handling and accessible labels.
+- Improve notices so they are actionable, escaped, and not noisy.
+- Simplify InspectorControls and move primary block content work to the canvas.
+- Use block supports instead of custom controls when core supports solve the task.
+
+### Example Final Response Format For The Agent
+
+```text
+Executive Summary
+The settings screen is functional but high-friction. The biggest issues are unclear grouping, missing labels, no visible save/error state, and admin CSS that can affect unrelated screens.
+
+UI Type And Target User
+- UI type: plugin settings page.
+- Target user: site admin configuring integration behavior.
+
+Findings
+- [P1] admin/settings.php:42 renders an input without a label.
+  Fix: add a visible label, connect help/error text with aria-describedby, and keep server-side validation.
+- [P2] assets/admin.css:1 styles `button` globally in wp-admin.
+  Fix: scope selectors under `.example-plugin-admin`.
+- [P2] admin/settings.php:78 uses a vague Submit label.
+  Fix: change to "Save settings" and show a success/error notice after save.
+- [P3] The page has no empty state for a disconnected account.
+  Fix: add a short explanation and "Connect account" primary action.
+
+Before/After Plan
+1. Preserve the current Settings API save flow.
+2. Add labels, sections, help text, and notices.
+3. Scope CSS and add focus states.
+4. Add empty/error/loading states for the connection workflow.
+
+Testing Checklist
+- Keyboard-only form completion.
+- Screen-reader spot check for labels and errors.
+- Narrow viewport and RTL review.
+- Save success, save validation error, and disconnected empty state.
+
+Manual Visual Review Needed
+- Confirm hierarchy, spacing, and contrast in real wp-admin with the active admin color scheme.
+```
+
 ## Workflow: Accessibility/i18n Review
 
 ### When To Use

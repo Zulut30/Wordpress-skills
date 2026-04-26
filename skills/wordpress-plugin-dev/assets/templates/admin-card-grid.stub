@@ -1,0 +1,31 @@
+<?php
+/**
+ * Responsive admin card grid template for {{PLUGIN_NAME}}.
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+$cards = isset( $cards ) && is_array( $cards ) ? $cards : array();
+?>
+<section class="{{ROOT_CLASS}}__cards" aria-labelledby="{{PLUGIN_SLUG}}-cards-title">
+	<h2 id="{{PLUGIN_SLUG}}-cards-title"><?php echo esc_html__( 'Status overview', '{{TEXT_DOMAIN}}' ); ?></h2>
+
+	<div class="{{ROOT_CLASS}}__card-grid">
+		<?php foreach ( $cards as $card ) : ?>
+			<article class="{{ROOT_CLASS}}__card">
+				<h3><?php echo esc_html( $card['title'] ?? '' ); ?></h3>
+				<p><?php echo esc_html( $card['description'] ?? '' ); ?></p>
+				<span class="{{ROOT_CLASS}}__badge {{ROOT_CLASS}}__badge--<?php echo esc_attr( sanitize_html_class( $card['status'] ?? 'info' ) ); ?>">
+					<?php echo esc_html( $card['status_label'] ?? __( 'Info', '{{TEXT_DOMAIN}}' ) ); ?>
+				</span>
+				<?php if ( ! empty( $card['url'] ) && ! empty( $card['action_label'] ) ) : ?>
+					<p>
+						<a class="button" href="<?php echo esc_url( $card['url'] ); ?>">
+							<?php echo esc_html( $card['action_label'] ); ?>
+						</a>
+					</p>
+				<?php endif; ?>
+			</article>
+		<?php endforeach; ?>
+	</div>
+</section>
