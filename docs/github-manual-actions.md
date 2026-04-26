@@ -2,6 +2,8 @@
 
 These steps improve public repository presentation without faking adoption or maturity.
 
+Status on 2026-04-26: About metadata, topics, homepage, labels, starter issues, roadmap issue, and release `v0.1.0` were completed with `gh`. Keep this file as a setup reference if the repository is recreated or metadata needs to be checked later.
+
 ## Repository About
 
 Set description:
@@ -38,7 +40,7 @@ developer-tools
 
 ## Release
 
-Publish `v0.1.0` using `RELEASE_SUMMARY_V0.1.0.md` as the source for release notes.
+Published `v0.1.0` using `RELEASE_SUMMARY_V0.1.0.md` as the source for release notes.
 
 Suggested release title:
 
@@ -48,9 +50,10 @@ v0.1.0 - Initial WordPress Plugin Dev Skill
 
 ## Community
 
-- Create labels from [starter issues](starter-issues.md).
-- Open the five prepared starter issues.
-- Open or pin a roadmap issue titled `Roadmap: WordPress Plugin Dev Skill v0.2.0 and beyond`.
+- Labels from [starter issues](starter-issues.md) were created.
+- The five prepared starter issues were opened.
+- A roadmap issue titled `Roadmap: WordPress Plugin Dev Skill v0.2.0 and beyond` was opened.
+- Pin the roadmap issue manually if it should stay visible.
 - Optionally enable GitHub Discussions if maintainers plan to respond.
 - Enable private vulnerability reporting if available.
 

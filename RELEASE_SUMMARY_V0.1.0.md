@@ -102,4 +102,4 @@ Additional version and metadata checks were run with PowerShell/Node against `pa
 
 ## Final Readiness Verdict
 
-`v0.1.0` is ready for a GitHub release as a public work-in-progress Agent Skill package. Do not create the git tag until the maintainer explicitly requests it.
+`v0.1.0` is published as a public work-in-progress Agent Skill package after maintainer request.

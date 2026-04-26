@@ -43,7 +43,7 @@
 
 ## Release Guardrails
 
-- [x] Do not create a git tag automatically.
+- [x] Create the `v0.1.0` tag only as part of the explicit release publication request.
 - [x] Do not claim the audit script is a complete security scanner.
 - [x] Do not claim Cursor filesystem paths are universally supported.
 - [x] Verify release-sensitive WordPress, Plugin Check, WP-CLI, npm, Composer, Codex, Cursor, and Claude Code behavior against current official docs before future releases.

@@ -61,17 +61,22 @@
 - Runs `audit-plugin.mjs` on `test-fixtures/sample-plugin` and verifies the expected fixture finding for `unsafe-example.php`.
 - Uses no repository secrets and no fake external service assumptions.
 
+## Public GitHub Steps Completed
+
+- Repository description set:
+  `Professional Agent Skill for building, auditing, testing, and releasing modern WordPress plugins with Codex, Cursor, and Claude Code.`
+- Suggested topics from `docs/github-repository-setup.md` added.
+- Homepage set to the text demo until a real project site exists:
+  `https://github.com/Zulut30/Wordpress-skills/blob/main/docs/demo.md`
+- Five prepared starter issues opened.
+- Roadmap issue opened.
+- Release `v0.1.0` published with title:
+  `v0.1.0 - Initial WordPress Plugin Dev Skill`
+
 ## Remaining Manual GitHub UI Steps
 
-- Set repository description:
-  `Professional Agent Skill for building, auditing, testing, and releasing modern WordPress plugins with Codex, Cursor, and Claude Code.`
-- Add suggested topics from `docs/github-repository-setup.md`.
-- Set homepage to the text demo until a real project site exists:
-  `https://github.com/Zulut30/Wordpress-skills/blob/main/docs/demo.md`
-- Open prepared starter issues from `docs/starter-issues.md`.
-- Pin a roadmap issue or enable Discussions if maintainers will monitor them.
-- Use release title:
-  `v0.1.0 - Initial WordPress Plugin Dev Skill`
+- Pin roadmap issue #6 if desired.
+- Enable Discussions only if maintainers will monitor them.
 - Enable private vulnerability reporting if available.
 - Add branch protection after the validation workflow has run successfully at least once.
 
