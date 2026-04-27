@@ -15,8 +15,8 @@
 - [x] `README.md` explains purpose, audience, install options, usage examples, limitations, and security model.
 - [x] `CHANGELOG.md` exists for v0.1.0.
 - [x] `RELEASE_NOTES.md` exists for v0.1.0.
-- [x] `FINAL_QA_REPORT.md` exists.
-- [x] `GITHUB_POLISH_REPORT.md` exists.
+- [x] `docs/reports/FINAL_QA_REPORT.md` exists.
+- [x] `docs/reports/GITHUB_POLISH_REPORT.md` exists.
 - [x] `TODO.md` contains realistic next improvements.
 - [x] Cursor install wording says to verify current official docs or in-app support before relying on paths/slash invocation.
 

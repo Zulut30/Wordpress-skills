@@ -11,6 +11,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Performance optimization reference for WordPress plugin hot paths, queries, caching, assets, REST/admin/block behavior, cron, and external HTTP calls.
 - Static performance audit mode in `audit-plugin.mjs` via `--performance` and `--performance-only`.
 - Performance templates, examples, fixture plugin, sample outputs, npm scripts, validation checks, and CI coverage.
+- Design/UX/UI reference, templates, examples, fixture plugin, sample outputs, and static `--design` audit mode.
+- Integrations and compatibility reference, templates, examples, fixture plugin, sample outputs, and static `--compatibility` audit mode.
+- Repository hardening docs for CI, compatibility matrix, release packaging, limitations, and wp-env smoke-test planning.
+- Versioned skill package builder with checksum output.
+- PHP syntax lint script and PHPCS/WPCS readiness configuration.
+- Reports index under `docs/reports/`.
 
 ### Planned
 

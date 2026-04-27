@@ -8,6 +8,9 @@ vendor/
 coverage/
 dist/
 build-release/
+packages/*.tar.gz
+packages/*.zip
+packages/*.sha256
 *.log
 logs/
 *.tmp

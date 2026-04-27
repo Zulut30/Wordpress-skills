@@ -16,7 +16,7 @@
     }
   },
   "scripts": {
-    "lint": "phpcs --standard=WordPress skills/wordpress-plugin-dev/fixtures/demo-plugin test-fixtures/sample-plugin",
-    "format": "phpcbf --standard=WordPress skills/wordpress-plugin-dev/fixtures/demo-plugin test-fixtures/sample-plugin"
+    "lint": "phpcs --standard=phpcs.xml.dist",
+    "format": "phpcbf --standard=phpcs.xml.dist"
   }
 }

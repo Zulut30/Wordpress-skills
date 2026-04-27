@@ -19,7 +19,7 @@ Realistic next improvements for the WordPress Plugin Dev Skill.
 
 ## Scripts
 
-- Add a dedicated markdown-link checker script instead of relying on ad hoc quality-pass commands.
+- Expand the markdown-link checker with optional anchor validation if it stays low-noise.
 - Add a fixture audit assertion script that expects `unsafe-example.php` findings and exits zero only when they are present.
 - Improve `audit-plugin.mjs` heuristics for:
   - nonce checks mapped to actual handler callbacks
@@ -28,6 +28,8 @@ Realistic next improvements for the WordPress Plugin Dev Skill.
   - file upload/delete patterns
   - outbound HTTP/SSRF risk
 - Add optional JSON schema validation for `block.json`, `composer.json`, and `package.json` stubs.
+- Make PHPCS/WPCS blocking after the readiness ruleset has a reviewed baseline.
+- Add PHPStan only for safe source and fixture files with explicit bad-fixture exclusions.
 - Improve performance heuristics in `audit-plugin.mjs` for:
   - fewer false positives around safe cache invalidation
   - better callback resolution for hooks and REST routes
@@ -62,15 +64,15 @@ Realistic next improvements for the WordPress Plugin Dev Skill.
 
 ## Packaging
 
-- Add a release packaging script that produces a clean archive of the skill repository.
-- Add CI for this repository that runs `npm run smoke`, markdown link checks, and sync-tree comparisons.
+- Attach `npm run package:skill` artifacts to GitHub releases after verifying checksums.
+- Add sync-tree comparison as a non-destructive CI check.
 - Keep the performance fixture audit in CI and validate JSON output.
 - Keep the design fixture audit in CI and validate JSON output.
 - Keep the compatibility fixture audit in CI and validate JSON output.
 - Add a real integration test matrix only after selecting specific plugin/theme versions and documenting manual verification.
 - Document exact manual test steps for Codex, Claude Code, and Cursor discovery after installing from a clean checkout.
 - Verify Cursor Agent Skill discovery paths and slash invocation against current official Cursor docs before making stronger install claims.
-- Add a repository release checklist that includes `FINAL_QA_REPORT.md`, synced install targets, fixture audit output, and source-map review status.
+- Add a repository release checklist that includes `docs/reports/FINAL_QA_REPORT.md`, synced install targets, fixture audit output, and source-map review status.
 
 ## Quality
 

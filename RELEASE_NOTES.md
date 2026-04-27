@@ -64,7 +64,7 @@ Additional checks:
   - avoided singleton as the default bootstrap pattern
   - added `label_for` support to the Settings API stub
   - clarified common placeholders in Composer/npm metadata
-- Added `FINAL_QA_REPORT.md` for the v0.1.0 release review.
+- Added `docs/reports/FINAL_QA_REPORT.md` for the v0.1.0 release review.
 
 ### Known Limitations
 

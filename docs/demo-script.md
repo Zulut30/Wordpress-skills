@@ -46,3 +46,32 @@ node skills/wordpress-plugin-dev/scripts/audit-plugin.mjs test-fixtures/sample-p
 ```
 
 Use this mode when another tool or CI job needs structured results.
+
+## Audit specialized fixtures
+
+```bash
+npm run performance:audit
+npm run design:audit
+npm run compatibility:audit
+```
+
+Expected result: each command prints a human-readable report with warning/info findings from fixture-only examples.
+
+Show structured output:
+
+```bash
+npm run performance:audit:json
+npm run design:audit:json
+npm run compatibility:audit:json
+```
+
+## Show proof links
+
+Open the README proof section and the generated examples:
+
+```text
+docs/examples/audit-sample-human.md
+docs/examples/performance-audit-human.md
+docs/examples/design-audit-human.md
+docs/examples/compatibility-audit-human.md
+```

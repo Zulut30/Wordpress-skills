@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<ruleset name="WordPress Plugin Dev Skill">
+	<description>Readiness PHPCS configuration for safe fixture examples. Intentionally bad fixture files are excluded.</description>
+
+	<arg name="extensions" value="php"/>
+	<arg name="colors"/>
+	<config name="testVersion" value="7.4-"/>
+
+	<file>skills/wordpress-plugin-dev/fixtures/demo-plugin</file>
+	<file>test-fixtures/sample-plugin</file>
+	<file>test-fixtures/performance-plugin/src/SafeExamples.php</file>
+	<file>test-fixtures/design-plugin/src/GoodAdminPage.php</file>
+	<file>test-fixtures/design-plugin/src/GoodFrontendOutput.php</file>
+	<file>test-fixtures/compatibility-plugin/src/GoodIntegrationRegistry.php</file>
+	<file>test-fixtures/compatibility-plugin/src/ClassicEditorGood.php</file>
+	<file>test-fixtures/compatibility-plugin/src/SeoGood.php</file>
+	<file>test-fixtures/compatibility-plugin/src/CacheGood.php</file>
+	<file>test-fixtures/compatibility-plugin/src/ThemeGood.php</file>
+	<file>test-fixtures/compatibility-plugin/src/ElementorGood.php</file>
+
+	<exclude-pattern>*/unsafe-example.php</exclude-pattern>
+	<exclude-pattern>*/PerformanceSmells.php</exclude-pattern>
+	<exclude-pattern>*/Bad*.php</exclude-pattern>
+	<exclude-pattern>*/ElementorBad.php</exclude-pattern>
+	<exclude-pattern>*/SeoBad.php</exclude-pattern>
+	<exclude-pattern>*/CacheBad.php</exclude-pattern>
+	<exclude-pattern>*/ThemeBad.php</exclude-pattern>
+	<exclude-pattern>*/ClassicEditorBad.php</exclude-pattern>
+
+	<rule ref="WordPress"/>
+	<rule ref="PHPCompatibilityWP"/>
+</ruleset>
+

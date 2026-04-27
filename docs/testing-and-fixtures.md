@@ -15,6 +15,8 @@ This project currently validates the skill package itself, not a full WordPress 
 - `npm run design:audit:json` emits structured design audit JSON.
 - `npm run compatibility:audit` runs integration/compatibility heuristics on the compatibility fixture.
 - `npm run compatibility:audit:json` emits structured compatibility audit JSON.
+- `npm run lint:php` runs PHP syntax lint when PHP is available.
+- `npm run package:skill` builds the versioned skill archive.
 - The GitHub Actions workflow runs validation and fixture audit on push and pull request.
 
 ## Fixtures
@@ -43,7 +45,7 @@ skills/wordpress-plugin-dev/fixtures/demo-plugin/
 
 - No live WordPress install is started by default.
 - No browser or block editor runtime test is currently run.
-- PHP linting and PHPCS are documented for target plugins, but not required for this repository's default CI.
+- PHP syntax lint is part of CI. PHPCS/WPCS is currently a non-blocking readiness check until the ruleset baseline is reviewed.
 - More fixture coverage is planned for AJAX, admin POST, SQL, filesystem, SSRF, block rendering, and REST callbacks.
 - Performance scanner output is heuristic and still needs real profiling with production-sized data.
 - Design scanner output is heuristic and still needs real WordPress admin/editor/frontend review.

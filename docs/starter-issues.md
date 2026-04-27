@@ -1,80 +1,145 @@
 # Starter Issues
 
-If GitHub issues have not been created yet, use these prepared issues.
+If GitHub issues have not been created yet, use these prepared issue bodies. Check existing issues first to avoid duplicates.
 
 ## Labels To Create
 
 - `good first issue`
-- `documentation`
-- `enhancement`
-- `testing`
 - `help wanted`
+- `documentation`
+- `testing`
+- `enhancement`
+- `wordpress`
+- `compatibility`
+- `ci`
 - `agent-skill`
 
-## Improve Placeholder Substitution Tests For Plugin Templates
+## 1. Add PHPCS/WPCS Coverage For Generated Plugin Templates
 
-Labels: `good first issue`, `testing`, `agent-skill`
+Labels: `good first issue`, `testing`, `ci`, `wordpress`
 
-Goal: add tests that render templates with sample placeholder values.
+Problem: PHP template stubs are useful, but placeholder substitution is not yet checked with PHPCS/WPCS.
 
-Files involved:
+Scope:
 
 - `skills/wordpress-plugin-dev/assets/templates/`
-- `skills/wordpress-plugin-dev/scripts/`
+- `phpcs.xml.dist`
+- validation scripts
 
 Acceptance criteria:
 
-- Replace `{{PLUGIN_SLUG}}`, `{{PLUGIN_NAME}}`, `{{TEXT_DOMAIN}}`, `{{VENDOR_NAMESPACE}}`, and `{{PLUGIN_VERSION}}` with sample values.
-- Parse JSON templates after substitution.
-- Run `php -l` on PHP template output when PHP is available.
-- Document unsupported cases.
+- replace common placeholders with sample values;
+- parse/lint generated PHP where possible;
+- document templates that cannot be linted directly;
+- keep intentionally bad fixtures excluded.
 
-## Add More Gutenberg Block Examples For Dynamic And Interactive Blocks
+## 2. Add PHPStan Baseline For Safe Source Files
 
-Labels: `documentation`, `enhancement`, `good first issue`
+Labels: `testing`, `ci`, `help wanted`
 
-Goal: add concise examples that show modern block patterns without copying official docs.
+Problem: PHPStan is not configured because the repository contains fixture-only bad examples.
 
-Acceptance criteria:
+Scope:
 
-- Add one dynamic block example with `block.json` and `render.php`.
-- Add one Interactivity API example or note when advanced patterns need current-doc verification.
-- Link examples from `references/blocks-gutenberg.md` or `references/interactivity-api.md`.
-
-## Expand audit-plugin.mjs Security Heuristics For Nonce, Capability, And Escaping Checks
-
-Labels: `enhancement`, `testing`, `help wanted`
-
-Goal: improve scanner coverage while keeping output explicit about heuristic limits.
+- `composer.json`
+- future `phpstan.neon.dist`
+- safe fixture/example files only
 
 Acceptance criteria:
 
-- Add focused rules with tests.
-- Avoid noisy broad regex findings where possible.
-- Include remediation text for each rule.
-- Keep `--json` output stable.
+- identify safe PHP targets;
+- exclude fixture-only bad examples;
+- add a minimal baseline or level;
+- document known limits in `docs/ci-hardening.md`.
 
-## Add Stronger Fixture Coverage For REST, Admin Settings, AJAX, And Block Rendering
+## 3. Add Real Classic Editor Manual Verification Notes
 
-Labels: `testing`, `help wanted`
+Labels: `documentation`, `compatibility`, `good first issue`
 
-Goal: make scanner demos and tests more representative.
+Problem: Classic Editor guidance exists, but no exact plugin version has been manually verified.
 
-Acceptance criteria:
+Scope:
 
-- Add safe and unsafe fixture cases.
-- Mark unsafe files as fixture-only.
-- Update docs/example outputs if scanner output changes.
-- Keep fixtures small.
-
-## Document Cursor Agent Skills Installation Workflows By Version
-
-Labels: `documentation`, `help wanted`
-
-Goal: replace version-dependent fallback wording with verified Cursor instructions where possible.
+- `docs/compatibility-matrix.md`
+- `skills/wordpress-plugin-dev/assets/examples/classic-editor-fallback.md`
 
 Acceptance criteria:
 
-- Link official Cursor docs or in-app documentation.
-- Document confirmed project-level or import workflows.
-- Keep fallback instructions for users on older or different Cursor versions.
+- install WordPress and Classic Editor;
+- verify metabox fallback flow;
+- record versions and manual steps;
+- update status only if evidence supports it.
+
+## 4. Add Compatibility Verification For One SEO Plugin
+
+Labels: `compatibility`, `testing`, `help wanted`
+
+Problem: SEO adapters are documented as experimental until real plugin versions are checked.
+
+Scope:
+
+- `docs/compatibility-matrix.md`
+- `skills/wordpress-plugin-dev/assets/examples/seo-plugin-compatibility.md`
+
+Acceptance criteria:
+
+- choose one SEO plugin and exact version;
+- verify no duplicate title/meta/canonical/schema output;
+- document public hooks used;
+- update the matrix conservatively.
+
+## 5. Add Compatibility Verification For One Cache Plugin
+
+Labels: `compatibility`, `testing`, `help wanted`
+
+Problem: Cache compatibility needs real public/private output and purge behavior checks.
+
+Scope:
+
+- `docs/compatibility-matrix.md`
+- `skills/wordpress-plugin-dev/assets/examples/cache-plugin-compatibility.md`
+
+Acceptance criteria:
+
+- choose one cache plugin and exact version;
+- test public versus private output;
+- test targeted purge behavior where documented;
+- document any manual exclusions as fallback only.
+
+## 6. Add Screenshot-Based Admin UI Review Example
+
+Labels: `documentation`, `testing`, `enhancement`
+
+Problem: Design/UX guidance is static and would benefit from a manual screenshot review example.
+
+Scope:
+
+- `docs/examples/`
+- `skills/wordpress-plugin-dev/assets/examples/design-audit-report.md`
+
+Acceptance criteria:
+
+- use a local, license-safe fixture screen;
+- include before/after review notes;
+- do not add fake screenshots;
+- document accessibility and responsive checks.
+
+## 7. Add wp-env Smoke Test Blueprint
+
+Labels: `testing`, `ci`, `wordpress`, `help wanted`
+
+Problem: Default CI does not start WordPress runtime tests yet.
+
+Scope:
+
+- `docs/wp-env-smoke-tests.md`
+- optional `.wp-env.json`
+- optional manual workflow
+
+Acceptance criteria:
+
+- document install/start/test/stop flow;
+- keep it optional unless it is stable in CI;
+- avoid requiring Docker in the default validation job;
+- explain what runtime coverage adds beyond static scanner checks.
+

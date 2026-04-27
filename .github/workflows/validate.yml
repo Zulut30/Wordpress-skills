@@ -30,6 +30,25 @@ jobs:
             npm install
           fi
 
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: composer
+
+      - name: Composer validate
+        run: composer validate
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: PHP syntax lint
+        run: npm run lint:php
+
+      - name: PHPCS readiness check
+        continue-on-error: true
+        run: composer run lint
+
       - name: Validate skill
         run: npm run validate:skill
 
@@ -83,3 +102,6 @@ jobs:
           fi
 
           echo "Sample fixture audit produced expected findings."
+
+      - name: Build release package
+        run: npm run package:skill

@@ -31,7 +31,8 @@ Experimental or version-dependent:
 - Expanded audit heuristics for nonces, capabilities, escaping, uploads, SSRF, and SQL patterns.
 - Optional docs refresh workflow that verifies official source links and review dates.
 - Clearer Cursor installation documentation by version/workflow.
-- Optional PHP/Composer CI matrix if the repository gains real PHP package checks.
+- Decide whether PHPCS/WPCS should become blocking after the current readiness check has a reviewed baseline.
+- Add PHPStan only for safe source/fixture targets with explicit exclusions for fixture-only bad examples.
 - Optional profiling workflow with Query Monitor/manual profiling notes.
 - Richer performance fixture coverage for REST, admin screens, cron, block render, custom tables, and assets.
 - More block performance examples with before/after render and asset-loading patterns.
@@ -58,9 +59,11 @@ Experimental or version-dependent:
 - Compatibility matrix generator for plugin release docs.
 - Conflict troubleshooting admin page pattern.
 - Better false-positive handling for compatibility scanner rules.
+- Real versioned compatibility verification for one SEO plugin, one cache plugin, Classic Editor, Block Editor, and one theme.
+- Release artifact upload workflow after `npm run package:skill` is stable across platforms.
 
 ## Collaboration Entry Points
 
-See [starter issues](starter-issues.md) for concrete contribution ideas.
+See [starter issues](starter-issues.md) and [roadmap milestones](roadmap-milestones.md) for concrete contribution ideas.
 
 Maintainers should pin a roadmap issue or enable GitHub Discussions after the first public release is published.
