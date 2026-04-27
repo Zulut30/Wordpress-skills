@@ -189,3 +189,59 @@ function example_render_page() {
     }
   );
 });
+
+test('auditPlugin detects compatibility heuristics only when requested', () => {
+  withPlugin(
+    {
+      'example.php': `<?php
+/**
+ * Plugin Name: Example
+ * Version: 1.0.0
+ * Text Domain: example
+ */
+defined( 'ABSPATH' ) || exit;
+add_action( 'wp_head', static function () {
+	echo '<meta name="description" content="Fixture">';
+	echo '<script type="application/ld+json">{}</script>';
+} );
+add_action( 'init', static function () {
+	rocket_clean_domain();
+} );
+function example_register_elementor() {
+	\\Elementor\\Plugin::instance();
+}
+`,
+      'assets/frontend.css': `body {
+	margin: 0;
+}
+.elementor-widget-example {
+	color: red !important;
+}
+`,
+    },
+    (root) => {
+      const normalReport = auditPlugin(root);
+      assert.equal(normalReport.findings.some((finding) => finding.category === 'compatibility'), false);
+
+      const compatibilityReport = auditPlugin(root, { compatibility: true });
+      assert.ok(
+        compatibilityReport.findings.some(
+          (finding) => finding.rule === 'compatibility.seo.unconditional-head-output'
+        )
+      );
+      assert.ok(
+        compatibilityReport.findings.some(
+          (finding) => finding.rule === 'compatibility.cache.purge-all-on-request'
+        )
+      );
+      assert.ok(
+        compatibilityReport.findings.some(
+          (finding) => finding.rule === 'compatibility.builder.unguarded-builder-reference'
+        )
+      );
+      assert.ok(
+        compatibilityReport.findings.some((finding) => finding.rule === 'compatibility.theme.global-frontend-css')
+      );
+    }
+  );
+});

@@ -1,0 +1,16 @@
+<?php
+namespace {{VENDOR_NAMESPACE}}\{{PLUGIN_SLUG}}\Integrations\Themes;
+
+final class KadenceCompatibility {
+	public function detect(): bool {
+		return 'kadence' === wp_get_theme()->get_template();
+	}
+
+	public function register(): void {
+		if ( ! $this->detect() ) {
+			return;
+		}
+		// Verify current Kadence theme hook docs before adding theme-specific placement.
+		add_filter( '{{PLUGIN_SLUG}}_theme_adapter', static fn (): string => 'kadence' );
+	}
+}

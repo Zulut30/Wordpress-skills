@@ -29,6 +29,12 @@ const requiredSourceHints = [
   '@wordpress/components',
   '@wordpress/admin-ui',
   '@wordpress/ui',
+  'Integrations and compatibility',
+  'Classic Editor',
+  'Yoast SEO',
+  'WP Rocket',
+  'Elementor',
+  'Astra',
 ];
 
 for (const hint of requiredSourceHints) {

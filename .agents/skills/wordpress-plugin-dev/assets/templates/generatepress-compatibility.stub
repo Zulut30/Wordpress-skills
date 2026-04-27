@@ -1,0 +1,16 @@
+<?php
+namespace {{VENDOR_NAMESPACE}}\{{PLUGIN_SLUG}}\Integrations\Themes;
+
+final class GeneratePressCompatibility {
+	public function detect(): bool {
+		return 'generatepress' === wp_get_theme()->get_template();
+	}
+
+	public function register(): void {
+		if ( ! $this->detect() ) {
+			return;
+		}
+		// Verify current GeneratePress hook/filter docs before adding hooks.
+		add_filter( '{{PLUGIN_SLUG}}_theme_adapter', static fn (): string => 'generatepress' );
+	}
+}

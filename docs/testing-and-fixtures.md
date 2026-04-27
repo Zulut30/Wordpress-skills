@@ -11,6 +11,10 @@ This project currently validates the skill package itself, not a full WordPress 
 - `npm run audit:fixture` runs the audit scanner on the bundled demo fixture.
 - `npm run performance:audit` runs performance heuristics on the performance fixture.
 - `npm run performance:audit:json` emits structured performance audit JSON.
+- `npm run design:audit` runs design/UX/UI heuristics on the design fixture.
+- `npm run design:audit:json` emits structured design audit JSON.
+- `npm run compatibility:audit` runs integration/compatibility heuristics on the compatibility fixture.
+- `npm run compatibility:audit:json` emits structured compatibility audit JSON.
 - The GitHub Actions workflow runs validation and fixture audit on push and pull request.
 
 ## Fixtures
@@ -31,6 +35,10 @@ skills/wordpress-plugin-dev/fixtures/demo-plugin/
 
 `test-fixtures/performance-plugin/` exercises the static performance heuristics. It includes safe examples and fixture-only slow examples for hooks, assets, queries, transients, REST, cron, and dynamic block rendering.
 
+`test-fixtures/design-plugin/` exercises static design/UX/UI heuristics. It includes safe and fixture-only bad examples for admin pages, frontend output, CSS, and Gutenberg block UI.
+
+`test-fixtures/compatibility-plugin/` exercises static integration/compatibility heuristics. It includes safe and fixture-only bad examples for optional integration detection, Classic Editor fallback, SEO output, cache behavior, theme CSS, and Elementor-style adapter loading.
+
 ## Known gaps
 
 - No live WordPress install is started by default.
@@ -38,3 +46,5 @@ skills/wordpress-plugin-dev/fixtures/demo-plugin/
 - PHP linting and PHPCS are documented for target plugins, but not required for this repository's default CI.
 - More fixture coverage is planned for AJAX, admin POST, SQL, filesystem, SSRF, block rendering, and REST callbacks.
 - Performance scanner output is heuristic and still needs real profiling with production-sized data.
+- Design scanner output is heuristic and still needs real WordPress admin/editor/frontend review.
+- Compatibility scanner output is heuristic and still needs current third-party docs plus manual testing with actual plugin/theme versions.

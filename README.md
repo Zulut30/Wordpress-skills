@@ -25,6 +25,7 @@ Status: `v0.1.0` work in progress. Useful today, but intentionally honest about 
 - [Usage Examples](#usage-examples)
 - [Performance Optimization](#performance-optimization)
 - [Design, UX, And UI](#design-ux-and-ui)
+- [Integrations And Compatibility](#integrations-and-compatibility)
 - [Tool Support Matrix](#tool-support-matrix)
 - [Included References](#included-references)
 - [Templates](#templates)
@@ -92,6 +93,7 @@ Optional future improvement: add a short terminal GIF or screencast after the te
 - WordPress security review workflows.
 - WordPress plugin performance audit workflows.
 - WordPress-native design, UX, and UI review workflows.
+- Integration and compatibility workflows for Classic Editor, SEO/cache plugins, themes, and page builders.
 - REST API and admin/settings guidance.
 - Gutenberg and `block.json` workflows.
 - Interactivity API notes.
@@ -114,6 +116,7 @@ This skill gives the agent:
 - a local audit script for quick triage;
 - performance heuristics for plugin hot paths;
 - design/UX heuristics for admin, editor, and frontend UI;
+- compatibility heuristics for optional integrations, SEO output, cache behavior, theme CSS, builders, and editor fallbacks;
 - fixture outputs that show what the tool actually reports.
 
 ## Repository Map
@@ -356,6 +359,73 @@ Design limitations:
 - Final UI should be tested in real WordPress admin, editor, and frontend contexts.
 - Experimental UI packages must be verified against current official docs.
 
+## Integrations And Compatibility
+
+`wordpress-plugin-dev` can help design and audit plugin compatibility with the real WordPress ecosystem without turning a plugin into a pile of hardcoded workarounds.
+
+It covers:
+
+- Classic Editor and Block Editor / Gutenberg fallback;
+- SEO plugins and duplicate meta/schema/canonical risks;
+- cache, performance, and asset optimization plugins;
+- classic themes, block themes, `theme.json`, and theme-friendly frontend output;
+- page builders such as Elementor and Divi as optional adapters;
+- classic widgets, block widgets, shortcodes, and dynamic blocks;
+- admin/editor compatibility and scoped assets.
+
+Compatibility defaults:
+
+- prefer WordPress core APIs before third-party plugin/theme APIs;
+- keep integrations optional and feature-detected;
+- verify current third-party plugin/theme docs before release-sensitive work;
+- maintain a compatibility matrix for support claims;
+- avoid claims like "compatible with all plugins/themes".
+
+Copy-paste prompts:
+
+```text
+Use wordpress-plugin-dev to audit this plugin for Classic Editor, Block Editor, SEO plugin, cache plugin, theme, and page builder compatibility. Do not change code yet; create COMPATIBILITY_AUDIT_REPORT.md with a compatibility matrix and prioritized fixes.
+```
+
+```text
+Use wordpress-plugin-dev to make this plugin SEO-plugin friendly. Avoid duplicate meta/schema output, detect active SEO plugins safely, use documented hooks where appropriate, and provide fallback output only when no SEO plugin handles it.
+```
+
+```text
+Use wordpress-plugin-dev to make this plugin cache-plugin compatible. Separate public and private output, avoid caching user-specific data, add targeted purge hooks, avoid purge-all on normal requests, and document manual cache exclusions only as fallback.
+```
+
+```text
+Use wordpress-plugin-dev to adapt this plugin frontend output to common themes. Scope CSS, use semantic HTML, inherit theme typography where practical, support responsive/RTL layouts, and avoid hardcoded theme assumptions.
+```
+
+Local commands:
+
+```bash
+npm run compatibility:audit
+npm run compatibility:audit:json
+node skills/wordpress-plugin-dev/scripts/audit-plugin.mjs /path/to/plugin --compatibility
+```
+
+References and examples:
+
+- [Integrations and compatibility reference](skills/wordpress-plugin-dev/references/integrations-compatibility.md)
+- [Compatibility audit human output](docs/examples/compatibility-audit-human.md)
+- [Compatibility audit JSON output](docs/examples/compatibility-audit-json.json)
+- [Compatibility audit explanation](docs/examples/compatibility-audit-explanation.md)
+- [Compatibility fixture plugin](test-fixtures/compatibility-plugin/)
+- [Compatibility matrix example](skills/wordpress-plugin-dev/assets/examples/compatibility-matrix-example.md)
+
+Compatibility limitations:
+
+- Static compatibility audit is heuristic.
+- Real compatibility requires testing with actual plugin/theme versions.
+- Third-party APIs can change.
+- Theme and page-builder visual behavior requires manual testing.
+- Cache behavior depends on hosting, server cache, CDN, and plugin settings.
+- SEO output must be verified in rendered HTML and structured data tools.
+- "Supported" integrations require tests or documented manual verification.
+
 ## Tool Support Matrix
 
 | Tool | What Works | Status |
@@ -378,10 +448,11 @@ Design limitations:
 | Interactivity API | `references/interactivity-api.md` | When to use the Interactivity API, core concepts, warnings, and examples. |
 | Performance | `references/performance-optimization.md` | Hot paths, hooks, queries, caching, REST/admin/block performance, assets, cron, and remediation plans. |
 | Design/UX/UI | `references/design-ux-ui.md` | WordPress-native admin UI, settings pages, dashboards, block UI, frontend output, states, a11y, RTL, and scoped CSS. |
+| Integrations/compatibility | `references/integrations-compatibility.md` | Classic Editor and Block Editor fallbacks, SEO/cache/theme/page-builder adapters, feature detection, graceful degradation, and compatibility matrices. |
 | i18n/a11y/privacy | `references/i18n-a11y-privacy.md` | Text domains, translations, labels, focus, privacy exports/erasure, and review checklist. |
 | Testing/CI | `references/testing-and-ci.md` | `wp-env`, WP-CLI scaffold tests, PHPUnit, JS tests, static analysis, Plugin Check, CI. |
 | Release | `references/release-wordpress-org.md` | `readme.txt`, Plugin Check, assets, packaging, and WordPress.org readiness. |
-| Review workflows | `references/review-checklists.md` | Architecture, security, block, REST, settings, release, performance, and a11y/i18n review workflows. |
+| Review workflows | `references/review-checklists.md` | Architecture, security, block, REST, settings, release, performance, design/UX/UI, integrations/compatibility, and a11y/i18n review workflows. |
 
 ## Templates
 
@@ -414,6 +485,28 @@ Design limitations:
 | `onboarding-step.stub` | Simple accessible onboarding step. |
 | `css-scoped-admin-ui.stub` | Scoped wp-admin CSS with focus states and responsive grid. |
 | `frontend-scoped-css.stub` | Scoped frontend CSS with logical/responsive patterns. |
+| `integration-interface.stub` | Optional integration adapter interface. |
+| `integration-registry.stub` | Safe integration registry that detects adapters before registering. |
+| `classic-editor-metabox-fallback.stub` | Classic Editor metabox fallback with nonce/capability flow. |
+| `block-editor-classic-fallback.stub` | Shared block/shortcode render fallback pattern. |
+| `seo-output-guard.stub` | SEO fallback output guard to avoid duplicate meta/schema. |
+| `yoast-integration.stub` | Optional Yoast SEO adapter placeholder. |
+| `rankmath-integration.stub` | Optional Rank Math adapter placeholder. |
+| `aioseo-integration.stub` | Optional AIOSEO adapter placeholder. |
+| `seopress-integration.stub` | Optional SEOPress adapter placeholder. |
+| `cache-integration-interface.stub` | Cache integration contract with targeted purge defaults. |
+| `generic-cache-compatibility.stub` | Public/private output separation and cache notes. |
+| `litespeed-cache-adapter.stub` | Optional LiteSpeed Cache adapter placeholder. |
+| `wp-rocket-adapter.stub` | Optional WP Rocket adapter placeholder. |
+| `w3-total-cache-adapter.stub` | Optional W3 Total Cache adapter placeholder. |
+| `autoptimize-compatibility.stub` | Asset optimization compatibility notes. |
+| `theme-compatibility-service.stub` | Generic theme-friendly wrapper/service pattern. |
+| `astra-compatibility.stub` | Optional Astra adapter placeholder. |
+| `generatepress-compatibility.stub` | Optional GeneratePress adapter placeholder. |
+| `kadence-compatibility.stub` | Optional Kadence adapter placeholder. |
+| `elementor-adapter.stub` | Optional Elementor adapter placeholder. |
+| `divi-adapter.stub` | Optional Divi adapter placeholder. |
+| `compatibility-matrix.stub` | Markdown compatibility matrix starter. |
 
 ## Scripts
 
@@ -426,12 +519,16 @@ Design limitations:
 | `npm run performance:audit:json` | Run performance heuristics against the performance fixture in JSON mode. |
 | `npm run design:audit` | Run design/UX/UI heuristics against `test-fixtures/design-plugin`. |
 | `npm run design:audit:json` | Run design/UX/UI heuristics against the design fixture in JSON mode. |
+| `npm run compatibility:audit` | Run integration/compatibility heuristics against `test-fixtures/compatibility-plugin`. |
+| `npm run compatibility:audit:json` | Run integration/compatibility heuristics against the compatibility fixture in JSON mode. |
 | `node skills/wordpress-plugin-dev/scripts/audit-plugin.mjs /path/to/plugin` | Run the heuristic plugin audit in human-readable mode. |
 | `node skills/wordpress-plugin-dev/scripts/audit-plugin.mjs /path/to/plugin --json` | Run the heuristic plugin audit with structured JSON output. |
 | `node skills/wordpress-plugin-dev/scripts/audit-plugin.mjs /path/to/plugin --performance` | Include static performance heuristics. |
 | `node skills/wordpress-plugin-dev/scripts/audit-plugin.mjs /path/to/plugin --performance-only --fail-on=warning` | Run only performance heuristics and exit non-zero on warnings. |
 | `node skills/wordpress-plugin-dev/scripts/audit-plugin.mjs /path/to/plugin --design` | Include static design/UX/UI/a11y heuristics. |
 | `node skills/wordpress-plugin-dev/scripts/audit-plugin.mjs /path/to/plugin --design-only --fail-on=warning` | Run only design heuristics and exit non-zero on warnings. |
+| `node skills/wordpress-plugin-dev/scripts/audit-plugin.mjs /path/to/plugin --compatibility` | Include static integration/compatibility heuristics. |
+| `node skills/wordpress-plugin-dev/scripts/audit-plugin.mjs /path/to/plugin --compatibility-only --fail-on=warning` | Run only compatibility heuristics and exit non-zero on warnings. |
 
 ## Testing And Fixtures
 
@@ -446,6 +543,7 @@ Current coverage:
 - demo fixture audit;
 - performance fixture audit;
 - design fixture audit;
+- compatibility fixture audit;
 - intentionally unsafe sample fixture for expected scanner findings.
 
 ## Limitations
@@ -453,15 +551,18 @@ Current coverage:
 - The audit script is heuristic and can miss vulnerabilities.
 - The performance scanner is heuristic and can miss bottlenecks or report false positives.
 - The design scanner is heuristic and can miss usability/accessibility issues or report false positives.
+- The compatibility scanner is heuristic and can miss integration conflicts or report false positives.
 - A clean audit output is not proof that a plugin is secure.
 - A clean performance audit is not proof that a plugin is fast under production data and traffic.
 - A clean design audit is not proof that UI is accessible, responsive, or usable in real WordPress contexts.
+- A clean compatibility audit is not proof that a plugin works with real third-party plugin/theme versions.
 - Cursor install paths and slash invocation are version/workflow-dependent.
 - Live WordPress runtime checks are not part of the default local workflow yet.
 - Composer/PHPStan/PHPCS checks are documented but not wired into the root CI matrix yet.
 - Release-sensitive guidance should be verified against current official docs.
 - Performance-sensitive changes need profiling, cache invalidation tests, and rollout monitoring.
 - Design-sensitive changes need manual visual review, keyboard testing, and real admin/editor/frontend checks.
+- Compatibility-sensitive changes need current third-party docs verification, rendered output checks, and manual tests with target versions.
 - The project is `v0.1.0`; it does not claim broad production adoption.
 
 ## Security Model
@@ -491,6 +592,7 @@ Near-term priorities:
 - more block examples;
 - optional docs refresh script;
 - Cursor install verification.
+- Real compatibility test matrix with selected plugin/theme versions.
 
 Prepared starter issues live in [docs/starter-issues.md](docs/starter-issues.md). If they are not open on GitHub yet, use that file as the source for labels, issue bodies, and acceptance criteria.
 

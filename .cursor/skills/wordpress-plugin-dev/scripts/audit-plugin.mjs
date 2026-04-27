@@ -31,6 +31,23 @@ const PERFORMANCE_SCOPE_RE =
 const CACHE_RE = /\b(get_transient|set_transient|wp_cache_get|wp_cache_set)\s*\(/;
 const BATCH_RE = /\b(batch|limit|offset|paged|per_page|posts_per_page|numberposts)\b/i;
 const BROAD_CSS_SELECTOR_RE = /^\s*(body|html|h[1-6]|p|a|button|input|select|textarea|table|tr|td|th|ul|ol|li|\*)\s*[{,]/i;
+const COMPAT_GUARD_RE =
+  /\b(class_exists|interface_exists|function_exists|defined|did_action|has_action|has_filter|is_plugin_active|wp_script_is|wp_style_is)\s*\(/;
+const THIRD_PARTY_PATTERNS = [
+  { name: 'Yoast SEO', pattern: /\b(WPSEO_|YoastSEO|Yoast\\|Yoast_SEO|wpseo_)\b/i },
+  { name: 'Rank Math', pattern: /\b(RankMath|RANK_MATH_VERSION|rank_math_)\b/i },
+  { name: 'AIOSEO', pattern: /\b(AIOSEO|aioseo|All_In_One_SEO)\b/i },
+  { name: 'SEOPress', pattern: /\b(SEOPRESS|seopress_)\b/i },
+  { name: 'The SEO Framework', pattern: /\b(THE_SEO_FRAMEWORK|the_seo_framework|tsf_)\b/i },
+  { name: 'WP Rocket', pattern: /\b(WP_ROCKET|rocket_clean|rocket_.*cache)\b/i },
+  { name: 'LiteSpeed Cache', pattern: /\b(LSCWP|LiteSpeed_Cache|litespeed_)\b/i },
+  { name: 'W3 Total Cache', pattern: /\b(W3TC|w3tc_|W3_Total_Cache)\b/i },
+  { name: 'Autoptimize', pattern: /\b(autoptimize|AUTOPTIMIZE)\b/i },
+  { name: 'Elementor', pattern: /\b(ELEMENTOR_VERSION|Elementor\\|elementor\/|elementor_)\b/i },
+  { name: 'Divi', pattern: /\b(ET_Builder|ET_BUILDER|et_pb_|et_core)\b/i },
+  { name: 'Astra', pattern: /\b(ASTRA_EXT|astra_)\b/i },
+];
+const THEME_SPECIFIC_RE = /\b(astra_|generatepress_|kadence_|oceanwp_|blocksy_|hello_elementor|twentytwenty|ET_Builder|et_pb_)\b/i;
 
 export function parseArgs(argv) {
   const args = [...argv];
@@ -39,6 +56,8 @@ export function parseArgs(argv) {
   const performanceOnly = args.includes('--performance-only');
   const design = args.includes('--design') || args.includes('--design-only');
   const designOnly = args.includes('--design-only');
+  const compatibility = args.includes('--compatibility') || args.includes('--compatibility-only');
+  const compatibilityOnly = args.includes('--compatibility-only');
   const help = args.includes('--help') || args.includes('-h');
   const failOnArg = args.find((arg) => arg.startsWith('--fail-on='));
   const failOn = failOnArg ? failOnArg.split('=')[1] : 'error';
@@ -49,6 +68,8 @@ export function parseArgs(argv) {
       arg !== '--performance-only' &&
       arg !== '--design' &&
       arg !== '--design-only' &&
+      arg !== '--compatibility' &&
+      arg !== '--compatibility-only' &&
       arg !== '--help' &&
       arg !== '-h' &&
       !arg.startsWith('--fail-on=')
@@ -60,6 +81,8 @@ export function parseArgs(argv) {
     performanceOnly,
     design,
     designOnly,
+    compatibility,
+    compatibilityOnly,
     failOn: ['error', 'warning', 'none'].includes(failOn) ? failOn : 'error',
     help,
     target: filtered[0] ? resolve(filtered[0]) : null,
@@ -1792,6 +1815,588 @@ function auditDesignHeuristics(report, files, phpFiles) {
   auditDesignCss(report, files);
 }
 
+function addCompatibilityFinding(report, severity, rule, file, line, message, why, remediation, confidence = 'medium') {
+  addFinding(report, severity, rule, file, line, message, remediation, {
+    category: 'compatibility',
+    why,
+    confidence,
+  });
+}
+
+function hasCompatibilityGuard(text) {
+  const withoutBootstrapGuard = text.replace(/\bdefined\s*\(\s*['"]ABSPATH['"]\s*\)/g, '');
+  return COMPAT_GUARD_RE.test(withoutBootstrapGuard) || /\bif\s*\(|\?\s*:/.test(withoutBootstrapGuard);
+}
+
+function isCompatCandidateFile(file) {
+  return /\.(php|js|jsx|ts|tsx|css|scss|md|txt)$/i.test(file);
+}
+
+function isCompatCodeFile(file) {
+  return /\.(php|js|jsx|ts|tsx|css|scss)$/i.test(file);
+}
+
+function auditCompatibilityOptionalDependencies(report, files) {
+  for (const file of files.filter(isCompatCodeFile)) {
+    const content = readText(file);
+    const lines = content.split(/\r?\n/);
+
+    lines.forEach((line, index) => {
+      const lineNumber = index + 1;
+      const window = nearbyText(lines, index, 8, 8);
+
+      if (/\b(?:include|include_once|require|require_once)\b.*(?:wp-content[\\/]+plugins[\\/]+|WP_PLUGIN_DIR)/i.test(line)) {
+        addCompatibilityFinding(
+          report,
+          'warning',
+          'compatibility.optional-dependency.direct-plugin-include',
+          file,
+          lineNumber,
+          'Code includes files from another plugin directory.',
+          'Directly including third-party plugin files is fragile and can fatal when paths or versions change.',
+          'Use feature detection and documented public APIs/hooks instead of requiring third-party plugin internals.',
+          'high'
+        );
+      }
+
+      for (const integration of THIRD_PARTY_PATTERNS) {
+        if (!integration.pattern.test(line) || hasCompatibilityGuard(window)) {
+          continue;
+        }
+
+        addCompatibilityFinding(
+          report,
+          'warning',
+          'compatibility.optional-dependency.unguarded-reference',
+          file,
+          lineNumber,
+          `${integration.name} appears to be referenced without nearby feature detection.`,
+          'Optional integrations can fatal or misbehave when the plugin/theme/builder is inactive or changes APIs.',
+          'Move integration code into an adapter and guard it with class_exists(), function_exists(), defined(), did_action(), or a documented detection method.',
+          'medium'
+        );
+      }
+    });
+  }
+}
+
+function auditCompatibilityClassicEditor(report, files, phpFiles) {
+  const hasBlocks = files.some((file) => basename(file) === 'block.json');
+  const allPhp = phpFiles.map(readText).join('\n');
+
+  if (hasBlocks && !/add_shortcode\s*\(|add_meta_box\s*\(/.test(allPhp)) {
+    addCompatibilityFinding(
+      report,
+      'info',
+      'compatibility.editor.block-only-no-classic-fallback',
+      null,
+      null,
+      'Block files were found without an obvious shortcode or Classic Editor fallback.',
+      'Some plugins need non-block insertion for Classic Editor or legacy workflows.',
+      'Document that the plugin is block-only, or add a shortcode/metabox fallback backed by shared render/save services.',
+      'low'
+    );
+  }
+
+  for (const file of phpFiles) {
+    const content = readText(file);
+    const lines = content.split(/\r?\n/);
+
+    if (/add_meta_box\s*\(/.test(content) && /save_post/.test(content)) {
+      const saveFunctionIndex = lines.findIndex((line) => /function\s+\w*save|public function save/.test(line));
+      const saveActionIndex = lines.findIndex((line) => /save_post/.test(line));
+      const saveIndex = saveFunctionIndex >= 0 ? saveFunctionIndex : saveActionIndex;
+      const saveWindow = saveIndex >= 0 ? lines.slice(saveIndex, saveIndex + 80).join('\n') : content;
+      if (!NONCE_RE.test(saveWindow) || !CAPABILITY_RE.test(saveWindow)) {
+        addCompatibilityFinding(
+          report,
+          'warning',
+          'compatibility.editor.metabox-save-missing-security',
+          file,
+          saveIndex >= 0 ? saveIndex + 1 : 1,
+          'Classic Editor metabox save flow lacks an obvious nonce and capability check.',
+          'Classic fallbacks must preserve the same security posture as block/editor saves.',
+          'Add wp_verify_nonce()/check_admin_referer(), current_user_can(), sanitization, and escaping.',
+          'medium'
+        );
+      }
+    }
+
+    lines.forEach((line, index) => {
+      const lineNumber = index + 1;
+      const window = nearbyText(lines, index, 6, 8);
+
+      if (/\b(mce_buttons|mce_external_plugins|teeny_mce_before_init)\b/.test(line) && !/(get_current_screen|post\.php|post-new\.php|use_block_editor_for_post_type)/.test(window)) {
+        addCompatibilityFinding(
+          report,
+          'info',
+          'compatibility.editor.tinymce-assets-not-scoped',
+          file,
+          lineNumber,
+          'TinyMCE/editor integration has no obvious screen or editor-context guard.',
+          'Classic editor assets loaded globally can slow wp-admin and conflict with block editor screens.',
+          'Gate TinyMCE assets by screen ID, post type, and editor context.',
+          'low'
+        );
+      }
+
+      if (/wp_enqueue_(?:script|style)\s*\(/.test(line) && /wp-edit-post|wp-block-editor|wp-blocks/.test(window) && !/use_block_editor_for_post_type|get_current_screen|enqueue_block_editor_assets/.test(content)) {
+        addCompatibilityFinding(
+          report,
+          'info',
+          'compatibility.editor.block-assets-context-review',
+          file,
+          lineNumber,
+          'Block editor assets appear without an obvious editor-context guard.',
+          'Block editor assets should not load in Classic Editor or unrelated admin screens.',
+          'Use enqueue_block_editor_assets or screen/post-type checks.',
+          'low'
+        );
+      }
+    });
+  }
+}
+
+function auditCompatibilitySeo(report, files, phpFiles) {
+  const schemaFiles = [];
+
+  for (const file of files.filter(isCompatCodeFile)) {
+    const content = readText(file);
+    const lines = content.split(/\r?\n/);
+    if (/application\/ld\+json|Schema\.org|schema_org|schema/i.test(content)) {
+      schemaFiles.push(file);
+    }
+
+    lines.forEach((line, index) => {
+      const lineNumber = index + 1;
+      const window = nearbyText(lines, index, 10, 12);
+      const seoOutputLine =
+        /<title\b|rel=["']canonical|name=["']description|property=["']og:|name=["']twitter:|application\/ld\+json|name=["']robots/i.test(
+          line
+        );
+      const seoOutput =
+        seoOutputLine ||
+        /<title\b|rel=["']canonical|name=["']description|property=["']og:|name=["']twitter:|application\/ld\+json|name=["']robots/i.test(
+          window
+        );
+
+      if (seoOutputLine && /wp_head/.test(window) && !/(WPSEO|RANK_MATH|AIOSEO|SEOPRESS|THE_SEO_FRAMEWORK|apply_filters|should_output|seo_plugin)/i.test(content)) {
+        addCompatibilityFinding(
+          report,
+          'warning',
+          'compatibility.seo.unconditional-head-output',
+          file,
+          lineNumber,
+          'SEO-relevant head output appears without an SEO plugin guard.',
+          'Manual title, canonical, meta, social, or schema output can duplicate SEO plugin output.',
+          'Add an SEO output guard, use documented SEO plugin hooks, and fallback only when no SEO plugin handles the concern.',
+          'medium'
+        );
+      }
+
+      if (seoOutputLine && seoOutput && !/apply_filters\s*\(/.test(content)) {
+        addCompatibilityFinding(
+          report,
+          'info',
+          'compatibility.seo.output-not-filterable',
+          file,
+          lineNumber,
+          'SEO-relevant output is not obviously filterable.',
+          'SEO integrations often need project-specific overrides without editing plugin code.',
+          'Expose documented filters around fallback SEO output and document when they run.',
+          'low'
+        );
+      }
+
+      if (/fetch\s*\(|wp\.apiFetch|axios\./.test(line) && /(schema|description|title|seo|content)/i.test(window) && !/render\.php|register_block_type|add_shortcode/.test(content)) {
+        addCompatibilityFinding(
+          report,
+          'info',
+          'compatibility.seo.client-only-content-review',
+          file,
+          lineNumber,
+          'SEO-relevant content appears to be fetched client-side without an obvious server-rendered fallback.',
+          'Search crawlers and social scrapers may miss client-only content depending on context.',
+          'Provide server-rendered block/shortcode fallback when the content matters for SEO.',
+          'low'
+        );
+      }
+    });
+  }
+
+  if (schemaFiles.length > 1) {
+    addCompatibilityFinding(
+      report,
+      'info',
+      'compatibility.seo.multiple-schema-files',
+      schemaFiles[0],
+      1,
+      `Schema-related output appears in multiple files (${schemaFiles.length}).`,
+      'Multiple schema sources increase duplicate or inconsistent structured data risk.',
+      'Centralize schema fallback logic and guard against active SEO plugins.',
+      'low'
+    );
+  }
+}
+
+function auditCompatibilityCache(report, files) {
+  for (const file of files.filter(isCompatCandidateFile)) {
+    const content = readText(file);
+    const lines = content.split(/\r?\n/);
+
+    lines.forEach((line, index) => {
+      const lineNumber = index + 1;
+      const window = nearbyText(lines, index, 10, 10);
+      const purgeAllLine = /\b(rocket_clean_domain|wp_cache_flush|w3tc_flush_all|litespeed_purge_all|do_action\s*\(\s*['"]litespeed_purge_all)/i.test(line);
+
+      if (purgeAllLine && /\b(add_action\s*\(\s*['"](?:init|wp|admin_init)|function\s+\w+)/.test(window)) {
+        addCompatibilityFinding(
+          report,
+          'warning',
+          'compatibility.cache.purge-all-on-request',
+          file,
+          lineNumber,
+          'Full cache purge appears in a normal request hook or broad callback.',
+          'Purging all cache during normal requests can destroy site performance and conflict with cache plugins.',
+          'Purge only affected URLs/posts on content/settings changes or explicit admin maintenance actions.',
+          'high'
+        );
+      }
+
+      if (/delete_(?:site_)?transient\s*\(\s*['"]_?transient|DELETE\s+FROM\s+.*_options.*_transient/i.test(window)) {
+        addCompatibilityFinding(
+          report,
+          'warning',
+          'compatibility.cache.broad-transient-delete',
+          file,
+          lineNumber,
+          'Code appears to delete broad transient/cache data.',
+          'Broad cache deletion can remove unrelated plugin/theme cache and cause avoidable load.',
+          'Delete only plugin-owned cache keys or document an explicit admin maintenance action.',
+          'medium'
+        );
+      }
+
+      if (/(get_current_user_id|wp_get_current_user|is_user_logged_in)\s*\(/.test(window) && /\b(echo|print|return)\b/.test(line) && !/(DONOTCACHEPAGE|nocache_headers|private cache|ESI|do not cache)/i.test(content)) {
+        addCompatibilityFinding(
+          report,
+          'warning',
+          'compatibility.cache.user-specific-public-output',
+          file,
+          lineNumber,
+          'Frontend output may include user-specific data without a cache compatibility note.',
+          'User-specific data can leak through public page caches if not isolated.',
+          'Separate private fragments, set no-cache behavior where appropriate, or document a private/ESI strategy.',
+          'medium'
+        );
+      }
+
+      if (/(wp_nonce_field|wp_create_nonce)\s*\(/.test(line) && /(shortcode|render|frontend|template|blocks[\\/].*render)/i.test(file) && !/(ESI|private cache|DONOTCACHEPAGE|cache compatibility)/i.test(content)) {
+        addCompatibilityFinding(
+          report,
+          'info',
+          'compatibility.cache.public-nonce-review',
+          file,
+          lineNumber,
+          'Public output contains a nonce without an obvious cache compatibility note.',
+          'Nonces in public cached HTML can expire or be shared between users.',
+          'Avoid public caching for nonce fragments, load nonces dynamically, or use a documented private/ESI strategy.',
+          'low'
+        );
+      }
+
+      if (/(?:time|microtime|rand|mt_rand)\s*\(\s*\)/.test(line) && /(wp_enqueue_|add_query_arg|ver|version)/.test(window)) {
+        addCompatibilityFinding(
+          report,
+          'warning',
+          'compatibility.cache.random-cache-busting',
+          file,
+          lineNumber,
+          'Asset or URL cache busting appears to use random/time-based values.',
+          'Random query strings defeat browser/CDN/cache optimization and can fight performance plugins.',
+          'Use plugin version, filemtime during development, or generated asset metadata.',
+          'medium'
+        );
+      }
+
+      if (/disable (?:the )?(?:cache|seo|minification|optimization) plugin/i.test(line)) {
+        addCompatibilityFinding(
+          report,
+          'warning',
+          'compatibility.docs.disable-plugin-first-solution',
+          file,
+          lineNumber,
+          'Documentation recommends disabling an integration plugin as a first solution.',
+          'Compatibility guidance should prefer scoped fixes before disabling other plugins.',
+          'Document targeted exclusions, guards, or adapter fixes before suggesting disabling a plugin.',
+          'medium'
+        );
+      }
+
+      if (/<script\b|wp_add_inline_script\s*\(/.test(line) && /(jQuery|document\.ready|window\.|var\s+)/.test(window)) {
+        addCompatibilityFinding(
+          report,
+          'info',
+          'compatibility.assets.inline-script-optimizer-review',
+          file,
+          lineNumber,
+          'Inline script may be sensitive to minification or execution-order changes.',
+          'Optimization plugins can combine/defer scripts and expose fragile ordering assumptions.',
+          'Prefer registered scripts with explicit dependencies and keep inline data small via wp_add_inline_script after the handle.',
+          'low'
+        );
+      }
+    });
+  }
+}
+
+function auditCompatibilityThemes(report, files) {
+  for (const file of files.filter(isCompatCandidateFile)) {
+    const content = readText(file);
+    const lines = content.split(/\r?\n/);
+    const isFrontend = /front|public|template|shortcode|blocks|render|theme/i.test(file);
+
+    lines.forEach((line, index) => {
+      const lineNumber = index + 1;
+      const window = nearbyText(lines, index, 6, 6);
+
+      if (/\.(css|scss)$/i.test(file) && isFrontend && BROAD_CSS_SELECTOR_RE.test(line)) {
+        addCompatibilityFinding(
+          report,
+          'warning',
+          'compatibility.theme.global-frontend-css',
+          file,
+          lineNumber,
+          'Frontend stylesheet contains broad/global selectors.',
+          'Global CSS can break active themes, block themes, and page-builder layouts.',
+          'Scope CSS under a plugin wrapper or block class and avoid resets.',
+          'medium'
+        );
+      }
+
+      if (/\.(css|scss)$/i.test(file) && /!important/.test(line)) {
+        addCompatibilityFinding(
+          report,
+          'info',
+          'compatibility.theme.important-review',
+          file,
+          lineNumber,
+          'Stylesheet uses !important.',
+          'Specificity fights are a common source of theme and builder conflicts.',
+          'Reduce specificity conflicts through scoped selectors and component classes.',
+          'low'
+        );
+      }
+
+      if (/\.(css|scss)$/i.test(file) && /(^|[;{\s])width\s*:\s*(?:\d{3,}|[4-9]\d)px/.test(line)) {
+        addCompatibilityFinding(
+          report,
+          'info',
+          'compatibility.theme.fixed-width-review',
+          file,
+          lineNumber,
+          'CSS uses a fixed pixel width.',
+          'Fixed widths can break responsive themes and builder columns.',
+          'Use max-width, minmax(), flex/grid, and logical properties where practical.',
+          'low'
+        );
+      }
+
+      if (isFrontend && /<div\b/i.test(line) && !/class\s*=/.test(window) && !/<(?:article|section|form|ul|ol|nav)\b/i.test(content)) {
+        addCompatibilityFinding(
+          report,
+          'info',
+          'compatibility.theme.frontend-markup-without-wrapper-class',
+          file,
+          lineNumber,
+          'Frontend markup has no obvious scoped wrapper class.',
+          'Wrapper classes help scope CSS without overriding theme elements globally.',
+          'Add a plugin or block wrapper class and keep markup semantic.',
+          'low'
+        );
+      }
+
+      if (THEME_SPECIFIC_RE.test(line) && !/(wp_get_theme|get_template|get_stylesheet|class_exists|function_exists|defined)/.test(window)) {
+        addCompatibilityFinding(
+          report,
+          'warning',
+          'compatibility.theme.specific-hook-without-detection',
+          file,
+          lineNumber,
+          'Theme-specific hook or identifier appears without detection.',
+          'Theme-specific code can break when the theme changes or a child theme is active.',
+          'Detect the theme safely and prefer generic WordPress hooks where possible.',
+          'medium'
+        );
+      }
+
+      if (/get_(?:stylesheet|template)_directory\s*\(|wp-content[\\/]+themes[\\/]+|require.*themes/i.test(line)) {
+        addCompatibilityFinding(
+          report,
+          'warning',
+          'compatibility.theme.theme-file-assumption',
+          file,
+          lineNumber,
+          'Code appears to depend on theme files or paths.',
+          'Plugins should not assume a theme file structure or edit/include theme internals.',
+          'Use public hooks, templates, blocks, or documented theme APIs instead.',
+          'medium'
+        );
+      }
+    });
+  }
+}
+
+function auditCompatibilityPageBuilders(report, files) {
+  const hasGenericFallback = files
+    .filter((file) => /\.(php|js|jsx|ts|tsx)$/i.test(file))
+    .some((file) => /(add_shortcode\s*\(|register_block_type\s*\()/.test(readText(file)));
+
+  for (const file of files.filter(isCompatCodeFile)) {
+    const content = readText(file);
+    const lines = content.split(/\r?\n/);
+    const referencesBuilder = /\b(Elementor\\|ELEMENTOR_VERSION|elementor\/|elementor_|ET_Builder|ET_BUILDER|et_pb_)\b/i.test(content);
+
+    if (!referencesBuilder) {
+      continue;
+    }
+
+    lines.forEach((line, index) => {
+      const lineNumber = index + 1;
+      const window = nearbyText(lines, index, 8, 8);
+
+      if (/\b(Elementor\\|ELEMENTOR_VERSION|elementor\/|elementor_|ET_Builder|ET_BUILDER|et_pb_)\b/i.test(line) && !hasCompatibilityGuard(window)) {
+        addCompatibilityFinding(
+          report,
+          'warning',
+          'compatibility.builder.unguarded-builder-reference',
+          file,
+          lineNumber,
+          'Page-builder-specific code appears without a dependency guard.',
+          'Builder adapters should not load when the builder is inactive.',
+          'Move code into an optional adapter and detect Elementor/Divi through documented signals.',
+          'medium'
+        );
+      }
+
+      if (/wp_enqueue_(?:script|style)\s*\(/.test(line) && !/(elementor|divi|builder|did_action|class_exists|get_current_screen)/i.test(window)) {
+        addCompatibilityFinding(
+          report,
+          'info',
+          'compatibility.builder.assets-not-scoped',
+          file,
+          lineNumber,
+          'Builder-related assets may be enqueued without builder context scoping.',
+          'Builder assets loaded globally can affect non-builder pages and admin screens.',
+          'Enqueue builder assets only in documented builder/editor/frontend contexts.',
+          'low'
+        );
+      }
+
+      if (/\.(?:elementor|elementor-widget|et_pb_|et-fb)/i.test(line) && !/(adapter|compat|builder)/i.test(file)) {
+        addCompatibilityFinding(
+          report,
+          'info',
+          'compatibility.builder.dom-internals-review',
+          file,
+          lineNumber,
+          'CSS/JS selector appears tied to page-builder DOM internals.',
+          'Builder DOM internals can change and break compatibility.',
+          'Prefer documented hooks/classes or isolate selectors in a builder adapter with manual tests.',
+          'low'
+        );
+      }
+    });
+
+    if (!hasGenericFallback) {
+      addCompatibilityFinding(
+        report,
+        'info',
+        'compatibility.builder.no-generic-fallback',
+        file,
+        1,
+        'Builder integration file has no obvious shortcode or block fallback.',
+        'Builder-specific content should usually have a generic insertion path.',
+        'Provide shortcode/block fallback unless the plugin is explicitly builder-only.',
+        'low'
+      );
+    }
+  }
+}
+
+function auditCompatibilityDocs(report, files) {
+  const docFiles = files.filter((file) => /\.(md|txt)$/i.test(file));
+  const claimFiles = [];
+
+  for (const file of docFiles) {
+    const content = readText(file);
+    const lines = content.split(/\r?\n/);
+
+    lines.forEach((line, index) => {
+      if (/compatible with (?:all|any) (?:themes|plugins|builders)|works with (?:all|any) (?:themes|plugins|builders)/i.test(line)) {
+        addCompatibilityFinding(
+          report,
+          'warning',
+          'compatibility.docs.overbroad-claim',
+          file,
+          index + 1,
+          'Documentation makes an overbroad compatibility claim.',
+          'No plugin can honestly claim compatibility with all themes/plugins/builders without qualification.',
+          'Replace with a tested compatibility matrix and known limitations.',
+          'high'
+        );
+      }
+
+      if (/(Yoast|Rank Math|AIOSEO|SEOPress|WP Rocket|LiteSpeed|W3 Total Cache|Autoptimize|Astra|GeneratePress|Kadence|Elementor|Divi)/i.test(line)) {
+        claimFiles.push(file);
+      }
+    });
+
+    if (/(Yoast|Rank Math|AIOSEO|SEOPress|WP Rocket|LiteSpeed|W3 Total Cache|Autoptimize|Astra|GeneratePress|Kadence|Elementor|Divi)/i.test(content) && !/(compatibility matrix|Status|Docs verified|Known issues)/i.test(content)) {
+      addCompatibilityFinding(
+        report,
+        'info',
+        'compatibility.docs.claims-without-matrix',
+        file,
+        1,
+        'Documentation mentions integrations without an obvious compatibility matrix.',
+        'Integration claims need status, detection, tested versions, risks, and manual verification notes.',
+        'Add a compatibility matrix or mark integrations as planned/experimental/unknown.',
+        'low'
+      );
+    }
+  }
+
+  if (claimFiles.length > 0 && !files.some((file) => /compatibility-matrix/i.test(file))) {
+    addCompatibilityFinding(
+      report,
+      'info',
+      'compatibility.docs.no-matrix-file',
+      claimFiles[0],
+      1,
+      'Integration claims found but no compatibility matrix file was detected.',
+      'A matrix prevents vague support claims and guides manual verification.',
+      'Add docs/compatibility-matrix.md or equivalent.',
+      'low'
+    );
+  }
+}
+
+function auditCompatibilityHeuristics(report, files, phpFiles) {
+  report.compatibility = {
+    limitation:
+      'Compatibility findings are static heuristics. They cannot prove support for real plugin/theme/builder versions; verify with current third-party docs and manual tests.',
+  };
+
+  auditCompatibilityOptionalDependencies(report, files);
+  auditCompatibilityClassicEditor(report, files, phpFiles);
+  auditCompatibilitySeo(report, files, phpFiles);
+  auditCompatibilityCache(report, files);
+  auditCompatibilityThemes(report, files);
+  auditCompatibilityPageBuilders(report, files);
+  auditCompatibilityDocs(report, files);
+}
+
 export function auditPlugin(pluginDir, options = {}) {
   const targetPath = resolve(pluginDir);
   if (!existsSync(targetPath) || !statSync(targetPath).isDirectory()) {
@@ -1802,13 +2407,15 @@ export function auditPlugin(pluginDir, options = {}) {
   const performanceOnly = Boolean(options.performanceOnly);
   const design = Boolean(options.design || options.designOnly);
   const designOnly = Boolean(options.designOnly);
-  const securityEnabled = !performanceOnly && !designOnly;
+  const compatibility = Boolean(options.compatibility || options.compatibilityOnly);
+  const compatibilityOnly = Boolean(options.compatibilityOnly);
+  const securityEnabled = !performanceOnly && !designOnly && !compatibilityOnly;
 
   const report = {
     tool: 'wordpress-plugin-dev audit-plugin',
     limitation:
-      performance || design
-        ? 'This is a heuristic scanner for agent review triage, not a security, performance, accessibility, or design oracle. It can miss issues and produce false positives; verify findings manually against current WordPress docs, profiling, and real UI review.'
+      performance || design || compatibility
+        ? 'This is a heuristic scanner for agent review triage, not a security, performance, accessibility, design, or compatibility oracle. It can miss issues and produce false positives; verify findings manually against current WordPress docs, profiling, real UI review, third-party docs, and real integration tests.'
         : 'This is a heuristic scanner for agent review triage, not a security oracle. It can miss vulnerabilities and produce false positives; verify findings manually against current WordPress docs and project context.',
     targetPath,
     modes: {
@@ -1817,6 +2424,8 @@ export function auditPlugin(pluginDir, options = {}) {
       performanceOnly,
       design,
       designOnly,
+      compatibility,
+      compatibilityOnly,
     },
     summary: {
       phpFiles: 0,
@@ -1851,6 +2460,10 @@ export function auditPlugin(pluginDir, options = {}) {
     auditDesignHeuristics(report, files, phpFiles);
   }
 
+  if (compatibility) {
+    auditCompatibilityHeuristics(report, files, phpFiles);
+  }
+
   report.summary.findings = {
     error: report.findings.filter((finding) => finding.severity === 'error').length,
     warning: report.findings.filter((finding) => finding.severity === 'warning').length,
@@ -1858,6 +2471,7 @@ export function auditPlugin(pluginDir, options = {}) {
   };
   report.summary.performanceFindings = report.findings.filter((finding) => finding.category === 'performance').length;
   report.summary.designFindings = report.findings.filter((finding) => finding.category === 'design').length;
+  report.summary.compatibilityFindings = report.findings.filter((finding) => finding.category === 'compatibility').length;
 
   return report;
 }
@@ -1877,6 +2491,9 @@ export function formatHumanReport(report) {
   }
   if (report.modes?.design) {
     lines.push(`- Design findings: ${report.summary.designFindings}`);
+  }
+  if (report.modes?.compatibility) {
+    lines.push(`- Compatibility findings: ${report.summary.compatibilityFindings}`);
   }
   lines.push(
     `- Findings: ${report.summary.findings.error} error, ${report.summary.findings.warning} warning, ${report.summary.findings.info} info`
@@ -1926,12 +2543,17 @@ function printHelp() {
   node skills/wordpress-plugin-dev/scripts/audit-plugin.mjs /path/to/plugin --design
   node skills/wordpress-plugin-dev/scripts/audit-plugin.mjs /path/to/plugin --design --json
   node skills/wordpress-plugin-dev/scripts/audit-plugin.mjs /path/to/plugin --design-only --fail-on=warning
+  node skills/wordpress-plugin-dev/scripts/audit-plugin.mjs /path/to/plugin --compatibility
+  node skills/wordpress-plugin-dev/scripts/audit-plugin.mjs /path/to/plugin --compatibility --json
+  node skills/wordpress-plugin-dev/scripts/audit-plugin.mjs /path/to/plugin --compatibility-only --fail-on=warning
 
 Options:
   --performance       Include static performance heuristics.
   --performance-only  Skip non-performance checks except basic file counting.
   --design            Include static design/UX/UI/a11y heuristics.
   --design-only       Skip non-design checks except basic file counting.
+  --compatibility     Include static integration/compatibility heuristics.
+  --compatibility-only Skip non-compatibility checks except basic file counting.
   --json              Print structured JSON.
   --fail-on=LEVEL     error, warning, or none. Default: error.
 
@@ -1977,6 +2599,8 @@ if (isDirectRun()) {
       performanceOnly: args.performanceOnly,
       design: args.design,
       designOnly: args.designOnly,
+      compatibility: args.compatibility,
+      compatibilityOnly: args.compatibilityOnly,
     });
     if (args.json) {
       console.log(JSON.stringify(report, null, 2));

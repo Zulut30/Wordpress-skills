@@ -1,0 +1,16 @@
+<?php
+namespace {{VENDOR_NAMESPACE}}\{{PLUGIN_SLUG}}\Integrations\Builders;
+
+final class DiviAdapter {
+	public function detect(): bool {
+		return defined( 'ET_BUILDER_VERSION' ) || class_exists( 'ET_Builder_Element', false );
+	}
+
+	public function register(): void {
+		if ( ! $this->detect() ) {
+			return;
+		}
+		// Verify current Divi developer docs before adding module registration.
+		add_filter( '{{PLUGIN_SLUG}}_builder_adapter', static fn (): string => 'divi' );
+	}
+}

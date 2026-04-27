@@ -1,0 +1,28 @@
+<?php
+namespace {{VENDOR_NAMESPACE}}\{{PLUGIN_SLUG}}\Integrations\Cache;
+
+final class LiteSpeedCacheAdapter implements CacheIntegrationInterface {
+	public function is_available(): bool {
+		return defined( 'LSCWP_V' ) || class_exists( 'LiteSpeed_Cache_API', false );
+	}
+
+	public function purge_url( string $url ): void {
+		if ( ! $this->is_available() ) {
+			return;
+		}
+		// Verify current LiteSpeed Cache API docs before replacing this placeholder.
+		do_action( 'litespeed_purge_url', esc_url_raw( $url ) );
+	}
+
+	public function purge_post( int $post_id ): void {
+		$this->purge_url( get_permalink( $post_id ) ?: home_url( '/' ) );
+	}
+
+	public function purge_all_warning(): string {
+		return __( 'Avoid purging all LiteSpeed cache except for explicit admin maintenance actions.', '{{TEXT_DOMAIN}}' );
+	}
+
+	public function get_notes(): array {
+		return array( 'Use ESI/private-cache strategy for nonces or user-specific fragments.' );
+	}
+}

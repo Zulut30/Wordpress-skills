@@ -1,0 +1,26 @@
+<?php
+namespace {{VENDOR_NAMESPACE}}\{{PLUGIN_SLUG}}\Integrations\Cache;
+
+final class WpRocketAdapter implements CacheIntegrationInterface {
+	public function is_available(): bool {
+		return defined( 'WP_ROCKET_VERSION' ) || function_exists( 'rocket_clean_post' );
+	}
+
+	public function purge_url( string $url ): void {
+		// Verify current WP Rocket docs for URL purge APIs before implementation.
+	}
+
+	public function purge_post( int $post_id ): void {
+		if ( $this->is_available() && function_exists( 'rocket_clean_post' ) ) {
+			rocket_clean_post( $post_id );
+		}
+	}
+
+	public function purge_all_warning(): string {
+		return __( 'Use targeted WP Rocket purges where possible.', '{{TEXT_DOMAIN}}' );
+	}
+
+	public function get_notes(): array {
+		return array( 'Optional adapter. No hard dependency.' );
+	}
+}

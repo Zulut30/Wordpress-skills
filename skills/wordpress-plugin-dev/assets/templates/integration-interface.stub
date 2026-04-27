@@ -1,0 +1,23 @@
+<?php
+/**
+ * Optional integration contract for {{PLUGIN_NAME}}.
+ *
+ * Placeholders: {{PLUGIN_SLUG}}, {{TEXT_DOMAIN}}, {{VENDOR_NAMESPACE}}, {{PLUGIN_VERSION}}, {{INTEGRATION_NAME}}.
+ */
+
+namespace {{VENDOR_NAMESPACE}}\{{PLUGIN_SLUG}}\Integrations;
+
+interface IntegrationInterface {
+	public function get_name(): string;
+
+	public function detect(): bool;
+
+	public function register(): void;
+
+	public function get_status(): string;
+
+	/**
+	 * @return string[]
+	 */
+	public function get_notes(): array;
+}

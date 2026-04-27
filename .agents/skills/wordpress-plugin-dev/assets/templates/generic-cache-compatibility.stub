@@ -1,0 +1,16 @@
+<?php
+namespace {{VENDOR_NAMESPACE}}\{{PLUGIN_SLUG}}\Integrations\Cache;
+
+final class GenericCacheCompatibility {
+	public function is_public_output_cache_safe( array $context ): bool {
+		return empty( $context['user_id'] ) && empty( $context['nonce'] ) && empty( $context['private_data'] );
+	}
+
+	public function get_fragment_cache_key( string $context ): string {
+		return '{{PLUGIN_SLUG}}_' . md5( $context );
+	}
+
+	public function render_private_notice(): string {
+		return esc_html__( 'This content is user-specific and should not be stored in public page cache.', '{{TEXT_DOMAIN}}' );
+	}
+}

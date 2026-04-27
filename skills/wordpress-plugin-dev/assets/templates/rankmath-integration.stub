@@ -1,0 +1,23 @@
+<?php
+namespace {{VENDOR_NAMESPACE}}\{{PLUGIN_SLUG}}\Integrations\Seo;
+
+use {{VENDOR_NAMESPACE}}\{{PLUGIN_SLUG}}\Integrations\IntegrationInterface;
+
+final class RankMathIntegration implements IntegrationInterface {
+	public function get_name(): string { return 'Rank Math'; }
+
+	public function detect(): bool {
+		return defined( 'RANK_MATH_VERSION' ) || class_exists( 'RankMath', false );
+	}
+
+	public function register(): void {
+		// Verify current Rank Math filters/hooks docs before adding schema/meta filters.
+		add_filter( '{{PLUGIN_SLUG}}_seo_provider', static fn (): string => 'rank-math' );
+	}
+
+	public function get_status(): string { return $this->detect() ? 'experimental' : 'not active'; }
+
+	public function get_notes(): array {
+		return array( 'Avoid duplicate schema, breadcrumbs, robots, canonical, and social meta.' );
+	}
+}

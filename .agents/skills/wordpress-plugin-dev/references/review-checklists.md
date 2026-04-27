@@ -542,6 +542,119 @@ Manual Visual Review Needed
 - Confirm hierarchy, spacing, and contrast in real wp-admin with the active admin color scheme.
 ```
 
+## Workflow: Integrations / Compatibility Review
+
+### When To Use
+
+Use when:
+
+- plugin must support Classic Editor and Block Editor;
+- plugin outputs SEO-relevant frontend content;
+- plugin interacts with cache/performance plugins;
+- plugin frontend output breaks under some themes;
+- plugin needs compatibility with Elementor/Divi;
+- plugin is preparing for public release;
+- users report plugin conflicts.
+
+### Files To Inspect
+
+- Main plugin bootstrap.
+- Integration registry/adapters.
+- Editor UI files and metabox files.
+- Block files, shortcodes, widgets, and frontend output.
+- SEO/meta/schema output.
+- Cache purge/invalidation code.
+- Asset enqueue files.
+- Frontend CSS/JS.
+- Theme compatibility files.
+- Page builder integration files.
+- README/readme compatibility claims.
+
+### Questions To Ask
+
+- Is this integration required or optional?
+- How is the dependency detected?
+- What happens if the dependency is absent?
+- Does the adapter use documented public APIs?
+- Does this duplicate SEO output?
+- Does this leak private data into cache?
+- Does this over-purge cache?
+- Does this break Classic Editor or Block Editor?
+- Are assets scoped by context?
+- Does frontend output inherit theme styles?
+- Does page builder integration load only when the builder is active?
+- Is there a compatibility matrix?
+- What requires manual testing?
+
+### Must-Pass Checks
+
+- No fatal behavior when optional plugin/theme/builder is missing.
+- Optional integrations use feature detection.
+- No duplicate meta, schema, canonical, robots, Open Graph, or Twitter output.
+- No global frontend/admin/theme CSS.
+- No user-specific output in public cache.
+- No all-cache purge on normal requests.
+- No unscoped editor/admin/builder assets.
+- Classic Editor metabox saves use nonce, capability, sanitization, and escaping.
+- Block Editor features have documented classic/shortcode fallback when required.
+- Compatibility claims include documented limitations and a matrix or checklist.
+
+### Common Fixes
+
+- Add an `IntegrationRegistry`.
+- Isolate adapters behind `detect()` and `register()`.
+- Add shortcode or Classic Editor fallback backed by shared services.
+- Add SEO output guards and documented SEO-plugin hooks.
+- Add targeted cache invalidation hooks.
+- Scope assets by editor, admin screen, block, shortcode, builder, or theme context.
+- Add wrapper classes and remove global CSS.
+- Replace theme-specific hacks with core hooks or block/theme.json-friendly patterns.
+- Add a compatibility matrix.
+- Add a troubleshooting/status admin screen only when actionable.
+- Mark lightly tested integrations as experimental.
+
+### Example Final Response Format For The Agent
+
+```text
+Executive Summary
+The plugin has medium compatibility risk. It references Elementor without a guard, outputs JSON-LD even when an SEO plugin may own schema, and purges all cache during normal requests.
+
+Integration Scope
+- Classic Editor fallback
+- SEO metadata/schema
+- Cache purge behavior
+- Theme/frontend CSS
+- Elementor optional adapter
+
+Compatibility Matrix
+| Area | Integration | Status | Detection | What works | Risks | Docs verified | Notes |
+| SEO | Yoast SEO | experimental | class/function guard needed | planned schema adapter | duplicate JSON-LD | no | verify current docs |
+
+Findings
+- [P1] src/ElementorBad.php:9 references Elementor classes without dependency detection.
+  Fix: move builder code into an optional adapter and register only after Elementor is loaded.
+- [P1] src/SeoBad.php:18 prints JSON-LD in wp_head with no SEO-plugin guard.
+  Fix: use an SEO output guard and documented plugin hooks where available.
+- [P2] src/CacheBad.php:14 purges all cache on init.
+  Fix: purge only affected URLs/posts on relevant content or settings changes.
+- [P2] assets/frontend.css:1 styles h1/buttons globally.
+  Fix: scope CSS under a plugin wrapper or block class.
+
+Manual Verification Checklist
+- Test Classic Editor and Block Editor on target post types.
+- Inspect rendered HTML for duplicate meta/schema/canonical tags.
+- Test logged-in and logged-out pages with cache enabled.
+- Test one classic theme, one block theme, and selected builder contexts.
+
+Requires Current Docs Verification
+- Yoast schema hooks.
+- LiteSpeed ESI/private cache strategy.
+- Elementor widget registration hooks.
+
+Experimental
+- Theme-specific hook placement until tested on current theme versions.
+```
+
 ## Workflow: Accessibility/i18n Review
 
 ### When To Use

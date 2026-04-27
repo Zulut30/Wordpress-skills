@@ -1,0 +1,29 @@
+<?php
+/**
+ * SEO output guard for {{PLUGIN_NAME}}.
+ */
+
+namespace {{VENDOR_NAMESPACE}}\{{PLUGIN_SLUG}}\Seo;
+
+final class SeoOutputGuard {
+	public function should_output_fallback_meta(): bool {
+		$seo_plugin_detected = defined( 'WPSEO_VERSION' )
+			|| defined( 'RANK_MATH_VERSION' )
+			|| defined( 'AIOSEO_VERSION' )
+			|| defined( 'SEOPRESS_VERSION' )
+			|| defined( 'THE_SEO_FRAMEWORK_VERSION' );
+
+		return (bool) apply_filters( '{{PLUGIN_SLUG}}_should_output_fallback_meta', ! $seo_plugin_detected );
+	}
+
+	public function render_fallback_meta( string $description ): void {
+		if ( ! $this->should_output_fallback_meta() ) {
+			return;
+		}
+
+		printf(
+			'<meta name="description" content="%s" />' . "\n",
+			esc_attr( wp_strip_all_tags( $description ) )
+		);
+	}
+}

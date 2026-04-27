@@ -14,6 +14,8 @@ Realistic next improvements for the WordPress Plugin Dev Skill.
 - Add screenshot-based manual review workflow for wp-admin, editor, and frontend output.
 - Add Figma/WordPress Design System notes while clearly marking experimental UI packages.
 - Add more Gutenberg block UI examples for Placeholder, ToolbarButton, InspectorControls, and mobile editor behavior.
+- Add deeper integrations docs for Classic Editor plus Block Editor parity, SEO output guards, cache plugin compatibility, and theme/page-builder adapter patterns.
+- Add WordPress Playground compatibility demo notes after target integrations are chosen.
 
 ## Scripts
 
@@ -38,6 +40,12 @@ Realistic next improvements for the WordPress Plugin Dev Skill.
   - optional contrast checks where static analysis is feasible
   - screenshot metadata support for manual review
   - frontend theme-compatibility hints
+- Improve compatibility heuristics in `audit-plugin.mjs` for:
+  - fewer false positives around guarded third-party references
+  - SEO rendered-output duplication patterns
+  - cache purge callback resolution
+  - optional builder/theme adapter scoping
+  - compatibility matrix detection and report quality
 
 ## Fixtures
 
@@ -49,6 +57,8 @@ Realistic next improvements for the WordPress Plugin Dev Skill.
 - Expand `test-fixtures/design-plugin` with more admin settings, dashboard, onboarding, block UI, modal, and frontend shortcode scenarios.
 - Add snapshot tests for design JSON output.
 - Add accessibility fixture coverage for focus management, field errors, live regions, and keyboard-only controls.
+- Expand `test-fixtures/compatibility-plugin` with Classic Editor plus Block Editor parity, SEO rendered-output cases, cache public/private output, page-builder adapters, and block theme examples.
+- Add snapshot tests for compatibility JSON output.
 
 ## Packaging
 
@@ -56,6 +66,8 @@ Realistic next improvements for the WordPress Plugin Dev Skill.
 - Add CI for this repository that runs `npm run smoke`, markdown link checks, and sync-tree comparisons.
 - Keep the performance fixture audit in CI and validate JSON output.
 - Keep the design fixture audit in CI and validate JSON output.
+- Keep the compatibility fixture audit in CI and validate JSON output.
+- Add a real integration test matrix only after selecting specific plugin/theme versions and documenting manual verification.
 - Document exact manual test steps for Codex, Claude Code, and Cursor discovery after installing from a clean checkout.
 - Verify Cursor Agent Skill discovery paths and slash invocation against current official Cursor docs before making stronger install claims.
 - Add a repository release checklist that includes `FINAL_QA_REPORT.md`, synced install targets, fixture audit output, and source-map review status.

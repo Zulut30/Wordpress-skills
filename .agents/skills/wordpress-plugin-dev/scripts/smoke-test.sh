@@ -47,6 +47,7 @@ references=(
 	"review-checklists.md"
 	"performance-optimization.md"
 	"design-ux-ui.md"
+	"integrations-compatibility.md"
 )
 
 for reference in "${references[@]}"; do
@@ -59,6 +60,7 @@ require_file "$SKILL_DIR/scripts/check-source-map.mjs"
 require_file "$SKILL_DIR/scripts/audit-plugin.mjs"
 require_dir "$ROOT/test-fixtures/performance-plugin"
 require_dir "$ROOT/test-fixtures/design-plugin"
+require_dir "$ROOT/test-fixtures/compatibility-plugin"
 
 if ! command -v node >/dev/null 2>&1; then
 	log "Node.js is not available. Next step: install Node.js LTS, then run npm install or npm ci."
@@ -105,6 +107,15 @@ if [ -d "$ROOT/test-fixtures/design-plugin" ]; then
 	node -e "JSON.parse(require('fs').readFileSync('/tmp/wordpress-plugin-dev-design-audit.json', 'utf8')); console.log('Design JSON parsed.')"
 else
 	log "Design fixture missing. Next step: add test-fixtures/design-plugin."
+fi
+
+if [ -d "$ROOT/test-fixtures/compatibility-plugin" ]; then
+	log "Running compatibility audit smoke check"
+	node "$SKILL_DIR/scripts/audit-plugin.mjs" "$ROOT/test-fixtures/compatibility-plugin" --compatibility
+	node "$SKILL_DIR/scripts/audit-plugin.mjs" "$ROOT/test-fixtures/compatibility-plugin" --compatibility --json >/tmp/wordpress-plugin-dev-compatibility-audit.json
+	node -e "JSON.parse(require('fs').readFileSync('/tmp/wordpress-plugin-dev-compatibility-audit.json', 'utf8')); console.log('Compatibility JSON parsed.')"
+else
+	log "Compatibility fixture missing. Next step: add test-fixtures/compatibility-plugin."
 fi
 
 log "Smoke test passed."

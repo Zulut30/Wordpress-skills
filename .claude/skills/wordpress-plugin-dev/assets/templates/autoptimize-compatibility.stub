@@ -1,0 +1,22 @@
+<?php
+/**
+ * Asset optimizer compatibility notes for {{PLUGIN_NAME}}.
+ */
+
+namespace {{VENDOR_NAMESPACE}}\{{PLUGIN_SLUG}}\Integrations\Assets;
+
+final class AutoptimizeCompatibility {
+	public function register_assets(): void {
+		wp_register_script(
+			'{{PLUGIN_SLUG}}-frontend',
+			plugins_url( 'build/frontend.js', {{PLUGIN_SLUG}}_PLUGIN_FILE ),
+			array(),
+			'{{PLUGIN_VERSION}}',
+			array( 'strategy' => 'defer', 'in_footer' => true )
+		);
+	}
+
+	public function get_manual_exclusion_note(): string {
+		return __( 'Only document optimization exclusions after confirming a real conflict with current plugin settings.', '{{TEXT_DOMAIN}}' );
+	}
+}

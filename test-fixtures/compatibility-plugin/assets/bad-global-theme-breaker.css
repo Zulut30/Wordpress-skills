@@ -1,0 +1,14 @@
+body {
+	margin: 0 !important;
+	font-family: Arial, sans-serif;
+}
+
+h1,
+button,
+input {
+	width: 900px !important;
+}
+
+.elementor-widget-container .some-private-node {
+	display: block;
+}

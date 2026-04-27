@@ -1,0 +1,21 @@
+<?php
+namespace {{VENDOR_NAMESPACE}}\{{PLUGIN_SLUG}}\Integrations\Seo;
+
+use {{VENDOR_NAMESPACE}}\{{PLUGIN_SLUG}}\Integrations\IntegrationInterface;
+
+final class SeopressIntegration implements IntegrationInterface {
+	public function get_name(): string { return 'SEOPress'; }
+
+	public function detect(): bool {
+		return defined( 'SEOPRESS_VERSION' ) || function_exists( 'seopress_get_service' );
+	}
+
+	public function register(): void {
+		// Verify current SEOPress hook docs before adding provider-specific filters.
+		add_filter( '{{PLUGIN_SLUG}}_seo_provider', static fn (): string => 'seopress' );
+	}
+
+	public function get_status(): string { return $this->detect() ? 'experimental' : 'not active'; }
+
+	public function get_notes(): array { return array( 'Check minimum SEOPress version before release claims.' ); }
+}

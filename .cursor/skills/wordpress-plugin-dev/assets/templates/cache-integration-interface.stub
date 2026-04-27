@@ -1,0 +1,17 @@
+<?php
+namespace {{VENDOR_NAMESPACE}}\{{PLUGIN_SLUG}}\Integrations\Cache;
+
+interface CacheIntegrationInterface {
+	public function is_available(): bool;
+
+	public function purge_url( string $url ): void;
+
+	public function purge_post( int $post_id ): void;
+
+	public function purge_all_warning(): string;
+
+	/**
+	 * @return string[]
+	 */
+	public function get_notes(): array;
+}

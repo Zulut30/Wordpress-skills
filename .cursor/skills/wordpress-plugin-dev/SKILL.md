@@ -1,6 +1,6 @@
 ---
 name: wordpress-plugin-dev
-description: "Helps agents develop, review, test, secure, optimize, design, package, and release modern WordPress plugins. Use for WordPress plugin architecture, Gutenberg block work, block.json, REST API, WP admin screens, shortcode implementation, Settings API, WP-CLI workflows, PHPUnit tests, wp-env environments, Plugin Check, WordPress.org release preparation, security audit, performance optimization, and plugin UI/UX design tasks."
+description: "Helps agents develop, review, test, secure, optimize, design, integrate, package, and release modern WordPress plugins. Use for WordPress plugin architecture, Gutenberg block work, block.json, REST API, WP admin screens, shortcode implementation, Settings API, WP-CLI workflows, PHPUnit tests, wp-env environments, Plugin Check, WordPress.org release preparation, security audit, performance optimization, plugin UI/UX design, Classic Editor compatibility, SEO/cache/theme/page-builder integrations, and compatibility audits."
 license: MIT
 compatibility: "Designed for Codex, Cursor, Claude Code, and other Agent Skills-compatible tools."
 ---
@@ -34,6 +34,15 @@ Before planning or editing, identify the primary task type:
 - `UX/accessibility review`
 - `visual polish`
 - `design system alignment`
+- `Classic Editor compatibility`
+- `SEO plugin integration`
+- `cache plugin compatibility`
+- `performance plugin compatibility`
+- `theme compatibility`
+- `page builder compatibility`
+- `compatibility audit`
+- `integration adapter implementation`
+- `compatibility matrix creation`
 - `testing/CI`
 - `release to WordPress.org`
 
@@ -66,6 +75,15 @@ Then inspect the plugin structure and load only the references needed for that t
 - Do not use placeholders as labels, do not rely on color alone, and give destructive actions clear labels plus confirmation.
 - Admin assets must be scoped to relevant screens, and generated UI text must be translation-ready.
 - If using experimental WordPress UI packages, verify current docs first.
+- Prefer WordPress core APIs before third-party plugin/theme-specific APIs.
+- Use feature detection before integration code; never fatal when an optional plugin, theme, or builder is missing.
+- Do not output duplicate SEO meta, schema, canonical, robots, Open Graph, or Twitter tags.
+- Do not cache user-specific/private data in public page cache, and do not purge all cache on every request.
+- Do not disable cache, SEO, or minification plugins as the first solution.
+- Do not load Elementor, Divi, or theme-specific adapters unless the dependency is detected.
+- Do not globally override theme CSS.
+- Classic Editor and Block Editor compatibility must use separate scoped assets/flows where needed.
+- Verify current third-party docs before release-sensitive integration work.
 
 ## Reference Routing
 
@@ -77,10 +95,11 @@ Then inspect the plugin structure and load only the references needed for that t
 - Interactivity API and script modules: `references/interactivity-api.md`
 - Performance optimization, hot paths, queries, caching, assets, REST/admin/block performance: `references/performance-optimization.md`
 - Design, admin UX, frontend output, Gutenberg UI, visual review, and a11y-aware polish: `references/design-ux-ui.md`
+- Classic Editor, SEO/cache/theme/page-builder integration, optional adapters, and compatibility audits: `references/integrations-compatibility.md`
 - i18n, accessibility, privacy, personal data workflows: `references/i18n-a11y-privacy.md`
 - `wp-env`, WP-CLI, PHPUnit, Plugin Check, CI: `references/testing-and-ci.md`
 - WordPress.org readme, assets, SVN/release workflow: `references/release-wordpress-org.md`
-- Review workflows and acceptance checklists for architecture, security, blocks, REST, admin settings, release, performance, design/UX/UI, and a11y/i18n: `references/review-checklists.md`
+- Review workflows and acceptance checklists for architecture, security, blocks, REST, admin settings, release, performance, design/UX/UI, integrations/compatibility, and a11y/i18n: `references/review-checklists.md`
 - Official source index and version-sensitive verification: `references/source-map.md`
 
 ## Common Workflows
@@ -200,6 +219,56 @@ Then inspect the plugin structure and load only the references needed for that t
 1. Define what the user sees before data exists, while work is in progress, after success, after failure, and at edge cases.
 2. Preserve user input on errors and announce important async updates where appropriate.
 3. Keep messages actionable, translatable, and safe.
+
+### audit-plugin-compatibility
+
+1. Read `references/integrations-compatibility.md` and the compatibility workflow in `references/review-checklists.md`.
+2. Identify required vs optional integrations and inspect detection, adapters, fallbacks, SEO output, cache behavior, theme CSS, builder code, and editor contexts.
+3. Produce a compatibility matrix with supported, partial, experimental, planned, not supported, and unknown statuses.
+4. Separate safe quick fixes from items requiring current third-party docs and manual testing.
+
+### add-classic-editor-fallback
+
+1. Check `use_block_editor_for_post_type()` and keep block/editor assets scoped.
+2. Add metabox or shortcode fallback only when users need non-block workflows.
+3. Share save/render services so block and classic flows do not diverge.
+4. Preserve nonce, capability, sanitization, and escaping.
+
+### add-seo-plugin-integration
+
+1. Detect active SEO plugins safely and verify current official docs first.
+2. Avoid duplicate meta, canonical, robots, Open Graph, Twitter, breadcrumbs, and schema output.
+3. Use documented hooks/APIs where available and fallback only when no SEO plugin handles the concern.
+
+### add-cache-plugin-compatibility
+
+1. Separate public cacheable output from private/user-specific output.
+2. Add targeted purge/invalidation hooks only for relevant content or settings changes.
+3. Avoid purge-all on normal requests and document manual cache exclusions only as fallback.
+
+### add-theme-compatibility-layer
+
+1. Prefer semantic, theme-friendly output and scoped CSS before theme-specific hooks.
+2. Detect themes safely and keep adapters optional.
+3. Respect block themes, classic themes, `theme.json`, responsive layout, and RTL.
+
+### add-page-builder-adapter
+
+1. Load Elementor, Divi, or builder-specific code only after dependency detection.
+2. Use documented hooks/APIs and avoid builder internals.
+3. Provide shortcode/block fallback and keep builder assets scoped.
+
+### create-compatibility-matrix
+
+1. List integrations, status, detection, docs, what works, risks, known issues, and manual tests.
+2. Mark lightly tested or version-sensitive work as experimental.
+3. Use unknown instead of pretending support exists.
+
+### troubleshoot-plugin-conflict
+
+1. Reproduce with the smallest plugin/theme/cache/editor combination possible.
+2. Identify whether the conflict is security, performance, design, SEO, cache, theme, builder, or editor-context related.
+3. Fix with feature detection, scoped assets, public hooks, graceful fallback, or documentation rather than global disabling.
 
 ## When Unsure
 

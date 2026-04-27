@@ -1,0 +1,39 @@
+<?php
+/**
+ * Optional integration registry for {{PLUGIN_NAME}}.
+ */
+
+namespace {{VENDOR_NAMESPACE}}\{{PLUGIN_SLUG}}\Integrations;
+
+final class IntegrationRegistry {
+	/** @var IntegrationInterface[] */
+	private array $integrations = array();
+
+	public function add( IntegrationInterface $integration ): void {
+		$this->integrations[] = $integration;
+	}
+
+	public function register_detected(): void {
+		foreach ( $this->integrations as $integration ) {
+			if ( ! $integration->detect() ) {
+				continue;
+			}
+
+			$integration->register();
+		}
+	}
+
+	/**
+	 * @return array<int,array{name:string,status:string,notes:string[]}>
+	 */
+	public function get_statuses(): array {
+		return array_map(
+			static fn ( IntegrationInterface $integration ): array => array(
+				'name'   => $integration->get_name(),
+				'status' => $integration->get_status(),
+				'notes'  => $integration->get_notes(),
+			),
+			$this->integrations
+		);
+	}
+}

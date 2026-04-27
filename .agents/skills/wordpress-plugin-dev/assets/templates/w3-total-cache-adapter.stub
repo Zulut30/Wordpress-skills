@@ -1,0 +1,24 @@
+<?php
+namespace {{VENDOR_NAMESPACE}}\{{PLUGIN_SLUG}}\Integrations\Cache;
+
+final class W3TotalCacheAdapter implements CacheIntegrationInterface {
+	public function is_available(): bool {
+		return defined( 'W3TC_VERSION' ) || function_exists( 'w3tc_flush_post' );
+	}
+
+	public function purge_url( string $url ): void {
+		// W3TC URL purge APIs vary; verify current docs before adding code.
+	}
+
+	public function purge_post( int $post_id ): void {
+		if ( $this->is_available() && function_exists( 'w3tc_flush_post' ) ) {
+			w3tc_flush_post( $post_id );
+		}
+	}
+
+	public function purge_all_warning(): string {
+		return __( 'Avoid W3TC full-cache purge unless the user explicitly requests it.', '{{TEXT_DOMAIN}}' );
+	}
+
+	public function get_notes(): array { return array( 'Use generic cache-safe behavior if public APIs are unclear.' ); }
+}

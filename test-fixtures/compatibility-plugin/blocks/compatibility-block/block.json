@@ -1,0 +1,10 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "compatibility-fixture/card",
+  "title": "Compatibility Fixture Card",
+  "category": "widgets",
+  "textdomain": "compatibility-fixture",
+  "render": "file:./render.php",
+  "style": "file:../../assets/good-theme-friendly.css"
+}

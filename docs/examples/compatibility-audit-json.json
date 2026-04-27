@@ -1,0 +1,472 @@
+{
+  "tool": "wordpress-plugin-dev audit-plugin",
+  "limitation": "This is a heuristic scanner for agent review triage, not a security, performance, accessibility, design, or compatibility oracle. It can miss issues and produce false positives; verify findings manually against current WordPress docs, profiling, real UI review, third-party docs, and real integration tests.",
+  "targetPath": "D:\\wp-skill\\test-fixtures\\compatibility-plugin",
+  "modes": {
+    "security": true,
+    "performance": false,
+    "performanceOnly": false,
+    "design": false,
+    "designOnly": false,
+    "compatibility": true,
+    "compatibilityOnly": false
+  },
+  "summary": {
+    "phpFiles": 14,
+    "blockJsonFiles": 1,
+    "mainPluginFile": "compatibility-plugin.php",
+    "findings": {
+      "error": 0,
+      "warning": 31,
+      "info": 11
+    },
+    "performanceFindings": 0,
+    "designFindings": 0,
+    "compatibilityFindings": 31
+  },
+  "findings": [
+    {
+      "severity": "warning",
+      "category": "security",
+      "rule": "security.output-without-obvious-escaping",
+      "file": "src/ClassicEditorBad.php",
+      "line": 16,
+      "message": "Output statement does not include an obvious escaping function.",
+      "remediation": "Escape late with esc_html(), esc_attr(), esc_url(), wp_kses(), or another context-appropriate escaping API."
+    },
+    {
+      "severity": "warning",
+      "category": "security",
+      "rule": "security.output-without-obvious-escaping",
+      "file": "src/SeoBad.php",
+      "line": 11,
+      "message": "Output statement does not include an obvious escaping function.",
+      "remediation": "Escape late with esc_html(), esc_attr(), esc_url(), wp_kses(), or another context-appropriate escaping API."
+    },
+    {
+      "severity": "warning",
+      "category": "security",
+      "rule": "security.output-without-obvious-escaping",
+      "file": "src/SeoBad.php",
+      "line": 12,
+      "message": "Output statement does not include an obvious escaping function.",
+      "remediation": "Escape late with esc_html(), esc_attr(), esc_url(), wp_kses(), or another context-appropriate escaping API."
+    },
+    {
+      "severity": "warning",
+      "category": "security",
+      "rule": "security.output-without-obvious-escaping",
+      "file": "src/SeoBad.php",
+      "line": 13,
+      "message": "Output statement does not include an obvious escaping function.",
+      "remediation": "Escape late with esc_html(), esc_attr(), esc_url(), wp_kses(), or another context-appropriate escaping API."
+    },
+    {
+      "severity": "warning",
+      "category": "security",
+      "rule": "security.output-without-obvious-escaping",
+      "file": "src/SeoBad.php",
+      "line": 14,
+      "message": "Output statement does not include an obvious escaping function.",
+      "remediation": "Escape late with esc_html(), esc_attr(), esc_url(), wp_kses(), or another context-appropriate escaping API."
+    },
+    {
+      "severity": "warning",
+      "category": "security",
+      "rule": "security.output-without-obvious-escaping",
+      "file": "src/SeoBad.php",
+      "line": 15,
+      "message": "Output statement does not include an obvious escaping function.",
+      "remediation": "Escape late with esc_html(), esc_attr(), esc_url(), wp_kses(), or another context-appropriate escaping API."
+    },
+    {
+      "severity": "warning",
+      "category": "security",
+      "rule": "security.output-without-obvious-escaping",
+      "file": "src/ThemeBad.php",
+      "line": 11,
+      "message": "Output statement does not include an obvious escaping function.",
+      "remediation": "Escape late with esc_html(), esc_attr(), esc_url(), wp_kses(), or another context-appropriate escaping API."
+    },
+    {
+      "severity": "info",
+      "category": "blocks",
+      "rule": "blocks.dynamic-render-reminder",
+      "file": "blocks/compatibility-block/block.json",
+      "line": 1,
+      "message": "Dynamic block render output should be validated and escaped.",
+      "remediation": "Treat attributes as untrusted in render.php or render callbacks; validate, sanitize, authorize if needed, and escape late."
+    },
+    {
+      "severity": "warning",
+      "category": "build",
+      "rule": "build.package-json-missing-lint:js",
+      "file": "package.json",
+      "line": 1,
+      "message": "package.json is missing scripts.lint:js.",
+      "remediation": "Add a lint:js script when the plugin ships block/editor JavaScript."
+    },
+    {
+      "severity": "warning",
+      "category": "build",
+      "rule": "build.package-json-missing-style-lint",
+      "file": "package.json",
+      "line": 1,
+      "message": "package.json is missing a CSS/style lint script.",
+      "remediation": "Add lint:css or lint:style using wp-scripts lint-style when the plugin has CSS or SCSS."
+    },
+    {
+      "severity": "warning",
+      "category": "build",
+      "rule": "build.composer-missing-lint-script",
+      "file": "composer.json",
+      "line": 1,
+      "message": "composer.json does not define a PHP lint script.",
+      "remediation": "Add a lint or lint:php script that runs PHPCS with WPCS."
+    },
+    {
+      "severity": "warning",
+      "category": "compatibility",
+      "rule": "compatibility.optional-dependency.direct-plugin-include",
+      "file": "src/BadIntegrationExamples.php",
+      "line": 12,
+      "message": "Code includes files from another plugin directory.",
+      "why": "Directly including third-party plugin files is fragile and can fatal when paths or versions change.",
+      "remediation": "Use feature detection and documented public APIs/hooks instead of requiring third-party plugin internals.",
+      "confidence": "high"
+    },
+    {
+      "severity": "warning",
+      "category": "compatibility",
+      "rule": "compatibility.optional-dependency.unguarded-reference",
+      "file": "src/BadIntegrationExamples.php",
+      "line": 16,
+      "message": "Yoast SEO appears to be referenced without nearby feature detection.",
+      "why": "Optional integrations can fatal or misbehave when the plugin/theme/builder is inactive or changes APIs.",
+      "remediation": "Move integration code into an adapter and guard it with class_exists(), function_exists(), defined(), did_action(), or a documented detection method.",
+      "confidence": "medium"
+    },
+    {
+      "severity": "warning",
+      "category": "compatibility",
+      "rule": "compatibility.optional-dependency.unguarded-reference",
+      "file": "src/BadIntegrationExamples.php",
+      "line": 17,
+      "message": "Elementor appears to be referenced without nearby feature detection.",
+      "why": "Optional integrations can fatal or misbehave when the plugin/theme/builder is inactive or changes APIs.",
+      "remediation": "Move integration code into an adapter and guard it with class_exists(), function_exists(), defined(), did_action(), or a documented detection method.",
+      "confidence": "medium"
+    },
+    {
+      "severity": "warning",
+      "category": "compatibility",
+      "rule": "compatibility.optional-dependency.unguarded-reference",
+      "file": "src/ElementorBad.php",
+      "line": 9,
+      "message": "Elementor appears to be referenced without nearby feature detection.",
+      "why": "Optional integrations can fatal or misbehave when the plugin/theme/builder is inactive or changes APIs.",
+      "remediation": "Move integration code into an adapter and guard it with class_exists(), function_exists(), defined(), did_action(), or a documented detection method.",
+      "confidence": "medium"
+    },
+    {
+      "severity": "warning",
+      "category": "compatibility",
+      "rule": "compatibility.editor.metabox-save-missing-security",
+      "file": "src/ClassicEditorBad.php",
+      "line": 20,
+      "message": "Classic Editor metabox save flow lacks an obvious nonce and capability check.",
+      "why": "Classic fallbacks must preserve the same security posture as block/editor saves.",
+      "remediation": "Add wp_verify_nonce()/check_admin_referer(), current_user_can(), sanitization, and escaping.",
+      "confidence": "medium"
+    },
+    {
+      "severity": "info",
+      "category": "compatibility",
+      "rule": "compatibility.editor.tinymce-assets-not-scoped",
+      "file": "src/ClassicEditorBad.php",
+      "line": 28,
+      "message": "TinyMCE/editor integration has no obvious screen or editor-context guard.",
+      "why": "Classic editor assets loaded globally can slow wp-admin and conflict with block editor screens.",
+      "remediation": "Gate TinyMCE assets by screen ID, post type, and editor context.",
+      "confidence": "low"
+    },
+    {
+      "severity": "warning",
+      "category": "compatibility",
+      "rule": "compatibility.seo.unconditional-head-output",
+      "file": "src/SeoBad.php",
+      "line": 11,
+      "message": "SEO-relevant head output appears without an SEO plugin guard.",
+      "why": "Manual title, canonical, meta, social, or schema output can duplicate SEO plugin output.",
+      "remediation": "Add an SEO output guard, use documented SEO plugin hooks, and fallback only when no SEO plugin handles the concern.",
+      "confidence": "medium"
+    },
+    {
+      "severity": "info",
+      "category": "compatibility",
+      "rule": "compatibility.seo.output-not-filterable",
+      "file": "src/SeoBad.php",
+      "line": 11,
+      "message": "SEO-relevant output is not obviously filterable.",
+      "why": "SEO integrations often need project-specific overrides without editing plugin code.",
+      "remediation": "Expose documented filters around fallback SEO output and document when they run.",
+      "confidence": "low"
+    },
+    {
+      "severity": "warning",
+      "category": "compatibility",
+      "rule": "compatibility.seo.unconditional-head-output",
+      "file": "src/SeoBad.php",
+      "line": 12,
+      "message": "SEO-relevant head output appears without an SEO plugin guard.",
+      "why": "Manual title, canonical, meta, social, or schema output can duplicate SEO plugin output.",
+      "remediation": "Add an SEO output guard, use documented SEO plugin hooks, and fallback only when no SEO plugin handles the concern.",
+      "confidence": "medium"
+    },
+    {
+      "severity": "info",
+      "category": "compatibility",
+      "rule": "compatibility.seo.output-not-filterable",
+      "file": "src/SeoBad.php",
+      "line": 12,
+      "message": "SEO-relevant output is not obviously filterable.",
+      "why": "SEO integrations often need project-specific overrides without editing plugin code.",
+      "remediation": "Expose documented filters around fallback SEO output and document when they run.",
+      "confidence": "low"
+    },
+    {
+      "severity": "warning",
+      "category": "compatibility",
+      "rule": "compatibility.seo.unconditional-head-output",
+      "file": "src/SeoBad.php",
+      "line": 13,
+      "message": "SEO-relevant head output appears without an SEO plugin guard.",
+      "why": "Manual title, canonical, meta, social, or schema output can duplicate SEO plugin output.",
+      "remediation": "Add an SEO output guard, use documented SEO plugin hooks, and fallback only when no SEO plugin handles the concern.",
+      "confidence": "medium"
+    },
+    {
+      "severity": "info",
+      "category": "compatibility",
+      "rule": "compatibility.seo.output-not-filterable",
+      "file": "src/SeoBad.php",
+      "line": 13,
+      "message": "SEO-relevant output is not obviously filterable.",
+      "why": "SEO integrations often need project-specific overrides without editing plugin code.",
+      "remediation": "Expose documented filters around fallback SEO output and document when they run.",
+      "confidence": "low"
+    },
+    {
+      "severity": "warning",
+      "category": "compatibility",
+      "rule": "compatibility.seo.unconditional-head-output",
+      "file": "src/SeoBad.php",
+      "line": 14,
+      "message": "SEO-relevant head output appears without an SEO plugin guard.",
+      "why": "Manual title, canonical, meta, social, or schema output can duplicate SEO plugin output.",
+      "remediation": "Add an SEO output guard, use documented SEO plugin hooks, and fallback only when no SEO plugin handles the concern.",
+      "confidence": "medium"
+    },
+    {
+      "severity": "info",
+      "category": "compatibility",
+      "rule": "compatibility.seo.output-not-filterable",
+      "file": "src/SeoBad.php",
+      "line": 14,
+      "message": "SEO-relevant output is not obviously filterable.",
+      "why": "SEO integrations often need project-specific overrides without editing plugin code.",
+      "remediation": "Expose documented filters around fallback SEO output and document when they run.",
+      "confidence": "low"
+    },
+    {
+      "severity": "warning",
+      "category": "compatibility",
+      "rule": "compatibility.seo.unconditional-head-output",
+      "file": "src/SeoBad.php",
+      "line": 15,
+      "message": "SEO-relevant head output appears without an SEO plugin guard.",
+      "why": "Manual title, canonical, meta, social, or schema output can duplicate SEO plugin output.",
+      "remediation": "Add an SEO output guard, use documented SEO plugin hooks, and fallback only when no SEO plugin handles the concern.",
+      "confidence": "medium"
+    },
+    {
+      "severity": "info",
+      "category": "compatibility",
+      "rule": "compatibility.seo.output-not-filterable",
+      "file": "src/SeoBad.php",
+      "line": 15,
+      "message": "SEO-relevant output is not obviously filterable.",
+      "why": "SEO integrations often need project-specific overrides without editing plugin code.",
+      "remediation": "Expose documented filters around fallback SEO output and document when they run.",
+      "confidence": "low"
+    },
+    {
+      "severity": "warning",
+      "category": "compatibility",
+      "rule": "compatibility.cache.purge-all-on-request",
+      "file": "src/CacheBad.php",
+      "line": 11,
+      "message": "Full cache purge appears in a normal request hook or broad callback.",
+      "why": "Purging all cache during normal requests can destroy site performance and conflict with cache plugins.",
+      "remediation": "Purge only affected URLs/posts on content/settings changes or explicit admin maintenance actions.",
+      "confidence": "high"
+    },
+    {
+      "severity": "warning",
+      "category": "compatibility",
+      "rule": "compatibility.cache.purge-all-on-request",
+      "file": "src/CacheBad.php",
+      "line": 12,
+      "message": "Full cache purge appears in a normal request hook or broad callback.",
+      "why": "Purging all cache during normal requests can destroy site performance and conflict with cache plugins.",
+      "remediation": "Purge only affected URLs/posts on content/settings changes or explicit admin maintenance actions.",
+      "confidence": "high"
+    },
+    {
+      "severity": "warning",
+      "category": "compatibility",
+      "rule": "compatibility.cache.user-specific-public-output",
+      "file": "src/CacheBad.php",
+      "line": 18,
+      "message": "Frontend output may include user-specific data without a cache compatibility note.",
+      "why": "User-specific data can leak through public page caches if not isolated.",
+      "remediation": "Separate private fragments, set no-cache behavior where appropriate, or document a private/ESI strategy.",
+      "confidence": "medium"
+    },
+    {
+      "severity": "warning",
+      "category": "compatibility",
+      "rule": "compatibility.cache.random-cache-busting",
+      "file": "src/CacheBad.php",
+      "line": 24,
+      "message": "Asset or URL cache busting appears to use random/time-based values.",
+      "why": "Random query strings defeat browser/CDN/cache optimization and can fight performance plugins.",
+      "remediation": "Use plugin version, filemtime during development, or generated asset metadata.",
+      "confidence": "medium"
+    },
+    {
+      "severity": "warning",
+      "category": "compatibility",
+      "rule": "compatibility.theme.global-frontend-css",
+      "file": "assets/bad-global-theme-breaker.css",
+      "line": 1,
+      "message": "Frontend stylesheet contains broad/global selectors.",
+      "why": "Global CSS can break active themes, block themes, and page-builder layouts.",
+      "remediation": "Scope CSS under a plugin wrapper or block class and avoid resets.",
+      "confidence": "medium"
+    },
+    {
+      "severity": "info",
+      "category": "compatibility",
+      "rule": "compatibility.theme.important-review",
+      "file": "assets/bad-global-theme-breaker.css",
+      "line": 2,
+      "message": "Stylesheet uses !important.",
+      "why": "Specificity fights are a common source of theme and builder conflicts.",
+      "remediation": "Reduce specificity conflicts through scoped selectors and component classes.",
+      "confidence": "low"
+    },
+    {
+      "severity": "warning",
+      "category": "compatibility",
+      "rule": "compatibility.theme.global-frontend-css",
+      "file": "assets/bad-global-theme-breaker.css",
+      "line": 6,
+      "message": "Frontend stylesheet contains broad/global selectors.",
+      "why": "Global CSS can break active themes, block themes, and page-builder layouts.",
+      "remediation": "Scope CSS under a plugin wrapper or block class and avoid resets.",
+      "confidence": "medium"
+    },
+    {
+      "severity": "warning",
+      "category": "compatibility",
+      "rule": "compatibility.theme.global-frontend-css",
+      "file": "assets/bad-global-theme-breaker.css",
+      "line": 7,
+      "message": "Frontend stylesheet contains broad/global selectors.",
+      "why": "Global CSS can break active themes, block themes, and page-builder layouts.",
+      "remediation": "Scope CSS under a plugin wrapper or block class and avoid resets.",
+      "confidence": "medium"
+    },
+    {
+      "severity": "warning",
+      "category": "compatibility",
+      "rule": "compatibility.theme.global-frontend-css",
+      "file": "assets/bad-global-theme-breaker.css",
+      "line": 8,
+      "message": "Frontend stylesheet contains broad/global selectors.",
+      "why": "Global CSS can break active themes, block themes, and page-builder layouts.",
+      "remediation": "Scope CSS under a plugin wrapper or block class and avoid resets.",
+      "confidence": "medium"
+    },
+    {
+      "severity": "info",
+      "category": "compatibility",
+      "rule": "compatibility.theme.important-review",
+      "file": "assets/bad-global-theme-breaker.css",
+      "line": 9,
+      "message": "Stylesheet uses !important.",
+      "why": "Specificity fights are a common source of theme and builder conflicts.",
+      "remediation": "Reduce specificity conflicts through scoped selectors and component classes.",
+      "confidence": "low"
+    },
+    {
+      "severity": "info",
+      "category": "compatibility",
+      "rule": "compatibility.theme.fixed-width-review",
+      "file": "assets/bad-global-theme-breaker.css",
+      "line": 9,
+      "message": "CSS uses a fixed pixel width.",
+      "why": "Fixed widths can break responsive themes and builder columns.",
+      "remediation": "Use max-width, minmax(), flex/grid, and logical properties where practical.",
+      "confidence": "low"
+    },
+    {
+      "severity": "info",
+      "category": "compatibility",
+      "rule": "compatibility.theme.frontend-markup-without-wrapper-class",
+      "file": "src/ThemeBad.php",
+      "line": 11,
+      "message": "Frontend markup has no obvious scoped wrapper class.",
+      "why": "Wrapper classes help scope CSS without overriding theme elements globally.",
+      "remediation": "Add a plugin or block wrapper class and keep markup semantic.",
+      "confidence": "low"
+    },
+    {
+      "severity": "warning",
+      "category": "compatibility",
+      "rule": "compatibility.theme.theme-file-assumption",
+      "file": "src/ThemeBad.php",
+      "line": 16,
+      "message": "Code appears to depend on theme files or paths.",
+      "why": "Plugins should not assume a theme file structure or edit/include theme internals.",
+      "remediation": "Use public hooks, templates, blocks, or documented theme APIs instead.",
+      "confidence": "medium"
+    },
+    {
+      "severity": "warning",
+      "category": "compatibility",
+      "rule": "compatibility.builder.unguarded-builder-reference",
+      "file": "src/BadIntegrationExamples.php",
+      "line": 17,
+      "message": "Page-builder-specific code appears without a dependency guard.",
+      "why": "Builder adapters should not load when the builder is inactive.",
+      "remediation": "Move code into an optional adapter and detect Elementor/Divi through documented signals.",
+      "confidence": "medium"
+    },
+    {
+      "severity": "warning",
+      "category": "compatibility",
+      "rule": "compatibility.builder.unguarded-builder-reference",
+      "file": "src/ElementorBad.php",
+      "line": 9,
+      "message": "Page-builder-specific code appears without a dependency guard.",
+      "why": "Builder adapters should not load when the builder is inactive.",
+      "remediation": "Move code into an optional adapter and detect Elementor/Divi through documented signals.",
+      "confidence": "medium"
+    }
+  ],
+  "compatibility": {
+    "limitation": "Compatibility findings are static heuristics. They cannot prove support for real plugin/theme/builder versions; verify with current third-party docs and manual tests."
+  }
+}

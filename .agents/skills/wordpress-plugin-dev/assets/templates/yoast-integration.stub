@@ -1,0 +1,27 @@
+<?php
+namespace {{VENDOR_NAMESPACE}}\{{PLUGIN_SLUG}}\Integrations\Seo;
+
+use {{VENDOR_NAMESPACE}}\{{PLUGIN_SLUG}}\Integrations\IntegrationInterface;
+
+final class YoastIntegration implements IntegrationInterface {
+	public function get_name(): string {
+		return 'Yoast SEO';
+	}
+
+	public function detect(): bool {
+		return defined( 'WPSEO_VERSION' ) || class_exists( 'YoastSEO', false );
+	}
+
+	public function register(): void {
+		// Verify current Yoast schema/meta docs before filling these hooks.
+		add_filter( '{{PLUGIN_SLUG}}_seo_provider', static fn (): string => 'yoast' );
+	}
+
+	public function get_status(): string {
+		return $this->detect() ? 'experimental' : 'not active';
+	}
+
+	public function get_notes(): array {
+		return array( 'Optional adapter. Uses public documented hooks only.' );
+	}
+}

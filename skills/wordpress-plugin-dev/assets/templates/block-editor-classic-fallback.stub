@@ -1,0 +1,47 @@
+<?php
+/**
+ * Block registration plus shortcode fallback for {{PLUGIN_NAME}}.
+ */
+
+namespace {{VENDOR_NAMESPACE}}\{{PLUGIN_SLUG}}\Blocks;
+
+final class BlockAndShortcodeFallback {
+	public function register(): void {
+		add_action( 'init', array( $this, 'register_block' ) );
+		add_shortcode( '{{PLUGIN_SLUG}}', array( $this, 'render_shortcode' ) );
+	}
+
+	public function register_block(): void {
+		register_block_type(
+			__DIR__ . '/../../blocks/{{PLUGIN_SLUG}}',
+			array(
+				'render_callback' => array( $this, 'render_block' ),
+			)
+		);
+	}
+
+	public function render_block( array $attributes, string $content = '' ): string {
+		return $this->render_shared( $attributes );
+	}
+
+	public function render_shortcode( array $atts = array() ): string {
+		$attributes = shortcode_atts(
+			array(
+				'title' => '',
+			),
+			$atts,
+			'{{PLUGIN_SLUG}}'
+		);
+
+		return $this->render_shared( $attributes );
+	}
+
+	private function render_shared( array $attributes ): string {
+		$title = isset( $attributes['title'] ) ? sanitize_text_field( (string) $attributes['title'] ) : '';
+
+		return sprintf(
+			'<div class="{{ROOT_CLASS}}">%s</div>',
+			esc_html( $title )
+		);
+	}
+}

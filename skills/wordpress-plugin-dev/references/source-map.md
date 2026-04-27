@@ -403,7 +403,290 @@ This map uses official WordPress Developer Resources, WordPress.org Plugin Direc
 
 - Design guidance must not override security, accessibility, performance, or i18n rules.
 
-## 23. WordPress.org `readme.txt` and release process
+## 23. Integrations and compatibility
+
+### Classic Editor / editor compatibility
+
+- Title: Classic Editor plugin
+- Official URL: https://wordpress.org/plugins/classic-editor/
+- What to use it for: Classic Editor plugin status and context.
+- When to verify online: Before claiming Classic Editor compatibility or support status.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Classic Editor is optional and context-dependent.
+
+- Title: Write Posts Classic Editor
+- Official URL: https://wordpress.org/documentation/article/write-posts-classic-editor/
+- What to use it for: User workflow context for Classic Editor fallbacks.
+- When to verify online: Before writing user-facing Classic Editor docs.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Use for workflow expectations, not low-level plugin APIs.
+
+- Title: Custom Meta Boxes
+- Official URL: https://developer.wordpress.org/plugins/metadata/custom-meta-boxes/
+- What to use it for: Classic metabox UI and save handlers.
+- When to verify online: Before implementing metabox fallbacks.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Metabox saves need nonce, capability, sanitization, and escaping.
+
+- Title: Block Editor Handbook
+- Official URL: https://developer.wordpress.org/block-editor/
+- What to use it for: Block/editor extension context and editor-scoped assets.
+- When to verify online: Before adding editor-specific compatibility behavior.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Do not assume all edit screens use the block editor.
+
+- Title: Block Metadata / `block.json`
+- Official URL: https://developer.wordpress.org/block-editor/reference-guides/block-api/block-metadata/
+- What to use it for: Block metadata, asset fields, render behavior, and block-scoped assets.
+- When to verify online: Before relying on newer metadata fields or block asset behavior.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Prefer block metadata and conditional assets for editor/frontend compatibility.
+
+- Title: `use_block_editor_for_post_type()`
+- Official URL: https://developer.wordpress.org/reference/functions/use_block_editor_for_post_type/
+- What to use it for: Per-post-type block editor compatibility checks.
+- When to verify online: Before branching Classic/Block Editor behavior.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Check context instead of guessing editor availability.
+
+### SEO plugins
+
+- Title: Yoast Developer Portal
+- Official URL: https://developer.yoast.com/
+- What to use it for: Current Yoast SEO developer APIs and extension docs.
+- When to verify online: Before release-sensitive Yoast integration.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Use public APIs, not private internals.
+
+- Title: Yoast APIs and classes
+- Official URL: https://developer.yoast.com/customization/apis/using-apis-classes/
+- What to use it for: Yoast API/class loading timing.
+- When to verify online: Before referencing Yoast classes.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Guard optional classes and hook adapter loading after plugins are available.
+
+- Title: Yoast REST API
+- Official URL: https://developer.yoast.com/customization/apis/rest-api/
+- What to use it for: Headless/REST SEO metadata.
+- When to verify online: Before exposing SEO data through REST.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Avoid duplicating data already provided by Yoast.
+
+- Title: Yoast Schema API
+- Official URL: https://developer.yoast.com/features/schema/api/
+- What to use it for: Schema graph extension.
+- When to verify online: Before adding Yoast schema graph integration.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: SEO integrations must avoid duplicate meta/schema output.
+
+- Title: Rank Math Filters and Hooks API
+- Official URL: https://rankmath.com/kb/filters-hooks-api-developer/
+- What to use it for: Rank Math documented hooks and filters.
+- When to verify online: Before implementing Rank Math adapters.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Avoid duplicate schema, breadcrumbs, robots, canonical, and social meta.
+
+- Title: Rank Math Filters and Hooks
+- Official URL: https://rankmath.com/docs/filters-and-hooks/
+- What to use it for: Additional Rank Math hook references.
+- When to verify online: Before release claims or hook-specific code.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Mark lightly tested support as experimental.
+
+- Title: AIOSEO Developer Documentation
+- Official URL: https://aioseo.com/doc-categories/developer-documentation/
+- What to use it for: AIOSEO developer APIs.
+- When to verify online: Before adding AIOSEO support.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Keep integration optional and guarded.
+
+- Title: AIOSEO Filter Hooks
+- Official URL: https://aioseo.com/doc-categories/filter-hooks/
+- What to use it for: AIOSEO hook/filter names.
+- When to verify online: Before using hook signatures.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Do not output fallback meta/schema when AIOSEO owns it.
+
+- Title: SEOPress Hooks
+- Official URL: https://www.seopress.org/support/hooks/
+- What to use it for: SEOPress hook references.
+- When to verify online: Before SEOPress-specific code.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Verify version-specific hooks.
+
+- Title: SEOPress Hooks Guide
+- Official URL: https://www.seopress.org/support/guides/how-to-use-seopress-hooks/
+- What to use it for: SEOPress usage context.
+- When to verify online: Before adapter implementation.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Use examples as context, not copied implementation.
+
+- Title: The SEO Framework Action Reference
+- Official URL: https://kb.theseoframework.com/kb/action-reference-for-the-seo-framework/
+- What to use it for: The SEO Framework actions/filters.
+- When to verify online: Before adding support or release claims.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Verify major-release behavior before marking supported.
+
+### Cache/performance plugins
+
+- Title: WP Rocket Docs
+- Official URL: https://docs.wp-rocket.me/
+- What to use it for: WP Rocket cache, compatibility, exclusions, and PHP functions.
+- When to verify online: Before purge/preload/exclusion logic.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Do not disable cache as a first fix; prefer targeted integration.
+
+- Title: LiteSpeed Cache for WordPress API
+- Official URL: https://docs.litespeedtech.com/lscache/lscwp/api/
+- What to use it for: LiteSpeed public API and purge hooks.
+- When to verify online: Before LiteSpeed-specific integration.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Cache integrations must avoid private data leakage and over-purging.
+
+- Title: LiteSpeed Cache behavior
+- Official URL: https://docs.litespeedtech.com/lscache/lscwp/cache/
+- What to use it for: Cache behavior, ESI, and private cache considerations.
+- When to verify online: Before caching forms, nonces, or user-specific fragments.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Never cache user-specific output publicly without a private/ESI strategy.
+
+- Title: W3 Total Cache Support
+- Official URL: https://www.boldgrid.com/support/w3-total-cache/
+- What to use it for: W3 Total Cache documentation and behavior.
+- When to verify online: Before W3TC-specific support.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Use generic cache-safe design if public APIs are unclear.
+
+- Title: Autoptimize plugin page
+- Official URL: https://wordpress.org/plugins/autoptimize/
+- What to use it for: Plugin status and optimization context.
+- When to verify online: Before support claims.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Use standard enqueues and dependencies; do not disable optimization first.
+
+- Title: LiteSpeed Cache plugin page
+- Official URL: https://wordpress.org/plugins/litespeed-cache/
+- What to use it for: Plugin availability and user-facing context.
+- When to verify online: Before compatibility claims.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Combine with official LiteSpeed docs for code-level work.
+
+- Title: W3 Total Cache plugin page
+- Official URL: https://wordpress.org/plugins/w3-total-cache/
+- What to use it for: Plugin availability and user-facing context.
+- When to verify online: Before compatibility claims.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Hosting/CDN/server cache can dominate behavior; document assumptions.
+
+### Themes
+
+- Title: Astra Developer Docs
+- Official URL: https://developers.wpastra.com/astra-theme/
+- What to use it for: Astra developer concepts.
+- When to verify online: Before Astra-specific adapters.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Theme compatibility should prefer generic WordPress APIs before theme-specific hooks.
+
+- Title: Astra Hooks
+- Official URL: https://developers.wpastra.com/astra-theme/reference/hooks/
+- What to use it for: Astra hook references.
+- When to verify online: Before using Astra hook names or parameters.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Guard with theme detection and never fatal on theme switch.
+
+- Title: GeneratePress Hooks
+- Official URL: https://docs.generatepress.com/collection/hooks/
+- What to use it for: GeneratePress hook locations.
+- When to verify online: Before GeneratePress-specific integration.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Use theme-specific hooks only when generic placement is insufficient.
+
+- Title: GeneratePress Filters
+- Official URL: https://docs.generatepress.com/collection/filters/
+- What to use it for: GeneratePress filter references.
+- When to verify online: Before using filters.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Mark untested support as experimental.
+
+- Title: Kadence Theme Hooks
+- Official URL: https://www.kadencewp.com/help-center/docs/kadence-theme/theme-hooks/
+- What to use it for: Kadence hook locations.
+- When to verify online: Before Kadence-specific placement.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Avoid hardcoded breakpoints or layout assumptions.
+
+- Title: OceanWP Hooks
+- Official URL: https://docs.oceanwp.org/category/376-hooks
+- What to use it for: OceanWP hook references.
+- When to verify online: Before OceanWP-specific code.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Keep adapter optional.
+
+- Title: Blocksy Docs
+- Official URL: https://creativethemes.com/blocksy/docs/
+- What to use it for: Blocksy theme context.
+- When to verify online: Before Blocksy support claims.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Theme-friendly markup/CSS comes before theme-specific adapters.
+
+### Page builders
+
+- Title: Elementor Developer Docs
+- Official URL: https://developers.elementor.com/docs/
+- What to use it for: Elementor addon architecture, widgets, scripts, controls, and extension points.
+- When to verify online: Before Elementor adapter code.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Elementor integrations are optional and should not load unless detected.
+
+- Title: Elementor Hooks
+- Official URL: https://developers.elementor.com/docs/hooks/
+- What to use it for: Elementor PHP/JS hook lifecycle.
+- When to verify online: Before registering widgets or editor/frontend hooks.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Avoid private builder internals.
+
+- Title: Hello Elementor Theme
+- Official URL: https://developers.elementor.com/docs/hello-elementor-theme/
+- What to use it for: Theme context for Elementor-heavy sites.
+- When to verify online: Before Hello Elementor compatibility claims.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Treat theme behavior separately from Elementor plugin behavior.
+
+- Title: Elegant Themes Developer Docs
+- Official URL: https://www.elegantthemes.com/developers/
+- What to use it for: Divi/Elegant Themes developer entry point.
+- When to verify online: Before Divi extension work.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Divi adapters are optional and should not load globally.
+
+- Title: Divi Hooks
+- Official URL: https://www.elegantthemes.com/documentation/developers/hooks/
+- What to use it for: Divi hook references.
+- When to verify online: Before Divi hook-specific code.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Avoid undocumented builder internals.
+
+### Generic WordPress compatibility APIs
+
+- Title: Plugin APIs
+- Official URL: https://developer.wordpress.org/plugins/
+- What to use it for: Core-first plugin APIs and architecture.
+- When to verify online: Before adding compatibility surfaces.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: WordPress core APIs first; third-party adapters second.
+
+- Title: Hooks API
+- Official URL: https://developer.wordpress.org/apis/hooks/
+- What to use it for: Public extension points and adapter boundaries.
+- When to verify online: Before publishing hooks or using third-party hooks.
+- Last reviewed: 2026-04-27
+- Notes for agent behavior: Prefer public hooks over private classes.
+
+- Popularity and version support can change; verify before making release claims.
+- “Compatible with all plugins/themes” is not an acceptable claim.
+
+## 24. WordPress.org `readme.txt` and release process
 
 - Title: Plugin Readmes
 - Official URL: https://developer.wordpress.org/plugins/wordpress-org/how-your-readme-txt-works/

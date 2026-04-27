@@ -1,0 +1,25 @@
+<?php
+namespace {{VENDOR_NAMESPACE}}\{{PLUGIN_SLUG}}\Integrations\Themes;
+
+final class ThemeCompatibilityService {
+	public function get_theme_slug(): string {
+		return wp_get_theme()->get_stylesheet();
+	}
+
+	public function get_wrapper_classes( array $extra = array() ): string {
+		$classes = array_merge( array( '{{ROOT_CLASS}}', '{{ROOT_CLASS}}--theme-friendly' ), $extra );
+		return esc_attr( implode( ' ', array_map( 'sanitize_html_class', $classes ) ) );
+	}
+
+	public function register(): void {
+		add_filter( '{{PLUGIN_SLUG}}_frontend_wrapper_classes', array( $this, 'filter_wrapper_classes' ) );
+	}
+
+	public function filter_wrapper_classes( array $classes ): array {
+		if ( wp_is_block_theme() ) {
+			$classes[] = '{{ROOT_CLASS}}--block-theme';
+		}
+
+		return $classes;
+	}
+}

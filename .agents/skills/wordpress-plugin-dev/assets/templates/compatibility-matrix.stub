@@ -1,0 +1,12 @@
+# {{PLUGIN_NAME}} Compatibility Matrix
+
+Plugin version: {{PLUGIN_VERSION}}
+Last reviewed: YYYY-MM-DD
+
+| Area | Integration | Status | Detection | Tested version | Docs link | What works | Known issues | Manual tests | Owner |
+|---|---|---|---|---|---|---|---|---|---|
+| Editor | Classic Editor | unknown | `use_block_editor_for_post_type()` / plugin state | Not tested | Official docs | Planned fallback | Unknown | Create/edit/save post | TBD |
+| SEO | {{INTEGRATION_NAME}} | experimental | guarded constant/class/function | Not tested | Verify current docs | Adapter skeleton | Hook names need verification | Inspect rendered meta/schema | TBD |
+| Cache | Generic cache | partial | N/A | N/A | WordPress/cache docs | Public/private output split | Host/CDN behavior varies | Logged-in/logged-out cache test | TBD |
+
+Status values: `supported`, `partial`, `experimental`, `planned`, `not supported`, `unknown`.

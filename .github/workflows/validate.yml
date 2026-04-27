@@ -50,6 +50,13 @@ jobs:
           npm run --silent design:audit:json > design-audit-output.json
           node -e "JSON.parse(require('fs').readFileSync('design-audit-output.json', 'utf8')); console.log('Design audit JSON parsed.')"
 
+      - name: Compatibility audit fixture
+        shell: bash
+        run: |
+          npm run compatibility:audit
+          npm run --silent compatibility:audit:json > compatibility-audit-output.json
+          node -e "JSON.parse(require('fs').readFileSync('compatibility-audit-output.json', 'utf8')); console.log('Compatibility audit JSON parsed.')"
+
       - name: Audit sample fixture
         shell: bash
         run: |

@@ -1,0 +1,20 @@
+<?php
+namespace {{VENDOR_NAMESPACE}}\{{PLUGIN_SLUG}}\Integrations\Builders;
+
+final class ElementorAdapter {
+	public function detect(): bool {
+		return did_action( 'elementor/loaded' ) || defined( 'ELEMENTOR_VERSION' );
+	}
+
+	public function register(): void {
+		if ( ! $this->detect() ) {
+			return;
+		}
+		// Verify current Elementor widget/category hooks before registering widgets.
+		add_action( 'elementor/widgets/register', array( $this, 'register_widgets' ) );
+	}
+
+	public function register_widgets( $widgets_manager ): void {
+		// Register widget classes here only after Elementor is loaded.
+	}
+}

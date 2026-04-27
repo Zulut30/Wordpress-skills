@@ -1,0 +1,11 @@
+{
+  "name": "wordpress-plugin-dev/compatibility-fixture-plugin",
+  "description": "Fixture plugin for compatibility audit checks.",
+  "type": "wordpress-plugin",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "CompatibilityFixture\\": "src/"
+    }
+  }
+}

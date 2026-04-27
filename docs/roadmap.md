@@ -22,6 +22,7 @@ Experimental or version-dependent:
 - broad security scanner coverage.
 - static performance checks are heuristic and do not replace profiling.
 - static design/UX checks are heuristic and do not replace manual visual, keyboard, and assistive-technology review.
+- static integration/compatibility checks are heuristic and do not replace testing with actual plugin/theme versions.
 
 ## v0.2.0 Candidates
 
@@ -47,6 +48,16 @@ Experimental or version-dependent:
 - Contrast helper/checker where feasible without overclaiming static certainty.
 - Support for design audit screenshots as optional evidence.
 - More frontend theme-compatibility examples for blocks, shortcodes, and widgets.
+- Real integration test matrix with selected plugin/theme/cache/builder versions.
+- WordPress Playground blueprints for compatibility demos.
+- Classic Editor plus Block Editor demo flow.
+- SEO rendered-output validation workflow for duplicate meta/schema/canonical checks.
+- Cache compatibility manual test checklist for public/private output and targeted purge.
+- Theme screenshot/manual review checklist for classic themes and block themes.
+- Elementor/Divi optional adapter examples that verify current docs before use.
+- Compatibility matrix generator for plugin release docs.
+- Conflict troubleshooting admin page pattern.
+- Better false-positive handling for compatibility scanner rules.
 
 ## Collaboration Entry Points
 

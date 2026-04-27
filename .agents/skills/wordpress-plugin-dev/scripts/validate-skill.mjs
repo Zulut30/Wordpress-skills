@@ -39,6 +39,28 @@ const REQUIRED_TEMPLATES = [
   'onboarding-step.stub',
   'css-scoped-admin-ui.stub',
   'frontend-scoped-css.stub',
+  'integration-interface.stub',
+  'integration-registry.stub',
+  'classic-editor-metabox-fallback.stub',
+  'block-editor-classic-fallback.stub',
+  'seo-output-guard.stub',
+  'yoast-integration.stub',
+  'rankmath-integration.stub',
+  'aioseo-integration.stub',
+  'seopress-integration.stub',
+  'cache-integration-interface.stub',
+  'generic-cache-compatibility.stub',
+  'litespeed-cache-adapter.stub',
+  'wp-rocket-adapter.stub',
+  'w3-total-cache-adapter.stub',
+  'autoptimize-compatibility.stub',
+  'theme-compatibility-service.stub',
+  'astra-compatibility.stub',
+  'generatepress-compatibility.stub',
+  'kadence-compatibility.stub',
+  'elementor-adapter.stub',
+  'divi-adapter.stub',
+  'compatibility-matrix.stub',
 ];
 const REQUIRED_SCRIPTS = [
   'audit-plugin.mjs',
@@ -72,6 +94,20 @@ const REQUIRED_DESIGN_DOC_EXAMPLES = [
   'design-audit-human.md',
   'design-audit-json.json',
   'design-audit-explanation.md',
+];
+const REQUIRED_COMPATIBILITY_EXAMPLES = [
+  'compatibility-audit-report.md',
+  'classic-editor-fallback.md',
+  'seo-plugin-compatibility.md',
+  'cache-plugin-compatibility.md',
+  'theme-compatibility-before-after.md',
+  'page-builder-compatibility.md',
+  'compatibility-matrix-example.md',
+];
+const REQUIRED_COMPATIBILITY_DOC_EXAMPLES = [
+  'compatibility-audit-human.md',
+  'compatibility-audit-json.json',
+  'compatibility-audit-explanation.md',
 ];
 const SUSPICIOUS_ALLOWED_TOOLS = [
   '*',
@@ -369,6 +405,72 @@ function validateDesignModule(skillContent) {
   }
 }
 
+function validateCompatibilityModule(skillContent) {
+  const compatibilityReference = join(skillDir, 'references', 'integrations-compatibility.md');
+  if (existsSync(compatibilityReference)) {
+    pass('Integrations/compatibility reference exists: references/integrations-compatibility.md');
+  } else {
+    fail('Missing integrations/compatibility reference: references/integrations-compatibility.md');
+  }
+
+  if (skillContent.includes('references/integrations-compatibility.md')) {
+    pass('SKILL.md routes compatibility tasks to references/integrations-compatibility.md.');
+  } else {
+    fail('SKILL.md does not reference references/integrations-compatibility.md.');
+  }
+
+  const sourceMap = join(skillDir, 'references', 'source-map.md');
+  if (existsSync(sourceMap) && /Integrations and compatibility/i.test(readText(sourceMap))) {
+    pass('source-map.md contains an Integrations and compatibility section.');
+  } else {
+    fail('source-map.md does not contain an Integrations and compatibility section.');
+  }
+
+  const examplesDir = join(skillDir, 'assets', 'examples');
+  for (const example of REQUIRED_COMPATIBILITY_EXAMPLES) {
+    const file = join(examplesDir, example);
+    if (existsSync(file)) {
+      pass(`Compatibility example exists: assets/examples/${example}`);
+    } else {
+      fail(`Missing compatibility example: assets/examples/${example}`);
+    }
+  }
+
+  const fixtureDir = join(repoRoot, 'test-fixtures', 'compatibility-plugin');
+  if (existsSync(fixtureDir)) {
+    pass('Compatibility fixture exists: test-fixtures/compatibility-plugin');
+  } else {
+    fail('Missing compatibility fixture: test-fixtures/compatibility-plugin');
+  }
+
+  const docsExamplesDir = join(repoRoot, 'docs', 'examples');
+  for (const example of REQUIRED_COMPATIBILITY_DOC_EXAMPLES) {
+    const file = join(docsExamplesDir, example);
+    if (existsSync(file)) {
+      pass(`Compatibility audit doc example exists: docs/examples/${example}`);
+    } else {
+      fail(`Missing compatibility audit doc example: docs/examples/${example}`);
+    }
+  }
+
+  const jsonExample = join(docsExamplesDir, 'compatibility-audit-json.json');
+  if (existsSync(jsonExample)) {
+    try {
+      JSON.parse(readText(jsonExample));
+      pass('Compatibility audit JSON example parses.');
+    } catch (error) {
+      fail(`Compatibility audit JSON example is invalid JSON: ${error.message}`);
+    }
+  }
+
+  const auditScript = join(skillDir, 'scripts', 'audit-plugin.mjs');
+  if (existsSync(auditScript) && readText(auditScript).includes('--compatibility')) {
+    pass('audit-plugin.mjs supports --compatibility.');
+  } else {
+    fail('audit-plugin.mjs does not appear to support --compatibility.');
+  }
+}
+
 function validateScripts() {
   const scriptDir = join(skillDir, 'scripts');
 
@@ -494,6 +596,7 @@ function validateSkill() {
   validateScripts();
   validatePerformanceModule(skillContent);
   validateDesignModule(skillContent);
+  validateCompatibilityModule(skillContent);
   validateReadmeInstallInstructions();
 }
 

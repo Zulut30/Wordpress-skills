@@ -1,0 +1,11 @@
+.compatibility-fixture-card {
+	box-sizing: border-box;
+	max-width: 40rem;
+	margin-block: 1rem;
+	padding: 1rem;
+}
+
+.compatibility-fixture-card a:focus-visible {
+	outline: 2px solid currentColor;
+	outline-offset: 2px;
+}

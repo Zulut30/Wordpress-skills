@@ -15,6 +15,8 @@ npm run performance:audit
 npm run performance:audit:json
 npm run design:audit
 npm run design:audit:json
+npm run compatibility:audit
+npm run compatibility:audit:json
 npm run smoke
 ```
 
@@ -56,3 +58,20 @@ Treat `audit-plugin.mjs` findings as triage signals, not proof of security. Veri
 - UI text must be i18n-ready.
 - Consider keyboard navigation, focus, contrast, RTL, and text expansion.
 - Treat design scanner output as heuristic.
+
+## Integration / Compatibility Defaults
+
+- Prefer WordPress core APIs before third-party plugin/theme APIs.
+- Use feature detection for optional integrations.
+- Never fatal if an optional plugin, theme, or builder is missing.
+- Isolate integration adapters.
+- Do not use third-party private internals unless there is no alternative and the risk is documented.
+- Do not output duplicate SEO meta, schema, canonical, robots, Open Graph, or Twitter tags.
+- Do not cache private/user-specific output publicly.
+- Avoid purge-all cache behavior except explicit admin actions.
+- Do not globally override theme CSS.
+- Keep Classic Editor and Block Editor flows scoped.
+- Do not load builder/theme-specific assets globally.
+- Maintain a compatibility matrix for claimed integrations.
+- Treat static compatibility scanner output as heuristic.
+- Verify current third-party docs before release-sensitive work.
