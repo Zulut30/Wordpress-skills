@@ -105,3 +105,6 @@ jobs:
 
       - name: Build release package
         run: npm run package:skill
+
+      - name: Verify release package
+        run: npm run package:verify

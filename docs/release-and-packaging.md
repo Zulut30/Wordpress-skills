@@ -20,14 +20,19 @@ The archive is generated locally and ignored by git. Attach it to a GitHub relea
 ## What The Archive Includes
 
 - `skills/wordpress-plugin-dev/`
+- `assets/`
 - `README.md`
 - `LICENSE`
 - `CHANGELOG.md`
+- `RELEASE_NOTES.md`
+- community and contributor docs
 - `package.json`
 - `composer.json`
+- root `scripts/`
 - `.codex-plugin/plugin.json`
 - `.agents/plugins/marketplace.json`
-- selected install, release, compatibility, demo, and example-output docs
+- `docs/`
+- `test-fixtures/`
 
 ## What The Archive Excludes
 
@@ -35,9 +40,17 @@ The archive is generated locally and ignored by git. Attach it to a GitHub relea
 - `node_modules/`
 - `vendor/`
 - synced install-target copies
-- `test-fixtures/`
-- `docs/reports/`
 - local build/cache/log files
+
+## Verify The Archive
+
+After building, verify the extracted archive with the same package-facing checks:
+
+```bash
+npm run package:verify
+```
+
+This extracts the generated archive into a temporary directory, then runs `npm run validate:skill` and `npm run smoke` from inside the extracted package.
 
 ## Verify Checksums
 
@@ -76,4 +89,3 @@ npm run release:check
 ```
 
 Do not create a git tag or overwrite a published release without maintainer approval.
-

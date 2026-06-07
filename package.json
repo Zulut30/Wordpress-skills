@@ -19,7 +19,8 @@
     "lint:php": "node scripts/lint-php-files.mjs",
     "test:audit": "node skills/wordpress-plugin-dev/scripts/audit-plugin.test.mjs",
     "package:skill": "node scripts/package-release.mjs",
-    "release:check": "npm run validate:skill && npm run smoke && npm run lint:php && npm run package:skill",
+    "package:verify": "node scripts/verify-release-package.mjs",
+    "release:check": "npm run validate:skill && npm run smoke && npm run lint:php && npm run package:skill && npm run package:verify",
     "sync:targets": "node skills/wordpress-plugin-dev/scripts/sync-install-targets.mjs",
     "sync": "node skills/wordpress-plugin-dev/scripts/sync-install-targets.mjs",
     "smoke": "npm run validate:skill && npm run check:sources && npm run check:links && npm run test:audit && npm run audit:fixture && npm run performance:audit && npm run performance:audit:json && npm run design:audit && npm run design:audit:json && npm run compatibility:audit && npm run compatibility:audit:json"
