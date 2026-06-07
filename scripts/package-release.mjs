@@ -85,9 +85,10 @@ function createHeader(entryName, stat, typeFlag) {
   const header = Buffer.alloc(512, 0);
   const { name, prefix } = splitName(entryName);
   const size = typeFlag === '5' ? 0 : stat.size;
+  const mode = stat.mode & 0o777;
 
   writeString(header, 0, 100, name);
-  writeOctal(header, 100, 8, typeFlag === '5' ? 0o755 : 0o644);
+  writeOctal(header, 100, 8, mode || (typeFlag === '5' ? 0o755 : 0o644));
   writeOctal(header, 108, 8, 0);
   writeOctal(header, 116, 8, 0);
   writeOctal(header, 124, 12, size);

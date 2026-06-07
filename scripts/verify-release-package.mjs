@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import {
   existsSync,
+  chmodSync,
   mkdtempSync,
   mkdirSync,
   readFileSync,
@@ -64,6 +65,7 @@ function extractTarGz(sourceFile, outputDir) {
     const name = readString(header, 0, 100);
     const prefix = readString(header, 345, 155);
     const entryName = prefix ? `${prefix}/${name}` : name;
+    const mode = readOctal(header, 100, 8);
     const size = readOctal(header, 124, 12);
     const typeFlag = readString(header, 156, 1) || '0';
     const target = assertSafePath(outputDir, entryName);
@@ -72,9 +74,11 @@ function extractTarGz(sourceFile, outputDir) {
 
     if (typeFlag === '5') {
       mkdirSync(target, { recursive: true });
+      chmodSync(target, mode || 0o755);
     } else if (typeFlag === '0') {
       mkdirSync(dirname(target), { recursive: true });
       writeFileSync(target, buffer.subarray(offset, offset + size));
+      chmodSync(target, mode || 0o644);
     }
 
     offset += Math.ceil(size / 512) * 512;

@@ -72,15 +72,6 @@ if [ ! -f "$ROOT/package.json" ]; then
 	exit 0
 fi
 
-if [ ! -d "$ROOT/node_modules" ]; then
-	log "Node dependencies are not installed. Next steps:"
-	log "  npm ci"
-	log "  npm run validate"
-	log "  npm run check:sources"
-	log "Skipping Node-based smoke checks for now."
-	exit 0
-fi
-
 log "Running Node-based skill checks"
 node "$SKILL_DIR/scripts/validate-skill.mjs"
 node "$SKILL_DIR/scripts/check-source-map.mjs"
