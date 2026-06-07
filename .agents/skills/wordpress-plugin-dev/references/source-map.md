@@ -669,6 +669,27 @@ This map uses official WordPress Developer Resources, WordPress.org Plugin Direc
 
 ### Generic WordPress compatibility APIs
 
+- Title: Top-100 popular plugin compatibility
+- Official URL: https://wordpress.org/plugins/browse/popular/
+- What to use it for: Popular plugin browsing context and current ecosystem prioritization.
+- When to verify online: Before broad compatibility claims or refreshing the top-100 watchlist.
+- Last reviewed: 2026-06-07
+- Notes for agent behavior: Treat top-100 presence as a review target, not a support guarantee.
+
+- Title: WordPress.org Plugin Installation API
+- Official URL: https://developer.wordpress.org/reference/functions/plugins_api/
+- What to use it for: Official context for `query_plugins`, `browse`, `per_page`, and Plugin API request fields.
+- When to verify online: Before changing top plugin refresh scripts or relying on API response fields.
+- Last reviewed: 2026-06-07
+- Notes for agent behavior: Use the API for watchlist refreshes; do not scrape when API fields are enough.
+
+- Title: Installed plugin metadata
+- Official URL: https://developer.wordpress.org/reference/functions/get_plugins/
+- What to use it for: Installed plugin data and plugin file path detection.
+- When to verify online: Before building active plugin detection utilities.
+- Last reviewed: 2026-06-07
+- Notes for agent behavior: Plugin slug and plugin main file can differ; detect safely and avoid fatal assumptions.
+
 - Title: Plugin APIs
 - Official URL: https://developer.wordpress.org/plugins/
 - What to use it for: Core-first plugin APIs and architecture.

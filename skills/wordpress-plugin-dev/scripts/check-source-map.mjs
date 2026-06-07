@@ -31,6 +31,8 @@ const requiredSourceHints = [
   '@wordpress/ui',
   'Integrations and compatibility',
   'Classic Editor',
+  'WordPress.org Plugin Installation API',
+  'Top-100 popular plugin compatibility',
   'Yoast SEO',
   'WP Rocket',
   'Elementor',

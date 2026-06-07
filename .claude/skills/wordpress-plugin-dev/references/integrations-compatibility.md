@@ -30,6 +30,21 @@ Compatibility work must not weaken security, performance, accessibility, i18n, p
 11. Integration code must remain secure, performant, accessible, and translation-ready.
 12. Verify third-party plugin/theme docs before release-sensitive integrations.
 
+## Top-100 Popular Plugin Watchlist
+
+For broad ecosystem compatibility or requests to avoid conflicts with the most popular WordPress plugins, also read `references/top-100-plugin-compatibility.md`.
+
+Use the top-100 watchlist to prioritize review and runtime testing. Do not turn it into a hard dependency map. Most conflicts are prevented by safe baseline behavior: namespacing, scoped assets, feature detection, optional adapters, public APIs, cache-safe output, duplicate SEO output guards, and exact versioned manual verification.
+
+Refresh the stored watchlist before release-sensitive claims:
+
+```bash
+npm run top-100-plugins:update
+npm run top-100-plugins:check
+```
+
+Top-100 presence means `watchlisted`, not `verified`. Mark individual plugins as supported only after testing exact versions and flows.
+
 ## Official Sources
 
 Primary third-party integration docs are included here because compatibility work depends on their public APIs and hooks.

@@ -14,6 +14,7 @@ This matrix is conservative. It documents what has evidence, what is only fixtur
 
 | Area | Integration | Version tested | Status | Verification type | What works | Known risks | Last verified | Notes |
 |---|---|---:|---|---|---|---|---|---|
+| Ecosystem | Top-100 popular plugin watchlist | Generated 2026-06-07 | watchlisted | WordPress.org API data + local validation | `data/top-100-popular-plugins.json` tracks current popular plugins for conflict review prioritization. | No universal compatibility claim; exact plugins require runtime verification. | 2026-06-07 | Refresh before release-sensitive claims with `npm run top-100-plugins:update`. |
 | Classic/editor | WordPress core | Not verified | partial | Fixture + docs | Core API-first guidance and static scanner checks. | No runtime install in CI. | 2026-04-27 | Verify against the target WordPress version. |
 | Classic/editor | Classic Editor | Not verified | experimental | Fixture + docs | Metabox fallback templates and scanner rules. | Real plugin behavior not tested. | 2026-04-27 | Manual verification required. |
 | Classic/editor | Block Editor / Gutenberg | Not verified | partial | Fixture + docs | `block.json`, block assets, fallback guidance. | Editor runtime not tested. | 2026-04-27 | Verify current block editor docs. |
@@ -52,7 +53,8 @@ For each integration before marking it `supported`:
 8. Confirm assets are scoped and theme CSS is not globally overridden.
 9. Update this matrix with version, verification type, date, and notes.
 
+For top-100 plugin work, the watchlist alone only supports `watchlisted` or `baseline-safe` language. Mark an individual plugin `supported` only after exact versioned manual verification.
+
 ## Why This Matrix Is Conservative
 
 There is no universal WordPress compatibility claim. Third-party APIs, plugin settings, cache layers, builders, and themes change. `supported` requires evidence; `unknown` is better than pretending.
-

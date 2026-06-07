@@ -40,6 +40,7 @@ Before planning or editing, identify the primary task type:
 - `performance plugin compatibility`
 - `theme compatibility`
 - `page builder compatibility`
+- `top-100 plugin compatibility`
 - `compatibility audit`
 - `integration adapter implementation`
 - `compatibility matrix creation`
@@ -96,6 +97,7 @@ Then inspect the plugin structure and load only the references needed for that t
 - Performance optimization, hot paths, queries, caching, assets, REST/admin/block performance: `references/performance-optimization.md`
 - Design, admin UX, frontend output, Gutenberg UI, visual review, and a11y-aware polish: `references/design-ux-ui.md`
 - Classic Editor, SEO/cache/theme/page-builder integration, optional adapters, and compatibility audits: `references/integrations-compatibility.md`
+- Top-100 popular plugin watchlist, broad ecosystem conflict prevention, and versioned verification workflow: `references/top-100-plugin-compatibility.md`
 - i18n, accessibility, privacy, personal data workflows: `references/i18n-a11y-privacy.md`
 - `wp-env`, WP-CLI, PHPUnit, Plugin Check, CI: `references/testing-and-ci.md`
 - WordPress.org readme, assets, SVN/release workflow: `references/release-wordpress-org.md`
@@ -226,6 +228,13 @@ Then inspect the plugin structure and load only the references needed for that t
 2. Identify required vs optional integrations and inspect detection, adapters, fallbacks, SEO output, cache behavior, theme CSS, builder code, and editor contexts.
 3. Produce a compatibility matrix with supported, partial, experimental, planned, not supported, and unknown statuses.
 4. Separate safe quick fixes from items requiring current third-party docs and manual testing.
+
+### prevent-top-100-plugin-conflicts
+
+1. Read `references/top-100-plugin-compatibility.md` and refresh `data/top-100-popular-plugins.json` when release-sensitive accuracy matters.
+2. Classify the target plugin's surfaces against the top-100 risk areas: commerce, SEO, cache/performance, forms, security, backup, analytics, builders, multilingual, LMS/membership, media, email, custom fields, search, and admin tooling.
+3. Check namespacing, hooks, REST namespaces, block names, shortcodes, options, transients, cron hooks, database tables, scripts/styles, cookies, query vars, and rendered output for likely collisions.
+4. Add optional adapters only behind feature detection and versioned manual verification. Keep untested plugins as watchlisted or planned.
 
 ### add-classic-editor-fallback
 

@@ -15,6 +15,7 @@ Realistic next improvements for the WordPress Plugin Dev Skill.
 - Add more Gutenberg block UI examples for Placeholder, ToolbarButton, InspectorControls, and mobile editor behavior.
 - Add deeper integrations docs for Classic Editor plus Block Editor parity, SEO output guards, cache plugin compatibility, and theme/page-builder adapter patterns.
 - Add WordPress Playground compatibility demo notes after target integrations are chosen.
+- Add runtime verification batches for the top-100 popular plugin watchlist after choosing exact WordPress/theme/test-flow coverage.
 
 ## Scripts
 
@@ -43,6 +44,7 @@ Realistic next improvements for the WordPress Plugin Dev Skill.
   - frontend theme-compatibility hints
 - Improve compatibility heuristics in `audit-plugin.mjs` for:
   - fewer false positives around guarded third-party references
+  - top-100 popular plugin risk categorization
   - SEO rendered-output duplication patterns
   - cache purge callback resolution
   - optional builder/theme adapter scoping

@@ -94,7 +94,7 @@ A lightweight terminal GIF can be added later if it is generated from real comma
 - Gutenberg and `block.json` workflows, including dynamic blocks and Interactivity API notes.
 - Performance optimization guidance for hooks, queries, options/autoload, cache, REST, admin screens, blocks, assets, cron, and external HTTP.
 - Design/UX/UI guidance for native-feeling admin pages, settings screens, dashboards, block UI, frontend output, onboarding, states, accessibility, RTL, and i18n.
-- Integrations and compatibility guidance for Classic Editor, Block Editor, SEO plugins, cache/performance plugins, themes, page builders, and graceful fallback.
+- Integrations and compatibility guidance for Classic Editor, Block Editor, SEO plugins, cache/performance plugins, themes, page builders, top-100 popular plugin conflict prevention, and graceful fallback.
 - Safe starter templates, fixture plugins, local validation scripts, and example audit outputs.
 
 ## Why This Is Better Than Generic Coding Agents
@@ -191,6 +191,7 @@ npm run audit:fixture
 npm run performance:audit
 npm run design:audit
 npm run compatibility:audit
+npm run top-100-plugins:check
 ```
 
 PHP/Composer checks when available:
@@ -232,6 +233,7 @@ The skill now includes compatibility guidance and scanner heuristics for:
 - cache/performance plugin public/private output and purge risks.
 - theme-friendly frontend output and scoped CSS.
 - optional page-builder adapters.
+- top-100 popular plugin watchlist refresh and conflict-prevention workflow.
 
 There is no "compatible with all plugins/themes" claim. See the conservative [compatibility matrix](docs/compatibility-matrix.md) for statuses, verification type, and version notes.
 

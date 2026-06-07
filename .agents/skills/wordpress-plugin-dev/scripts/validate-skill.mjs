@@ -61,11 +61,14 @@ const REQUIRED_TEMPLATES = [
   'elementor-adapter.stub',
   'divi-adapter.stub',
   'compatibility-matrix.stub',
+  'top-plugin-compatibility-registry.stub',
 ];
 const REQUIRED_SCRIPTS = [
   'audit-plugin.mjs',
   'check-source-map.mjs',
+  'check-top-plugins.mjs',
   'sync-install-targets.mjs',
+  'update-top-plugins.mjs',
   'validate-skill.mjs',
   'smoke-test.sh',
 ];
@@ -407,6 +410,8 @@ function validateDesignModule(skillContent) {
 
 function validateCompatibilityModule(skillContent) {
   const compatibilityReference = join(skillDir, 'references', 'integrations-compatibility.md');
+  const topPluginReference = join(skillDir, 'references', 'top-100-plugin-compatibility.md');
+  const topPluginData = join(skillDir, 'data', 'top-100-popular-plugins.json');
   if (existsSync(compatibilityReference)) {
     pass('Integrations/compatibility reference exists: references/integrations-compatibility.md');
   } else {
@@ -417,6 +422,33 @@ function validateCompatibilityModule(skillContent) {
     pass('SKILL.md routes compatibility tasks to references/integrations-compatibility.md.');
   } else {
     fail('SKILL.md does not reference references/integrations-compatibility.md.');
+  }
+
+  if (existsSync(topPluginReference)) {
+    pass('Top-100 plugin compatibility reference exists: references/top-100-plugin-compatibility.md');
+  } else {
+    fail('Missing top-100 plugin compatibility reference: references/top-100-plugin-compatibility.md');
+  }
+
+  if (skillContent.includes('references/top-100-plugin-compatibility.md')) {
+    pass('SKILL.md routes top-100 compatibility tasks to references/top-100-plugin-compatibility.md.');
+  } else {
+    fail('SKILL.md does not reference references/top-100-plugin-compatibility.md.');
+  }
+
+  if (existsSync(topPluginData)) {
+    try {
+      const data = JSON.parse(readText(topPluginData));
+      if (Array.isArray(data.plugins) && data.plugins.length === 100) {
+        pass('Top-100 popular plugin watchlist contains 100 plugins.');
+      } else {
+        fail('Top-100 popular plugin watchlist does not contain exactly 100 plugins.');
+      }
+    } catch (error) {
+      fail(`Top-100 popular plugin watchlist is invalid JSON: ${error.message}`);
+    }
+  } else {
+    fail('Missing top-100 popular plugin watchlist: data/top-100-popular-plugins.json');
   }
 
   const sourceMap = join(skillDir, 'references', 'source-map.md');
