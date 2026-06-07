@@ -240,7 +240,7 @@ This map uses official WordPress Developer Resources, WordPress.org Plugin Direc
 - Official URL: https://wordpress.org/plugins/plugin-check/
 - What to use it for: Automated checks for WordPress.org requirements and plugin best practices across security, performance, accessibility, and i18n.
 - When to verify online: Before release, before interpreting check categories/severity, or before recommending exact WP-CLI usage.
-- Last reviewed: 2026-04-26
+- Last reviewed: 2026-06-07
 - Notes for agent behavior: Plugin Check supports review but does not replace manual review. Treat false positives carefully and document unresolved findings.
 
 ## 21. Performance optimization
@@ -692,21 +692,28 @@ This map uses official WordPress Developer Resources, WordPress.org Plugin Direc
 - Official URL: https://developer.wordpress.org/plugins/wordpress-org/how-your-readme-txt-works/
 - What to use it for: `readme.txt` headers, sections, stable tag, screenshots, changelog, and directory display behavior.
 - When to verify online: Before public release, readme validation, or changing WordPress.org listing metadata.
-- Last reviewed: 2026-04-26
+- Last reviewed: 2026-06-07
 - Notes for agent behavior: Keep `readme.txt`, plugin headers, and release tags consistent.
 
 - Title: Detailed Plugin Guidelines
 - Official URL: https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/
 - What to use it for: WordPress.org plugin repository rules, licensing, naming, external services, security, and review expectations.
 - When to verify online: Before submission, resubmission, takeover, or policy-sensitive changes.
-- Last reviewed: 2026-04-26
+- Last reviewed: 2026-06-07
 - Notes for agent behavior: For public releases, policy compliance is a release blocker, not a style preference.
+
+- Title: Plugin Assets
+- Official URL: https://developer.wordpress.org/plugins/wordpress-org/plugin-assets/
+- What to use it for: WordPress.org listing icons, banners, screenshots, and asset folder behavior.
+- When to verify online: Before changing plugin directory listing assets or screenshot metadata.
+- Last reviewed: 2026-06-07
+- Notes for agent behavior: Keep listing assets separate from plugin runtime assets unless the plugin actually needs them at runtime.
 
 - Title: Using Subversion
 - Official URL: https://developer.wordpress.org/plugins/wordpress-org/how-to-use-subversion/
 - What to use it for: WordPress.org SVN checkout, trunk/tags/assets workflow, and release upload process.
 - When to verify online: Before issuing SVN commands or advising a WordPress.org release workflow.
-- Last reviewed: 2026-04-26
+- Last reviewed: 2026-06-07
 - Notes for agent behavior: Do not run release commands without explicit user intent and repository credentials.
 
 ## Additional official ecosystem sources

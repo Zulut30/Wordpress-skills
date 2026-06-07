@@ -4,7 +4,6 @@ Realistic next improvements for the WordPress Plugin Dev Skill.
 
 ## Documentation
 
-- Expand `references/release-wordpress-org.md` with a fuller SVN release checklist and asset packaging notes.
 - Add a short `references/custom-data-models.md` or expand architecture notes for custom tables, metadata, options, and migrations.
 - Add a small reference for uninstall/privacy/export/erase workflows with practical examples.
 - Review all official source links on a scheduled cadence and update `Last reviewed` dates only after actual review.
