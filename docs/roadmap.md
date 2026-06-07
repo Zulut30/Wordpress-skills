@@ -51,6 +51,7 @@ Experimental or version-dependent:
 - More frontend theme-compatibility examples for blocks, shortcodes, and widgets.
 - Real integration test matrix with selected plugin/theme/cache/builder versions.
 - WordPress Playground blueprints for compatibility demos.
+- Deterministic compatibility runtime plan generated from top-100 plugin/theme watchlists.
 - Classic Editor plus Block Editor demo flow.
 - SEO rendered-output validation workflow for duplicate meta/schema/canonical checks.
 - Cache compatibility manual test checklist for public/private output and targeted purge.

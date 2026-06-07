@@ -2,6 +2,8 @@
 
 This matrix is conservative. It documents what has evidence, what is only fixture/docs coverage, and what still needs real WordPress ecosystem verification.
 
+For planned runtime batches, see [compatibility runtime plan](compatibility-runtime-plan.md). For reproducible smoke environments, see [Playground blueprints](playground-blueprints/).
+
 ## Status Definitions
 
 - `supported`: tested or manually verified with a documented version and notes.

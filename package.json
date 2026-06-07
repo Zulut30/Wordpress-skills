@@ -20,6 +20,9 @@
     "top-100-plugins:check": "node skills/wordpress-plugin-dev/scripts/check-top-plugins.mjs",
     "top-100-themes:update": "node skills/wordpress-plugin-dev/scripts/update-top-themes.mjs",
     "top-100-themes:check": "node skills/wordpress-plugin-dev/scripts/check-top-themes.mjs",
+    "compatibility:plan": "node skills/wordpress-plugin-dev/scripts/generate-compatibility-runtime-plan.mjs",
+    "compatibility:plan:check": "node skills/wordpress-plugin-dev/scripts/generate-compatibility-runtime-plan.mjs --check",
+    "playground:check": "node skills/wordpress-plugin-dev/scripts/check-playground-blueprints.mjs",
     "lint:php": "node scripts/lint-php-files.mjs",
     "lint:php:required": "node scripts/lint-php-files.mjs --require-php",
     "test:audit": "node skills/wordpress-plugin-dev/scripts/audit-plugin.test.mjs",
@@ -29,7 +32,7 @@
     "sync:targets": "node skills/wordpress-plugin-dev/scripts/sync-install-targets.mjs",
     "sync:check": "node skills/wordpress-plugin-dev/scripts/sync-install-targets.mjs --check",
     "sync": "node skills/wordpress-plugin-dev/scripts/sync-install-targets.mjs",
-    "smoke": "npm run validate:skill && npm run check:sources && npm run check:links && npm run top-100-plugins:check && npm run top-100-themes:check && npm run test:audit && npm run audit:fixture && npm run performance:audit && npm run performance:audit:json && npm run design:audit && npm run design:audit:json && npm run compatibility:audit && npm run compatibility:audit:json"
+    "smoke": "npm run validate:skill && npm run check:sources && npm run check:links && npm run top-100-plugins:check && npm run top-100-themes:check && npm run playground:check && npm run compatibility:plan:check && npm run test:audit && npm run audit:fixture && npm run performance:audit && npm run performance:audit:json && npm run design:audit && npm run design:audit:json && npm run compatibility:audit && npm run compatibility:audit:json"
   },
   "engines": {
     "node": ">=18"

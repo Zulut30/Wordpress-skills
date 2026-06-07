@@ -95,6 +95,7 @@ A lightweight terminal GIF can be added later if it is generated from real comma
 - Performance optimization guidance for hooks, queries, options/autoload, cache, REST, admin screens, blocks, assets, cron, and external HTTP.
 - Design/UX/UI guidance for native-feeling admin pages, settings screens, dashboards, block UI, frontend output, onboarding, states, accessibility, RTL, and i18n.
 - Integrations and compatibility guidance for Classic Editor, Block Editor, SEO plugins, cache/performance plugins, themes, page builders, top-100 popular plugin/theme conflict prevention, Newspaper/tagDiv review, and graceful fallback.
+- Runtime compatibility planning, validated WordPress Playground blueprints, and static top-100 conflict heuristics.
 - Safe starter templates, fixture plugins, local validation scripts, and example audit outputs.
 
 ## Why This Is Better Than Generic Coding Agents
@@ -193,6 +194,8 @@ npm run design:audit
 npm run compatibility:audit
 npm run top-100-plugins:check
 npm run top-100-themes:check
+npm run playground:check
+npm run compatibility:plan:check
 ```
 
 PHP/Composer checks when available:
@@ -236,6 +239,8 @@ The skill now includes compatibility guidance and scanner heuristics for:
 - optional page-builder adapters.
 - top-100 popular plugin watchlist refresh and conflict-prevention workflow.
 - top-100 popular theme watchlist refresh, child-theme-aware checks, and Newspaper/tagDiv review workflow.
+- runtime verification batches in [compatibility runtime plan](docs/compatibility-runtime-plan.md).
+- validated [WordPress Playground blueprints](docs/playground-blueprints/) for repeatable smoke environments.
 
 There is no "compatible with all plugins/themes" claim. See the conservative [compatibility matrix](docs/compatibility-matrix.md) for statuses, verification type, and version notes.
 

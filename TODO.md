@@ -14,9 +14,8 @@ Realistic next improvements for the WordPress Plugin Dev Skill.
 - Add Figma/WordPress Design System notes while clearly marking experimental UI packages.
 - Add more Gutenberg block UI examples for Placeholder, ToolbarButton, InspectorControls, and mobile editor behavior.
 - Add deeper integrations docs for Classic Editor plus Block Editor parity, SEO output guards, cache plugin compatibility, and theme/page-builder adapter patterns.
-- Add WordPress Playground compatibility demo notes after target integrations are chosen.
-- Add runtime verification batches for the top-100 popular plugin watchlist after choosing exact WordPress/theme/test-flow coverage.
-- Add runtime verification batches for the top-100 popular theme watchlist, including Newspaper/tagDiv as a premium external target.
+- Execute and document runtime verification batches from `docs/compatibility-runtime-plan.md`.
+- Expand WordPress Playground blueprints with starter content and target-plugin installation once a real plugin package is selected.
 
 ## Scripts
 
@@ -45,8 +44,8 @@ Realistic next improvements for the WordPress Plugin Dev Skill.
   - frontend theme-compatibility hints
 - Improve compatibility heuristics in `audit-plugin.mjs` for:
   - fewer false positives around guarded third-party references
-  - top-100 popular plugin risk categorization
-  - top-100 popular theme and child-theme risk categorization
+  - deeper top-100 popular plugin risk categorization
+  - deeper top-100 popular theme and child-theme risk categorization
   - SEO rendered-output duplication patterns
   - cache purge callback resolution
   - optional builder/theme adapter scoping

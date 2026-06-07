@@ -1,0 +1,410 @@
+{
+  "schema": "wordpress-plugin-dev/compatibility-runtime-plan/v1",
+  "generated_from": {
+    "top_plugins_generated_at": "2026-06-07T14:36:30.870Z",
+    "top_themes_generated_at": "2026-06-07T15:09:33.702Z"
+  },
+  "limitation": "This is a deterministic runtime verification plan. It does not prove compatibility until each scenario is executed against exact versions and recorded in the compatibility matrix.",
+  "scenarios": [
+    {
+      "id": "baseline-block-theme",
+      "title": "Baseline block theme",
+      "status": "planned",
+      "theme": {
+        "slug": "twentytwentyfive",
+        "name": "Twenty Twenty-Five",
+        "rank": 1,
+        "version": "1.5",
+        "status": "watchlisted"
+      },
+      "external_theme": null,
+      "plugins": [],
+      "playground_blueprint": "docs/playground-blueprints/baseline-block-theme.json",
+      "risk_areas": [
+        "block theme",
+        "theme.json",
+        "frontend output",
+        "editor canvas"
+      ],
+      "flows": [
+        "activation",
+        "frontend page",
+        "single post",
+        "block editor",
+        "logged-in and logged-out view"
+      ],
+      "evidence_required": [
+        "WordPress version",
+        "PHP version",
+        "Theme version and child theme status",
+        "Plugin versions and settings",
+        "Activation order",
+        "Screens or flows tested",
+        "Known failures, warnings, screenshots, or logs"
+      ]
+    },
+    {
+      "id": "elementor-hello-elementor",
+      "title": "Elementor builder shell",
+      "status": "planned",
+      "theme": {
+        "slug": "hello-elementor",
+        "name": "Hello Elementor",
+        "rank": 2,
+        "version": "3.4.9",
+        "status": "watchlisted"
+      },
+      "external_theme": null,
+      "plugins": [
+        {
+          "slug": "elementor",
+          "name": "Elementor Website Builder – more than just a page builder",
+          "rank": 1,
+          "version": "4.1.1",
+          "active_installs": 10000000,
+          "status": "watchlisted"
+        }
+      ],
+      "playground_blueprint": "docs/playground-blueprints/elementor-hello-elementor.json",
+      "risk_areas": [
+        "page builder",
+        "builder assets",
+        "frontend wrappers",
+        "global CSS",
+        "editor context"
+      ],
+      "flows": [
+        "builder editor load",
+        "frontend builder page",
+        "non-builder page",
+        "asset scoping",
+        "deactivation fallback"
+      ],
+      "evidence_required": [
+        "WordPress version",
+        "PHP version",
+        "Theme version and child theme status",
+        "Plugin versions and settings",
+        "Activation order",
+        "Screens or flows tested",
+        "Known failures, warnings, screenshots, or logs"
+      ]
+    },
+    {
+      "id": "commerce-astra",
+      "title": "WooCommerce on Astra",
+      "status": "planned",
+      "theme": {
+        "slug": "astra",
+        "name": "Astra",
+        "rank": 3,
+        "version": "4.13.4",
+        "status": "watchlisted"
+      },
+      "external_theme": null,
+      "plugins": [
+        {
+          "slug": "woocommerce",
+          "name": "WooCommerce",
+          "rank": 6,
+          "version": "10.8.1",
+          "active_installs": 7000000,
+          "status": "watchlisted"
+        }
+      ],
+      "playground_blueprint": "docs/playground-blueprints/woocommerce-astra.json",
+      "risk_areas": [
+        "commerce",
+        "cart/session data",
+        "checkout/account pages",
+        "emails",
+        "public cache"
+      ],
+      "flows": [
+        "shop archive",
+        "product page",
+        "cart",
+        "checkout",
+        "my account",
+        "logged-in and logged-out view"
+      ],
+      "evidence_required": [
+        "WordPress version",
+        "PHP version",
+        "Theme version and child theme status",
+        "Plugin versions and settings",
+        "Activation order",
+        "Screens or flows tested",
+        "Known failures, warnings, screenshots, or logs"
+      ]
+    },
+    {
+      "id": "seo-cache-generatepress",
+      "title": "SEO plus cache on GeneratePress",
+      "status": "planned",
+      "theme": {
+        "slug": "generatepress",
+        "name": "GeneratePress",
+        "rank": 14,
+        "version": "3.6.1",
+        "status": "watchlisted"
+      },
+      "external_theme": null,
+      "plugins": [
+        {
+          "slug": "wordpress-seo",
+          "name": "Yoast SEO – Advanced SEO with real-time guidance and built-in AI",
+          "rank": 2,
+          "version": "27.7",
+          "active_installs": 10000000,
+          "status": "watchlisted"
+        },
+        {
+          "slug": "litespeed-cache",
+          "name": "LiteSpeed Cache",
+          "rank": 5,
+          "version": "7.8.1",
+          "active_installs": 7000000,
+          "status": "watchlisted"
+        }
+      ],
+      "playground_blueprint": "docs/playground-blueprints/seo-cache-generatepress.json",
+      "risk_areas": [
+        "SEO output",
+        "schema/canonical/meta",
+        "cache purge",
+        "minification",
+        "asset ordering"
+      ],
+      "flows": [
+        "wp_head output",
+        "single post schema",
+        "archive metadata",
+        "cached frontend",
+        "asset dependency order"
+      ],
+      "evidence_required": [
+        "WordPress version",
+        "PHP version",
+        "Theme version and child theme status",
+        "Plugin versions and settings",
+        "Activation order",
+        "Screens or flows tested",
+        "Known failures, warnings, screenshots, or logs"
+      ]
+    },
+    {
+      "id": "forms-blocksy",
+      "title": "Popular forms on Blocksy",
+      "status": "planned",
+      "theme": {
+        "slug": "blocksy",
+        "name": "Blocksy",
+        "rank": 10,
+        "version": "2.1.44",
+        "status": "watchlisted"
+      },
+      "external_theme": null,
+      "plugins": [
+        {
+          "slug": "contact-form-7",
+          "name": "Contact Form 7",
+          "rank": 3,
+          "version": "6.1.6",
+          "active_installs": 10000000,
+          "status": "watchlisted"
+        },
+        {
+          "slug": "wpforms-lite",
+          "name": "WPForms – Easy Form Builder for WordPress – Contact Forms, Payment Forms, Surveys, & More",
+          "rank": 8,
+          "version": "1.10.1.1",
+          "active_installs": 6000000,
+          "status": "watchlisted"
+        }
+      ],
+      "playground_blueprint": "docs/playground-blueprints/forms-blocksy.json",
+      "risk_areas": [
+        "forms",
+        "nonces",
+        "submission lifecycle",
+        "email delivery",
+        "frontend CSS"
+      ],
+      "flows": [
+        "form render",
+        "validation error",
+        "successful submission",
+        "logged-out cache",
+        "mobile layout"
+      ],
+      "evidence_required": [
+        "WordPress version",
+        "PHP version",
+        "Theme version and child theme status",
+        "Plugin versions and settings",
+        "Activation order",
+        "Screens or flows tested",
+        "Known failures, warnings, screenshots, or logs"
+      ]
+    },
+    {
+      "id": "classic-editor-oceanwp",
+      "title": "Classic Editor fallback on OceanWP",
+      "status": "planned",
+      "theme": {
+        "slug": "oceanwp",
+        "name": "OceanWP",
+        "rank": 9,
+        "version": "4.1.6",
+        "status": "watchlisted"
+      },
+      "external_theme": null,
+      "plugins": [
+        {
+          "slug": "classic-editor",
+          "name": "Classic Editor",
+          "rank": 4,
+          "version": "1.7.0",
+          "active_installs": 9000000,
+          "status": "watchlisted"
+        }
+      ],
+      "playground_blueprint": "docs/playground-blueprints/classic-editor-oceanwp.json",
+      "risk_areas": [
+        "Classic Editor",
+        "metabox fallback",
+        "admin assets",
+        "theme frontend CSS"
+      ],
+      "flows": [
+        "classic post edit",
+        "metabox save",
+        "shortcode fallback",
+        "frontend render",
+        "block editor disabled flow"
+      ],
+      "evidence_required": [
+        "WordPress version",
+        "PHP version",
+        "Theme version and child theme status",
+        "Plugin versions and settings",
+        "Activation order",
+        "Screens or flows tested",
+        "Known failures, warnings, screenshots, or logs"
+      ]
+    },
+    {
+      "id": "security-migration-kadence",
+      "title": "Security and migration plugins on Kadence",
+      "status": "planned",
+      "theme": {
+        "slug": "kadence",
+        "name": "Kadence",
+        "rank": 5,
+        "version": "1.5.0",
+        "status": "watchlisted"
+      },
+      "external_theme": null,
+      "plugins": [
+        {
+          "slug": "wordfence",
+          "name": "Wordfence Security – Firewall, Malware Scan, and Login Security",
+          "rank": 11,
+          "version": "8.2.2",
+          "active_installs": 5000000,
+          "status": "watchlisted"
+        },
+        {
+          "slug": "all-in-one-wp-migration",
+          "name": "All-in-One WP Migration and Backup",
+          "rank": 10,
+          "version": "7.105",
+          "active_installs": 5000000,
+          "status": "watchlisted"
+        }
+      ],
+      "playground_blueprint": "docs/playground-blueprints/security-migration-kadence.json",
+      "risk_areas": [
+        "security hardening",
+        "firewall/login behavior",
+        "backup paths",
+        "export/import data",
+        "file operations"
+      ],
+      "flows": [
+        "activation order",
+        "admin screens",
+        "export/import dry run",
+        "login/admin access",
+        "PHP log review"
+      ],
+      "evidence_required": [
+        "WordPress version",
+        "PHP version",
+        "Theme version and child theme status",
+        "Plugin versions and settings",
+        "Activation order",
+        "Screens or flows tested",
+        "Known failures, warnings, screenshots, or logs"
+      ]
+    },
+    {
+      "id": "newspaper-tagdiv-manual",
+      "title": "Newspaper / tagDiv premium manual pass",
+      "status": "planned",
+      "theme": null,
+      "external_theme": {
+        "slug": "newspaper",
+        "name": "Newspaper",
+        "vendor": "tagDiv",
+        "ecosystem": "ThemeForest / tagDiv",
+        "status": "watchlisted"
+      },
+      "plugins": [
+        {
+          "slug": "woocommerce",
+          "name": "WooCommerce",
+          "rank": 6,
+          "version": "10.8.1",
+          "active_installs": 7000000,
+          "status": "watchlisted"
+        },
+        {
+          "slug": "litespeed-cache",
+          "name": "LiteSpeed Cache",
+          "rank": 5,
+          "version": "7.8.1",
+          "active_installs": 7000000,
+          "status": "watchlisted"
+        }
+      ],
+      "playground_blueprint": "docs/playground-blueprints/newspaper-manual-prep.json",
+      "risk_areas": [
+        "premium theme",
+        "tagDiv Composer",
+        "Cloud Library",
+        "news layouts",
+        "ads",
+        "WooCommerce",
+        "mobile/AMP"
+      ],
+      "flows": [
+        "manual premium theme install",
+        "tagDiv Composer editor",
+        "homepage/category/single templates",
+        "ads and schema output",
+        "cached mobile frontend"
+      ],
+      "evidence_required": [
+        "WordPress version",
+        "PHP version",
+        "Theme version and child theme status",
+        "Plugin versions and settings",
+        "Activation order",
+        "Screens or flows tested",
+        "Known failures, warnings, screenshots, or logs"
+      ]
+    }
+  ]
+}

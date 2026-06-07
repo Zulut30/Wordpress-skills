@@ -718,6 +718,20 @@ This map uses official WordPress Developer Resources, WordPress.org Plugin Direc
 - Last reviewed: 2026-06-07
 - Notes for agent behavior: Useful for manual verification, not required for stored watchlists.
 
+- Title: WordPress Playground Blueprints
+- Official URL: https://wordpress.github.io/wordpress-playground/blueprints/getting-started/
+- What to use it for: Blueprint schema, Playground setup files, and reproducible smoke-test environments.
+- When to verify online: Before changing blueprint schema, install steps, or Playground launch instructions.
+- Last reviewed: 2026-06-07
+- Notes for agent behavior: Blueprints are smoke-test setup helpers, not proof of compatibility.
+
+- Title: WordPress Playground Blueprint Steps
+- Official URL: https://wordpress.github.io/wordpress-playground/blueprints/steps/
+- What to use it for: `installPlugin`, `installTheme`, `login`, `setSiteOptions`, and other blueprint step shapes.
+- When to verify online: Before adding or changing blueprint steps.
+- Last reviewed: 2026-06-07
+- Notes for agent behavior: Use `pluginData` and `themeData` resources for WordPress.org assets.
+
 - Title: Newspaper Theme
 - Official URL: https://themeforest.net/item/newspaper/5489609
 - What to use it for: Newspaper premium theme marketplace context, vendor, popularity signals, and high-level feature areas.

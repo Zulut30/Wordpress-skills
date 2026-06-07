@@ -48,6 +48,78 @@ const THIRD_PARTY_PATTERNS = [
   { name: 'Astra', pattern: /\b(ASTRA_EXT|astra_)\b/i },
 ];
 const THEME_SPECIFIC_RE = /\b(astra_|generatepress_|kadence_|oceanwp_|blocksy_|hello_elementor|twentytwenty|ET_Builder|et_pb_)\b/i;
+const TOP_100_PLUGIN_RISK_PATTERNS = [
+  {
+    name: 'WooCommerce',
+    area: 'commerce',
+    pattern: /\b(WooCommerce|WC_|wc_|woocommerce_)\b|WC\s*\(/i,
+  },
+  {
+    name: 'Contact Form 7',
+    area: 'forms',
+    pattern: /\b(WPCF7|wpcf7_|contact-form-7)\b/i,
+  },
+  {
+    name: 'WPForms',
+    area: 'forms',
+    pattern: /\b(WPForms|wpforms_)\b/i,
+  },
+  {
+    name: 'Wordfence',
+    area: 'security',
+    pattern: /\b(Wordfence|wordfence|WORDFENCE)\b/,
+  },
+  {
+    name: 'All-in-One WP Migration',
+    area: 'backup/migration',
+    pattern: /\b(AI1WM|ai1wm|All_In_One_WP_Migration)\b/,
+  },
+  {
+    name: 'Google Site Kit',
+    area: 'analytics',
+    pattern: /\b(googlesitekit|Google\\Site_Kit|google_site_kit)\b/i,
+  },
+];
+const POPULAR_SHORTCODE_NAMES = new Set([
+  'contact-form-7',
+  'wpforms',
+  'woocommerce_cart',
+  'woocommerce_checkout',
+  'woocommerce_my_account',
+  'product_page',
+  'products',
+  'elementor-template',
+  'rank_math_breadcrumb',
+]);
+const POPULAR_HANDLE_NAMES = new Set([
+  'woocommerce',
+  'wc-cart',
+  'wc-checkout',
+  'elementor',
+  'elementor-frontend',
+  'wpforms',
+  'contact-form-7',
+  'wpcf7',
+  'rank-math',
+  'yoast-seo',
+  'litespeed-cache',
+  'newspaper',
+  'tagdiv',
+]);
+const POPULAR_BLOCK_NAMESPACES = new Set([
+  'woocommerce',
+  'elementor',
+  'wpforms',
+  'contact-form-7',
+  'yoast',
+  'rank-math',
+  'kadence',
+  'generateblocks',
+  'astra',
+]);
+const POPULAR_PLUGIN_CLASS_SELECTOR_RE =
+  /\.(woocommerce|elementor|wpforms|wpcf7|rank-math|yoast|aioseo|litespeed|wordfence|td-|tdb-|tagdiv)[a-z0-9_-]*/i;
+const NEWSPAPER_TAGDIV_RE = /\b(Newspaper|tagDiv|tagdiv|td_[a-z0-9_]*|tdb_[a-z0-9_]*|td-composer|td_block|td_module)\b/i;
 
 export function parseArgs(argv) {
   const args = [...argv];
@@ -2382,6 +2454,156 @@ function auditCompatibilityDocs(report, files) {
   }
 }
 
+function firstStringArg(line, functionName) {
+  const pattern = new RegExp(`${functionName}\\s*\\(\\s*['"]([^'"]+)['"]`);
+  return line.match(pattern)?.[1] || null;
+}
+
+function auditCompatibilityTop100RiskAreas(report, files) {
+  for (const file of files.filter((candidate) => isCompatCandidateFile(candidate) || basename(candidate) === 'block.json')) {
+    const content = readText(file);
+    const lines = content.split(/\r?\n/);
+    const isStylesheet = /\.(css|scss)$/i.test(file);
+
+    if (basename(file) === 'block.json') {
+      try {
+        const block = JSON.parse(content);
+        const namespace = typeof block.name === 'string' && block.name.includes('/') ? block.name.split('/')[0] : null;
+        if (namespace && POPULAR_BLOCK_NAMESPACES.has(namespace)) {
+          addCompatibilityFinding(
+            report,
+            'warning',
+            'compatibility.top100.block-namespace-collision',
+            file,
+            1,
+            `Block namespace "${namespace}" overlaps with a popular plugin/theme ecosystem namespace.`,
+            'Block namespace collisions can confuse users, tooling, inserter search, and integration code.',
+            'Use a unique vendor/plugin namespace for custom blocks.',
+            'high'
+          );
+        }
+      } catch {
+        // Invalid block.json is reported by the normal block audit.
+      }
+    }
+
+    lines.forEach((line, index) => {
+      const lineNumber = index + 1;
+      const window = nearbyText(lines, index, 8, 8);
+
+      for (const integration of TOP_100_PLUGIN_RISK_PATTERNS) {
+        if (!integration.pattern.test(line) || hasCompatibilityGuard(window)) {
+          continue;
+        }
+
+        addCompatibilityFinding(
+          report,
+          'warning',
+          'compatibility.top100-plugin.unguarded-risk-reference',
+          file,
+          lineNumber,
+          `${integration.name} top-100 ${integration.area} integration appears without nearby feature detection.`,
+          'Top-100 plugin integrations are common conflict points when the dependency is inactive, network-active, or version-shifted.',
+          'Move integration behavior into an optional adapter and guard it with documented feature detection.',
+          'medium'
+        );
+      }
+
+      const shortcode = firstStringArg(line, 'add_shortcode');
+      if (shortcode && POPULAR_SHORTCODE_NAMES.has(shortcode)) {
+        addCompatibilityFinding(
+          report,
+          'warning',
+          'compatibility.top100-plugin.shortcode-collision',
+          file,
+          lineNumber,
+          `Shortcode "${shortcode}" collides with a popular plugin shortcode namespace.`,
+          'Shortcode collisions can override or break popular plugin output on existing sites.',
+          'Use a unique prefixed shortcode and provide migration docs if replacing legacy shortcodes.',
+          'high'
+        );
+      }
+
+      const scriptHandle = firstStringArg(line, 'wp_enqueue_script') || firstStringArg(line, 'wp_register_script');
+      const styleHandle = firstStringArg(line, 'wp_enqueue_style') || firstStringArg(line, 'wp_register_style');
+      const handle = scriptHandle || styleHandle;
+      if (handle && POPULAR_HANDLE_NAMES.has(handle)) {
+        addCompatibilityFinding(
+          report,
+          'warning',
+          'compatibility.top100-plugin.asset-handle-collision',
+          file,
+          lineNumber,
+          `Asset handle "${handle}" overlaps with a popular plugin/theme handle.`,
+          'Asset handle collisions can deregister, replace, reorder, or localize another plugin/theme asset.',
+          'Prefix asset handles with the plugin slug and declare dependencies explicitly.',
+          'high'
+        );
+      }
+
+      const registeredBlock = firstStringArg(line, 'register_block_type');
+      if (registeredBlock && registeredBlock.includes('/')) {
+        const namespace = registeredBlock.split('/')[0];
+        if (POPULAR_BLOCK_NAMESPACES.has(namespace)) {
+          addCompatibilityFinding(
+            report,
+            'warning',
+            'compatibility.top100.block-namespace-collision',
+            file,
+            lineNumber,
+            `Registered block namespace "${namespace}" overlaps with a popular plugin/theme ecosystem namespace.`,
+            'Block namespace collisions can confuse users, tooling, inserter search, and integration code.',
+            'Use a unique vendor/plugin namespace for custom blocks.',
+            'high'
+          );
+        }
+      }
+
+      if (isStylesheet && POPULAR_PLUGIN_CLASS_SELECTOR_RE.test(line) && !/(adapter|compat|integration|override)/i.test(file)) {
+        addCompatibilityFinding(
+          report,
+          'info',
+          'compatibility.top100.selector-internals-review',
+          file,
+          lineNumber,
+          'Stylesheet targets popular plugin/theme DOM classes outside an obvious compatibility adapter.',
+          'Popular plugin/theme DOM internals can change and selector overrides often create fragile conflicts.',
+          'Isolate these selectors in a versioned compatibility adapter or prefer plugin-owned wrapper classes.',
+          'low'
+        );
+      }
+
+      if (NEWSPAPER_TAGDIV_RE.test(line) && !hasCompatibilityGuard(window) && !/(top-100|watchlist|compatibility matrix)/i.test(file)) {
+        addCompatibilityFinding(
+          report,
+          'warning',
+          'compatibility.top100-theme.newspaper-tagdiv-unguarded-reference',
+          file,
+          lineNumber,
+          'Newspaper/tagDiv-specific reference appears without nearby theme or companion-plugin detection.',
+          'Newspaper is a premium external theme and tagDiv companion plugins may be inactive or version-specific.',
+          'Guard Newspaper/tagDiv behavior with get_template()/get_stylesheet(), wp_get_theme(), class_exists(), function_exists(), or documented tagDiv signals.',
+          'medium'
+        );
+      }
+
+      if (/get_template\s*\(\s*\)/.test(line) && /(astra|generatepress|kadence|oceanwp|blocksy|hello-elementor|newspaper)/i.test(window) && !/get_stylesheet\s*\(\s*\)/.test(window)) {
+        addCompatibilityFinding(
+          report,
+          'info',
+          'compatibility.top100-theme.child-theme-detection-review',
+          file,
+          lineNumber,
+          'Theme detection checks parent theme without an obvious child theme check.',
+          'Popular sites often use child themes; parent-only detection can miss active child-theme behavior.',
+          'Check both get_template() and get_stylesheet(), and record child theme status in the compatibility matrix.',
+          'low'
+        );
+      }
+    });
+  }
+}
+
 function auditCompatibilityHeuristics(report, files, phpFiles) {
   report.compatibility = {
     limitation:
@@ -2395,6 +2617,7 @@ function auditCompatibilityHeuristics(report, files, phpFiles) {
   auditCompatibilityThemes(report, files);
   auditCompatibilityPageBuilders(report, files);
   auditCompatibilityDocs(report, files);
+  auditCompatibilityTop100RiskAreas(report, files);
 }
 
 export function auditPlugin(pluginDir, options = {}) {

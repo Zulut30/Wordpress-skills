@@ -67,8 +67,10 @@ const REQUIRED_TEMPLATES = [
 const REQUIRED_SCRIPTS = [
   'audit-plugin.mjs',
   'check-source-map.mjs',
+  'check-playground-blueprints.mjs',
   'check-top-plugins.mjs',
   'check-top-themes.mjs',
+  'generate-compatibility-runtime-plan.mjs',
   'sync-install-targets.mjs',
   'update-top-plugins.mjs',
   'update-top-themes.mjs',

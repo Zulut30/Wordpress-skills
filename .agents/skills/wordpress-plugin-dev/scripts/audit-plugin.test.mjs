@@ -245,3 +245,57 @@ function example_register_elementor() {
     }
   );
 });
+
+test('auditPlugin detects top-100 plugin and theme risk heuristics', () => {
+  withPlugin(
+    {
+      'example.php': `<?php
+/**
+ * Plugin Name: Example
+ * Version: 1.0.0
+ * Text Domain: example
+ */
+defined( 'ABSPATH' ) || exit;
+add_shortcode( 'woocommerce_cart', 'example_cart' );
+wp_enqueue_script( 'elementor', plugins_url( 'frontend.js', __FILE__ ), array(), '1.0.0', true );
+function example_cart() {
+	WC()->cart->get_cart();
+	td_global::$current_template = 'single';
+}
+`,
+      'blocks/example/block.json': JSON.stringify({
+        apiVersion: 3,
+        name: 'woocommerce/example',
+        title: 'Example',
+        textdomain: 'example',
+      }),
+      'assets/frontend.css': `.td-module-title {
+	color: red;
+}
+`,
+    },
+    (root) => {
+      const report = auditPlugin(root, { compatibility: true });
+      assert.ok(
+        report.findings.some(
+          (finding) => finding.rule === 'compatibility.top100-plugin.unguarded-risk-reference'
+        )
+      );
+      assert.ok(
+        report.findings.some((finding) => finding.rule === 'compatibility.top100-plugin.shortcode-collision')
+      );
+      assert.ok(
+        report.findings.some((finding) => finding.rule === 'compatibility.top100-plugin.asset-handle-collision')
+      );
+      assert.ok(report.findings.some((finding) => finding.rule === 'compatibility.top100.block-namespace-collision'));
+      assert.ok(
+        report.findings.some(
+          (finding) => finding.rule === 'compatibility.top100-theme.newspaper-tagdiv-unguarded-reference'
+        )
+      );
+      assert.ok(
+        report.findings.some((finding) => finding.rule === 'compatibility.top100.selector-internals-review')
+      );
+    }
+  );
+});

@@ -36,6 +36,7 @@ const requiredSourceHints = [
   'WordPress.org Themes API',
   'Top-100 popular theme compatibility',
   'Newspaper Theme',
+  'WordPress Playground Blueprints',
   'Yoast SEO',
   'WP Rocket',
   'Elementor',
