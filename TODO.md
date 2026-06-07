@@ -65,7 +65,6 @@ Realistic next improvements for the WordPress Plugin Dev Skill.
 ## Packaging
 
 - Attach `npm run package:skill` artifacts to GitHub releases after verifying checksums.
-- Add sync-tree comparison as a non-destructive CI check.
 - Keep the performance fixture audit in CI and validate JSON output.
 - Keep the design fixture audit in CI and validate JSON output.
 - Keep the compatibility fixture audit in CI and validate JSON output.
@@ -80,4 +79,3 @@ Realistic next improvements for the WordPress Plugin Dev Skill.
 - Add a contributor checklist for updating references without copying official documentation.
 - Add a lightweight copyright/originality check for reference files.
 - Keep `SKILL.md` under 500 lines by moving detailed guidance into references.
-- Add a non-destructive `--check` mode to `sync-install-targets.mjs` for CI drift detection without rewriting target directories.

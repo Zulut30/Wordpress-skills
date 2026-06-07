@@ -52,6 +52,9 @@ jobs:
       - name: Validate skill
         run: npm run validate:skill
 
+      - name: Check synced install targets
+        run: npm run sync:check
+
       - name: Smoke test
         run: npm run smoke
 

@@ -13,6 +13,7 @@ The GitHub Actions workflow at `.github/workflows/validate.yml` runs:
 - PHP syntax lint through `npm run lint:php:required`.
 - PHPCS/WPCS readiness through `composer run lint` as a non-blocking step.
 - `npm run validate:skill`.
+- `npm run sync:check`.
 - `npm run smoke`.
 - fixture audits for sample, performance, design, and compatibility fixtures.
 - JSON parse checks for generated audit output.
@@ -24,6 +25,7 @@ Run the core checks:
 
 ```bash
 npm run validate:skill
+npm run sync:check
 npm run smoke
 npm run check:links
 npm run audit:fixture

@@ -184,6 +184,7 @@ Core local checks:
 
 ```bash
 npm run validate:skill
+npm run sync:check
 npm run smoke
 npm run check:links
 npm run audit:fixture
