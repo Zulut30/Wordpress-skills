@@ -198,10 +198,11 @@ PHP/Composer checks when available:
 composer validate
 composer install
 npm run lint:php
+npm run lint:php:required
 composer run lint
 ```
 
-GitHub Actions runs Node validation, Composer validation, PHP syntax lint, fixture audits, JSON parse checks, and release package build. PHPCS/WPCS is included as a non-blocking readiness check until the ruleset baseline is reviewed.
+GitHub Actions runs Node validation, Composer validation, required PHP syntax lint, fixture audits, JSON parse checks, release package build, and extracted package verification. PHPCS/WPCS is included as a non-blocking readiness check until the ruleset baseline is reviewed.
 
 See [CI hardening](docs/ci-hardening.md) and [testing and fixtures](docs/testing-and-fixtures.md).
 
@@ -274,4 +275,3 @@ Use official WordPress sources where possible, do not copy official docs wholesa
 ## License
 
 MIT. See [LICENSE](LICENSE).
-

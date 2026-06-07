@@ -11,6 +11,13 @@ const scanRoots = [
 ];
 const skipDirs = new Set(['.git', 'node_modules', 'vendor', 'build', 'dist']);
 const phpFiles = [];
+const requirePhp = process.argv.includes('--require-php');
+
+function exitMissingPhp(message) {
+  const suffix = requirePhp ? ' Failing because --require-php was passed.' : '';
+  console.log(`${message}${suffix}`);
+  process.exit(requirePhp ? 1 : 0);
+}
 
 function walk(dir) {
   let entries;
@@ -41,13 +48,11 @@ function walk(dir) {
 
 const phpVersion = spawnSync('php', ['-v'], { encoding: 'utf8' });
 if (phpVersion.error && phpVersion.error.code === 'ENOENT') {
-  console.log('PHP executable not found; skipping PHP syntax lint.');
-  process.exit(0);
+  exitMissingPhp('PHP executable not found; skipping PHP syntax lint.');
 }
 
 if (phpVersion.status !== 0) {
-  console.log('PHP executable is unavailable or not runnable; skipping PHP syntax lint.');
-  process.exit(0);
+  exitMissingPhp('PHP executable is unavailable or not runnable; skipping PHP syntax lint.');
 }
 
 for (const root of scanRoots) {

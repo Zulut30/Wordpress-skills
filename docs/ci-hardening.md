@@ -10,7 +10,7 @@ The GitHub Actions workflow at `.github/workflows/validate.yml` runs:
 - npm install or npm ci when a lockfile exists.
 - Composer validate.
 - Composer dependency install.
-- PHP syntax lint through `npm run lint:php`.
+- PHP syntax lint through `npm run lint:php:required`.
 - PHPCS/WPCS readiness through `composer run lint` as a non-blocking step.
 - `npm run validate:skill`.
 - `npm run smoke`.
@@ -31,6 +31,7 @@ npm run performance:audit
 npm run design:audit
 npm run compatibility:audit
 npm run package:skill
+npm run package:verify
 ```
 
 Run PHP checks when PHP and Composer are available:
@@ -39,6 +40,7 @@ Run PHP checks when PHP and Composer are available:
 composer validate
 composer install
 npm run lint:php
+npm run lint:php:required
 composer run lint
 ```
 
