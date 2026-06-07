@@ -690,6 +690,48 @@ This map uses official WordPress Developer Resources, WordPress.org Plugin Direc
 - Last reviewed: 2026-06-07
 - Notes for agent behavior: Plugin slug and plugin main file can differ; detect safely and avoid fatal assumptions.
 
+- Title: Top-100 popular theme compatibility
+- Official URL: https://wordpress.org/themes/browse/popular/
+- What to use it for: Popular theme browsing context and current WordPress.org theme prioritization.
+- When to verify online: Before broad theme compatibility claims or refreshing the top-100 theme watchlist.
+- Last reviewed: 2026-06-07
+- Notes for agent behavior: Treat top-100 presence as a review target, not a support guarantee.
+
+- Title: WordPress.org Themes API
+- Official URL: https://codex.wordpress.org/WordPress.org_API#Themes
+- What to use it for: Official context for `query_themes`, `browse`, `per_page`, and Theme API request fields.
+- When to verify online: Before changing top theme refresh scripts or relying on API response fields.
+- Last reviewed: 2026-06-07
+- Notes for agent behavior: Use the API for WordPress.org theme watchlist refreshes; premium themes are not returned here.
+
+- Title: Theme Developer Handbook
+- Official URL: https://developer.wordpress.org/themes/
+- What to use it for: Theme template hierarchy, block themes, classic themes, theme.json, enqueueing, and theme compatibility context.
+- When to verify online: Before theme-sensitive plugin output, template integration, or adapter work.
+- Last reviewed: 2026-06-07
+- Notes for agent behavior: Prefer theme-friendly output before theme-specific adapters.
+
+- Title: WP-CLI Theme Search
+- Official URL: https://developer.wordpress.org/cli/commands/theme/search/
+- What to use it for: CLI verification of WordPress.org theme fields and theme search behavior.
+- When to verify online: Before recommending exact WP-CLI theme search fields or commands.
+- Last reviewed: 2026-06-07
+- Notes for agent behavior: Useful for manual verification, not required for stored watchlists.
+
+- Title: Newspaper Theme
+- Official URL: https://themeforest.net/item/newspaper/5489609
+- What to use it for: Newspaper premium theme marketplace context, vendor, popularity signals, and high-level feature areas.
+- When to verify online: Before making Newspaper-specific compatibility claims.
+- Last reviewed: 2026-06-07
+- Notes for agent behavior: Treat as an external/premium watchlist target and verify exact versions.
+
+- Title: Newspaper Theme Documentation
+- Official URL: https://forum.tagdiv.com/newspaper-theme-documentation/
+- What to use it for: tagDiv Newspaper setup, companion plugins, builder concepts, and theme-specific workflows.
+- When to verify online: Before coding Newspaper/tagDiv-specific behavior.
+- Last reviewed: 2026-06-07
+- Notes for agent behavior: Verify exact theme and tagDiv plugin versions before marking support as verified.
+
 - Title: Plugin APIs
 - Official URL: https://developer.wordpress.org/plugins/
 - What to use it for: Core-first plugin APIs and architecture.

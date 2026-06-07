@@ -1,0 +1,84 @@
+<?php
+/**
+ * Compatibility registry for popular WordPress themes.
+ */
+
+namespace {{VENDOR_NAMESPACE}}\{{PLUGIN_SLUG}}\Compatibility;
+
+final class TopThemeCompatibilityRegistry {
+	/**
+	 * Theme aliases include WordPress.org slugs and common premium theme folder names.
+	 *
+	 * @var array<string,array{name:string,aliases:string[],area:string,notes:string}>
+	 */
+	private const WATCHLIST = array(
+		'astra'           => array(
+			'name'    => 'Astra',
+			'aliases' => array( 'astra' ),
+			'area'    => 'classic/theme hooks',
+			'notes'   => 'Prefer theme-friendly markup and generic WordPress hooks before Astra-specific hooks.',
+		),
+		'hello-elementor' => array(
+			'name'    => 'Hello Elementor',
+			'aliases' => array( 'hello-elementor' ),
+			'area'    => 'builder/theme shell',
+			'notes'   => 'Keep Elementor-specific behavior behind builder detection and avoid global frontend CSS.',
+		),
+		'newspaper'       => array(
+			'name'    => 'Newspaper',
+			'aliases' => array( 'newspaper', 'Newspaper' ),
+			'area'    => 'premium news/magazine theme',
+			'notes'   => 'Verify tagDiv Composer, Cloud Library, WooCommerce, AMP/mobile, ads, cache, and layout flows by exact version.',
+		),
+	);
+
+	/**
+	 * @return array<string,array{name:string,area:string,notes:string,active:bool,is_parent:bool,is_child:bool}>
+	 */
+	public function get_detected_statuses(): array {
+		$statuses = array();
+
+		foreach ( self::WATCHLIST as $slug => $details ) {
+			$status             = $this->detect_theme_aliases( $details['aliases'] );
+			$statuses[ $slug ] = array(
+				'name'      => $details['name'],
+				'area'      => $details['area'],
+				'notes'     => $details['notes'],
+				'active'    => $status['active'],
+				'is_parent' => $status['is_parent'],
+				'is_child'  => $status['is_child'],
+			);
+		}
+
+		return $statuses;
+	}
+
+	/**
+	 * @param string[] $aliases
+	 * @return array{active:bool,is_parent:bool,is_child:bool}
+	 */
+	private function detect_theme_aliases( array $aliases ): array {
+		$template   = strtolower( (string) get_template() );
+		$stylesheet = strtolower( (string) get_stylesheet() );
+		$theme      = wp_get_theme();
+		$name       = strtolower( (string) $theme->get( 'Name' ) );
+
+		foreach ( $aliases as $alias ) {
+			$needle = strtolower( $alias );
+
+			if ( $template === $needle || $stylesheet === $needle || str_contains( $name, $needle ) ) {
+				return array(
+					'active'    => true,
+					'is_parent' => $template === $needle,
+					'is_child'  => $stylesheet !== $template,
+				);
+			}
+		}
+
+		return array(
+			'active'    => false,
+			'is_parent' => false,
+			'is_child'  => false,
+		);
+	}
+}

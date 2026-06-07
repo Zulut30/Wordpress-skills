@@ -45,6 +45,21 @@ npm run top-100-plugins:check
 
 Top-100 presence means `watchlisted`, not `verified`. Mark individual plugins as supported only after testing exact versions and flows.
 
+## Top-100 Popular Theme Watchlist
+
+For broad theme compatibility, top theme conflict prevention, or Newspaper/tagDiv requests, also read `references/top-100-theme-compatibility.md`.
+
+Use the theme watchlist to prioritize layout, CSS, template, builder, block theme, child theme, and companion-plugin verification. Do not hardcode theme workarounds into the main plugin path. Most conflicts are prevented by scoped frontend output, child-theme-aware detection, public hooks, template hierarchy respect, editor/frontend asset separation, duplicate output guards, and exact versioned manual verification.
+
+Refresh the stored watchlist before release-sensitive claims:
+
+```bash
+npm run top-100-themes:update
+npm run top-100-themes:check
+```
+
+Premium themes such as Newspaper are tracked separately from the WordPress.org top-100 list. Top theme presence means `watchlisted`, not `verified`.
+
 ## Official Sources
 
 Primary third-party integration docs are included here because compatibility work depends on their public APIs and hooks.

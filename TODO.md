@@ -16,6 +16,7 @@ Realistic next improvements for the WordPress Plugin Dev Skill.
 - Add deeper integrations docs for Classic Editor plus Block Editor parity, SEO output guards, cache plugin compatibility, and theme/page-builder adapter patterns.
 - Add WordPress Playground compatibility demo notes after target integrations are chosen.
 - Add runtime verification batches for the top-100 popular plugin watchlist after choosing exact WordPress/theme/test-flow coverage.
+- Add runtime verification batches for the top-100 popular theme watchlist, including Newspaper/tagDiv as a premium external target.
 
 ## Scripts
 
@@ -45,6 +46,7 @@ Realistic next improvements for the WordPress Plugin Dev Skill.
 - Improve compatibility heuristics in `audit-plugin.mjs` for:
   - fewer false positives around guarded third-party references
   - top-100 popular plugin risk categorization
+  - top-100 popular theme and child-theme risk categorization
   - SEO rendered-output duplication patterns
   - cache purge callback resolution
   - optional builder/theme adapter scoping

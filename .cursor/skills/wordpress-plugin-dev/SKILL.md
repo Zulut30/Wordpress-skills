@@ -41,6 +41,7 @@ Before planning or editing, identify the primary task type:
 - `theme compatibility`
 - `page builder compatibility`
 - `top-100 plugin compatibility`
+- `top-100 theme compatibility`
 - `compatibility audit`
 - `integration adapter implementation`
 - `compatibility matrix creation`
@@ -98,6 +99,7 @@ Then inspect the plugin structure and load only the references needed for that t
 - Design, admin UX, frontend output, Gutenberg UI, visual review, and a11y-aware polish: `references/design-ux-ui.md`
 - Classic Editor, SEO/cache/theme/page-builder integration, optional adapters, and compatibility audits: `references/integrations-compatibility.md`
 - Top-100 popular plugin watchlist, broad ecosystem conflict prevention, and versioned verification workflow: `references/top-100-plugin-compatibility.md`
+- Top-100 popular theme watchlist, Newspaper/tagDiv notes, theme conflict prevention, and child theme verification workflow: `references/top-100-theme-compatibility.md`
 - i18n, accessibility, privacy, personal data workflows: `references/i18n-a11y-privacy.md`
 - `wp-env`, WP-CLI, PHPUnit, Plugin Check, CI: `references/testing-and-ci.md`
 - WordPress.org readme, assets, SVN/release workflow: `references/release-wordpress-org.md`
@@ -235,6 +237,13 @@ Then inspect the plugin structure and load only the references needed for that t
 2. Classify the target plugin's surfaces against the top-100 risk areas: commerce, SEO, cache/performance, forms, security, backup, analytics, builders, multilingual, LMS/membership, media, email, custom fields, search, and admin tooling.
 3. Check namespacing, hooks, REST namespaces, block names, shortcodes, options, transients, cron hooks, database tables, scripts/styles, cookies, query vars, and rendered output for likely collisions.
 4. Add optional adapters only behind feature detection and versioned manual verification. Keep untested plugins as watchlisted or planned.
+
+### prevent-top-100-theme-conflicts
+
+1. Read `references/top-100-theme-compatibility.md` and refresh `data/top-100-popular-themes.json` when release-sensitive accuracy matters.
+2. Check whether the target site uses a WordPress.org theme, child theme, block theme, classic theme, builder shell, or premium theme such as Newspaper.
+3. Inspect frontend wrappers, CSS, JS handles, template overrides, hooks, shortcodes, blocks, query vars, rewrite rules, image handling, breadcrumbs, schema, cache behavior, editor assets, and WooCommerce/theme template flows.
+4. Prefer theme-safe output and scoped assets before adding theme-specific adapters. Keep untested themes as watchlisted or planned.
 
 ### add-classic-editor-fallback
 

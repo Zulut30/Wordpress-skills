@@ -62,13 +62,16 @@ const REQUIRED_TEMPLATES = [
   'divi-adapter.stub',
   'compatibility-matrix.stub',
   'top-plugin-compatibility-registry.stub',
+  'top-theme-compatibility-registry.stub',
 ];
 const REQUIRED_SCRIPTS = [
   'audit-plugin.mjs',
   'check-source-map.mjs',
   'check-top-plugins.mjs',
+  'check-top-themes.mjs',
   'sync-install-targets.mjs',
   'update-top-plugins.mjs',
+  'update-top-themes.mjs',
   'validate-skill.mjs',
   'smoke-test.sh',
 ];
@@ -412,6 +415,8 @@ function validateCompatibilityModule(skillContent) {
   const compatibilityReference = join(skillDir, 'references', 'integrations-compatibility.md');
   const topPluginReference = join(skillDir, 'references', 'top-100-plugin-compatibility.md');
   const topPluginData = join(skillDir, 'data', 'top-100-popular-plugins.json');
+  const topThemeReference = join(skillDir, 'references', 'top-100-theme-compatibility.md');
+  const topThemeData = join(skillDir, 'data', 'top-100-popular-themes.json');
   if (existsSync(compatibilityReference)) {
     pass('Integrations/compatibility reference exists: references/integrations-compatibility.md');
   } else {
@@ -449,6 +454,42 @@ function validateCompatibilityModule(skillContent) {
     }
   } else {
     fail('Missing top-100 popular plugin watchlist: data/top-100-popular-plugins.json');
+  }
+
+  if (existsSync(topThemeReference)) {
+    pass('Top-100 theme compatibility reference exists: references/top-100-theme-compatibility.md');
+  } else {
+    fail('Missing top-100 theme compatibility reference: references/top-100-theme-compatibility.md');
+  }
+
+  if (skillContent.includes('references/top-100-theme-compatibility.md')) {
+    pass('SKILL.md routes top-100 theme compatibility tasks to references/top-100-theme-compatibility.md.');
+  } else {
+    fail('SKILL.md does not reference references/top-100-theme-compatibility.md.');
+  }
+
+  if (existsSync(topThemeData)) {
+    try {
+      const data = JSON.parse(readText(topThemeData));
+      if (Array.isArray(data.themes) && data.themes.length === 100) {
+        pass('Top-100 popular theme watchlist contains 100 themes.');
+      } else {
+        fail('Top-100 popular theme watchlist does not contain exactly 100 themes.');
+      }
+
+      if (
+        Array.isArray(data.premium_theme_watchlist) &&
+        data.premium_theme_watchlist.some((theme) => theme.slug === 'newspaper')
+      ) {
+        pass('Top-100 popular theme watchlist includes Newspaper in premium_theme_watchlist.');
+      } else {
+        fail('Top-100 popular theme watchlist does not include Newspaper in premium_theme_watchlist.');
+      }
+    } catch (error) {
+      fail(`Top-100 popular theme watchlist is invalid JSON: ${error.message}`);
+    }
+  } else {
+    fail('Missing top-100 popular theme watchlist: data/top-100-popular-themes.json');
   }
 
   const sourceMap = join(skillDir, 'references', 'source-map.md');
